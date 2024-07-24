@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100px" height="100px" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 63.1 (92452) - https://sketch.com -->
+    <title>Artboard</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Genericos/Navegacion/miventa_app,-miventa_appear/Light-Mode">
+            <g id="Genericos/Navegacion/miventa_app,-miventa_appear">
+                <g>
+                    <g id="Genericos/miventa_app,-miventa_appear">
+                        <g id="B2C/miventa_app,-miventa_appear">
+                            <g id="Primary" transform="translate(26.000000, 28.000000)" fill-rule="nonzero">
+                                <path d="M37.58,46 C37.3770384,46 37.1773782,45.9486431 37,45.85 L21.48,37.42 L7.39,37.42 C3.67702538,37.4200041 0.66551705,34.4129705 0.66,30.7 L0.66,6.7 C0.681971908,2.99712822 3.68706702,0.00542878445 7.39,-3.55271368e-15 L40.61,-3.55271368e-15 C44.3245928,0.00550718894 47.3344928,3.01540718 47.34,6.73 L47.34,30.73 C47.334483,34.4429705 44.3229746,37.4500041 40.61,37.45 L38.79,37.45 L38.79,44.81 C38.7747235,45.2215499 38.5528448,45.5976154 38.2,45.81 C38.0134491,45.92634 37.7997037,45.9918426 37.58,46 L37.58,46 Z M7.39,2.43 C5.00965273,2.43 3.08,4.35965273 3.08,6.74 L3.08,30.74 C3.10738929,33.1007981 5.02904301,35.0001589 7.39,35 L21.79,35 C21.9929616,34.9997206 22.1926218,35.0513569 22.37,35.15 L36.37,42.75 L36.37,36.21 C36.37,35.5417355 36.9117355,35 37.58,35 L40.58,35 C42.9564475,35.0000064 44.8844862,33.0764411 44.89,30.7 L44.89,6.7 C44.89,5.55691693 44.435912,4.46065156 43.6276302,3.65236977 C42.8193484,2.84408798 41.7230831,2.39 40.58,2.39 L7.39,2.43 Z" id="Shape" fill="#00C8FF"></path>
+                                <circle id="Oval" fill="#00377B" cx="32.29" cy="19.92" r="3.01"></circle>
+                                <circle id="Oval" fill="#00377B" cx="24" cy="19.92" r="3.01"></circle>
+                                <circle id="Oval" fill="#00377B" cx="15.71" cy="19.92" r="3.01"></circle>
+                            </g>
+                            <g id="Marco">
+                                <rect id="Rectangle" x="0" y="0" width="100" height="100"></rect>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
