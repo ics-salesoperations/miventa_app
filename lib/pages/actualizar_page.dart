@@ -27,6 +27,8 @@ class _ActualizarPageState extends State<ActualizarPage>
 
     _actualizarBloc = BlocProvider.of<ActualizarBloc>(context);
     _auth = BlocProvider.of<AuthBloc>(context);
+    _actualizarBloc.init();
+
 
     btnController = AnimationController(
       vsync: this,

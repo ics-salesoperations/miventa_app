@@ -540,6 +540,8 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
           )
           .timeout(const Duration(minutes: 5));
 
+      print(resp.body);
+
       if (resp.statusCode == 200) {
         await _dbService.updateEnviados(
           respuestas,
@@ -569,6 +571,7 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
       );
       return;
     } catch (e) {
+      print(e.toString());
       add(
         const OnFinalizarVisitaEvent(
           enviado: false,

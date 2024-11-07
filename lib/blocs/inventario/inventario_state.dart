@@ -6,6 +6,9 @@ class InventarioState extends Equatable {
   final List<ProductoTangible> inventario;
   final List<ProductoTangible> inventarioFiltrado;
   final String tipoSeleccionado;
+  final List<TipoTangibleInfo> tipoInfo;
+  final String modeloSeleccionado;
+  
 
   const InventarioState({
     this.cargando = false,
@@ -13,6 +16,8 @@ class InventarioState extends Equatable {
     this.inventario = const [],
     this.inventarioFiltrado = const [],
     this.tipoSeleccionado = "",
+    this.tipoInfo = const [],
+    this.modeloSeleccionado = ""
   });
 
   InventarioState copyWith({
@@ -21,6 +26,8 @@ class InventarioState extends Equatable {
     List<ProductoTangible>? inventario,
     List<ProductoTangible>? inventarioFiltrado,
     String? tipoSeleccionado,
+    List<TipoTangibleInfo>? tipoInfo,
+    String? modeloSeleccionado
   }) =>
       InventarioState(
         cargando: cargando ?? this.cargando,
@@ -28,6 +35,8 @@ class InventarioState extends Equatable {
         inventario: inventario ?? this.inventario,
         inventarioFiltrado: inventarioFiltrado ?? this.inventarioFiltrado,
         tipoSeleccionado: tipoSeleccionado ?? this.tipoSeleccionado,
+        tipoInfo: tipoInfo ?? this.tipoInfo,
+        modeloSeleccionado: modeloSeleccionado ?? this.modeloSeleccionado
       );
 
   @override
@@ -37,5 +46,7 @@ class InventarioState extends Equatable {
         inventario,
         tipoSeleccionado,
         inventarioFiltrado,
+        tipoInfo,
+        modeloSeleccionado
       ];
 }

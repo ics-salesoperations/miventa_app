@@ -89,6 +89,7 @@ dependencies:
   data_table_2: ^2.4.1
   huawei_map: ^6.11.2+301
   onesignal_flutter: ^3.5.1
+  custom_refresh_indicator: ^4.0.1
 
 dev_dependencies:
   flutter_test:

@@ -1253,6 +1253,40 @@ class DBService {
     }
   }
 
+
+  Future<List<TipoTangibleInfo>> leerDescripcionModelos({String? tangible}) async {
+    await LocalDatabase.init();
+
+    String where = ""; //" AND a.instanceId = '$instanceId' ";
+
+  
+    if (tangible != null && tangible.isNotEmpty) {
+      where += " AND a.tangible = '$tangible'";
+    }
+
+    String query = """
+                     SELECT
+                       count(*) cantidad,
+                      b.descripcion tipo
+                    FROM tangible a
+                        INNER JOIN modelo b
+                            on a.modelo = b.modelo
+                    WHERE a.asignado != 1
+                      $where
+                      GROUP BY b.descripcion
+
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+        await LocalDatabase.customQuery(query);
+
+
+    return maps.map((json) => TipoTangibleInfo.fromMap(json)).toList();
+  }
+
+
+
+
   Future<List<ProductoTangible>> leerInventarioDB() async {
     await LocalDatabase.init();
 

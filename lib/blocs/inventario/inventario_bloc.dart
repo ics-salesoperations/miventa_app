@@ -23,20 +23,22 @@ class InventarioBloc extends Bloc<InventarioEvent, InventarioState> {
     on<OnCargarInventarioEvent>((event, emit) {
       emit(
         state.copyWith(
-          cargando: event.cargando,
-          tipos: event.tipos,
-          inventario: event.inventario,
-          inventarioFiltrado: event.inventario,
-        ),
+            cargando: event.cargando,
+            tipos: event.tipos,
+            inventario: event.inventario,
+            inventarioFiltrado: event.inventario,
+            tipoSeleccionado: '',
+            modeloSeleccionado: ''),
       );
     });
     on<OnFiltrarTipoEvent>((event, emit) {
       emit(
         state.copyWith(
-          cargando: event.cargando,
-          tipoSeleccionado: event.tipoSeleccionado,
-          inventarioFiltrado: event.inventarioFiltrado,
-        ),
+            cargando: event.cargando,
+            tipoSeleccionado: event.tipoSeleccionado,
+            inventarioFiltrado: event.inventarioFiltrado,
+            tipoInfo: event.tipoInfo,
+            modeloSeleccionado: event.modeloSeleccionado),
       );
     });
   }
@@ -99,29 +101,97 @@ class InventarioBloc extends Bloc<InventarioEvent, InventarioState> {
     );
   }
 
-  Future<void> filtrarInventario({
-    required String tipoSeleccionado,
-  }) async {
+  Future<void> filtrarInventario(
+      {required String tipoSeleccionado, String? modeloSeleccionado}) async {
     add(
       OnFiltrarTipoEvent(
-        cargando: true,
-        tipoSeleccionado: tipoSeleccionado,
-        inventarioFiltrado: const [],
-      ),
+          cargando: true,
+          tipoSeleccionado: tipoSeleccionado,
+          inventarioFiltrado: const [],
+          tipoInfo: const [],
+          modeloSeleccionado: modeloSeleccionado ?? ''),
     );
 
     final filtrado = state.inventario
-        .where(
-          (element) => element.producto.toString() == tipoSeleccionado,
-        )
+        .where((element) =>
+            element.producto.toString() == tipoSeleccionado &&
+            (modeloSeleccionado == null ||
+                element.descModelo.toString() == modeloSeleccionado))
         .toList();
+
+    final modelo =
+        await _dbService.leerDescripcionModelos(tangible: tipoSeleccionado);
 
     add(
       OnFiltrarTipoEvent(
-        cargando: false,
-        tipoSeleccionado: tipoSeleccionado,
-        inventarioFiltrado: filtrado,
+          cargando: false,
+          tipoSeleccionado: tipoSeleccionado,
+          inventarioFiltrado: filtrado,
+          tipoInfo: modelo,
+          modeloSeleccionado: modeloSeleccionado),
+    );
+  }
+
+  Future<void> actualizarTangible() async {
+    add(
+      const OnCargarInventarioEvent(
+        cargando: true,
+        tipos: [],
+        inventario: [],
       ),
     );
+
+    try {
+      final token = await _authService.getToken();
+      final usuario = await _userService.getInfoUsuario();
+
+      final tangibleConfirmado = await _dbService.getTangibleConfirmado();
+
+      if (tangibleConfirmado.isNotEmpty) {
+        add(
+          OnCargarInventarioEvent(
+            cargando: false,
+            tipos: state.tipos,
+            inventario: state.inventario,
+          ),
+        );
+
+        return;
+      }
+
+      final resp = await http.get(
+          Uri.parse('${Environment.apiURL}/appmiventa/tangibles_vendedor/' +
+              usuario.idDms.toString()),
+          headers: {
+            'Content-Type': 'application/json',
+            'token': token,
+          }).timeout(
+        const Duration(
+          minutes: 10,
+        ),
+      );
+
+      final productoResponse = productoTangibleResponseFromJson(
+        utf8.decode(resp.bodyBytes),
+      );
+
+      //guardar en base de datos local
+      await _dbService.guardarTangibles(productoResponse.tangiblesAsignados);
+      await _dbService.updateTabla(tbl: 'tangible');
+   
+    } catch (e) {
+      null;
+    } finally {
+      final tipo = await _dbService.leerTiposDB();
+      final inv = await _dbService.leerInventarioDB();
+
+      add(
+        OnCargarInventarioEvent(
+          cargando: false,
+          tipos: tipo,
+          inventario: inv,
+        ),
+      );
+    }
   }
 }

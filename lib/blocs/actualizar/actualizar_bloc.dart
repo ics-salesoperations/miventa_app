@@ -70,7 +70,6 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
         ),
       );
     });
-    _init();
   }
 
   Future<void> actualizarTodo({required List<Tabla> currentTablas}) async {
@@ -78,7 +77,7 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
     await actualizarPlanning(currentTablas: currentTablas);
   }
 
-  Future<void> _init() async {
+  Future<void> init() async {
     final tablas = await getTablas();
     add(OnGetTablasEvent(
       tablas: tablas,

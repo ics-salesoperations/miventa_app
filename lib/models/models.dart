@@ -24,6 +24,7 @@ export 'package:miventa_app/models/solicitudes.dart';
 export 'package:miventa_app/models/solicitudes_response.dart';
 export 'package:miventa_app/models/sucursal.dart';
 export 'package:miventa_app/models/tabla.dart';
+export 'package:miventa_app/models/tipo_tangible_info.dart';
 export 'package:miventa_app/models/tracking.dart';
 export 'package:miventa_app/models/tracking_det.dart';
 export 'package:miventa_app/models/tracking_head.dart';

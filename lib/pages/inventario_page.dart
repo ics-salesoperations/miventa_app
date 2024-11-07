@@ -7,6 +7,7 @@ import 'package:miventa_app/blocs/blocs.dart';
 import 'package:miventa_app/models/models.dart';
 import 'package:miventa_app/services/db_service.dart';
 import 'package:miventa_app/widgets/widgets.dart';
+import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 //import 'package:elegant_notification/elegant_notification.dart';
 
 class InventarioPage extends StatefulWidget {
@@ -133,49 +134,91 @@ class _InventarioPageState extends State<InventarioPage> {
                       const SizedBox(
                         height: 10,
                       ),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          height: 600,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.grey,
-                                  offset: Offset(1, 1),
-                                  blurRadius: 2,
-                                )
-                              ]),
-                          child: ListView(
-                            scrollDirection: Axis.vertical,
-                            physics: const BouncingScrollPhysics(),
-                            shrinkWrap: true,
-                            children: [
-                              const Align(
-                                alignment: Alignment.center,
-                                child: Text(
-                                  "Lista de Productos",
-                                  style: TextStyle(
-                                    fontFamily: 'CronosSPro',
-                                    fontSize: 18,
-                                    color: kPrimaryColor,
+                      state.tipoInfo.isEmpty
+                          ? Container()
+                          : Container(
+                              height: 70,
+                              padding: const EdgeInsets.all(8),
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: ListView(
+                                scrollDirection: Axis.horizontal,
+                                children: [
+                                  ...state.tipoInfo.map(
+                                    (e) => GestureDetector(
+                                      onTap: () {
+                                        inventarioBloc.filtrarInventario(
+                                            tipoSeleccionado: inventarioBloc
+                                                .state.tipoSeleccionado,
+                                            modeloSeleccionado: e.tipo);
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 5),
+                                        margin: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              e.tipo == state.modeloSeleccionado
+                                                  ? Colors.white
+                                                  : kPrimaryColor,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Stack(
+                                          clipBehavior: Clip.none,
+                                          children: [
+                                            Text(
+                                              e.tipo,
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontFamily: 'CronosSPro',
+                                                  color: e.tipo ==
+                                                          state
+                                                              .modeloSeleccionado
+                                                      ? kThirdColor
+                                                      : Colors.white),
+                                            ),
+                                            Positioned(
+                                              right: -10,
+                                              top: -10,
+                                              child: Container(
+                                                height: 20,
+                                                width: 20,
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(
+                                                    color: kThirdColor,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12)),
+                                                child: Text(
+                                                  e.cantidad.toString(),
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    fontFamily: 'CronosSPro',
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              SizedBox(
-                                height: 100,
-                                child: _BuscarSerie(
-                                  modelo: ModeloTangible(),
-                                ),
-                              ),
-                              ...state.inventarioFiltrado.map(
-                                (e) => Container(
+                            ),
+                      Expanded(
+                        child: CustomMaterialIndicator(
+                          onRefresh: () async {
+                            await inventarioBloc.actualizarTangible();
+                          },
+                          child: state.inventarioFiltrado.isEmpty
+                              ? Container(
                                   padding: const EdgeInsets.all(8),
-                                  margin: const EdgeInsets.all(3),
+                                  height: 600,
                                   decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(12),
@@ -186,43 +229,151 @@ class _InventarioPageState extends State<InventarioPage> {
                                           blurRadius: 2,
                                         )
                                       ]),
-                                  child: Row(
+                                  child: Column(
                                     children: [
-                                      const Icon(
-                                        Icons.list,
-                                      ),
-                                      const VerticalDivider(
-                                        color: Colors.grey,
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            e.serie.toString(),
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontFamily: 'CronosSPro',
-                                              color: kPrimaryColor
-                                                  .withOpacity(0.8),
+                                      Expanded(
+                                        child: ListView(
+                                          children: [
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.all(8),
+                                              margin: const EdgeInsets.all(3),
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          12),
+                                                  boxShadow: const [
+                                                    BoxShadow(
+                                                      color: Colors.grey,
+                                                      offset: Offset(1, 1),
+                                                      blurRadius: 2,
+                                                    )
+                                                  ]),
+                                              child: Text(
+                                                'No tienes producto asignado para ' +
+                                                    state.tipoSeleccionado,
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontFamily: 'CronosSPro',
+                                                  color: kSecondaryColor,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
                                             ),
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                )
+                              : Container(
+                                  padding: const EdgeInsets.all(8),
+                                  height: 600,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Colors.grey,
+                                          offset: Offset(1, 1),
+                                          blurRadius: 2,
+                                        )
+                                      ]),
+                                  child: Column(
+                                    children: [
+                                      const Align(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          "Lista de Productos",
+                                          style: TextStyle(
+                                            fontFamily: 'CronosSPro',
+                                            fontSize: 18,
+                                            color: kPrimaryColor,
                                           ),
-                                          Text(
-                                            e.descModelo.toString(),
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontFamily: 'CronosSPro',
-                                              color: kSecondaryColor,
-                                            ),
-                                          )
-                                        ],
+                                        ),
                                       ),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      SizedBox(
+                                        height: 100,
+                                        child: _BuscarSerie(
+                                          series: state.inventario,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: ListView(
+                                          children: [
+                                            ...state.inventarioFiltrado.map(
+                                              (e) => Container(
+                                                padding:
+                                                    const EdgeInsets.all(8),
+                                                margin:
+                                                    const EdgeInsets.all(3),
+                                                decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12),
+                                                    boxShadow: const [
+                                                      BoxShadow(
+                                                        color: Colors.grey,
+                                                        offset: Offset(1, 1),
+                                                        blurRadius: 2,
+                                                      )
+                                                    ]),
+                                                child: Row(
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.list,
+                                                    ),
+                                                    const VerticalDivider(
+                                                      color: Colors.grey,
+                                                    ),
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            e.serie
+                                                                .toString(),
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              fontFamily:
+                                                                  'CronosSPro',
+                                                              color: kPrimaryColor
+                                                                  .withOpacity(
+                                                                      0.8),
+                                                            ),
+                                                          ),
+                                                          Text(
+                                                            e.descModelo
+                                                                .toString(),
+                                                            style:
+                                                                const TextStyle(
+                                                              fontSize: 16,
+                                                              fontFamily:
+                                                                  'CronosSPro',
+                                                              color:
+                                                                  kSecondaryColor,
+                                                            ),
+                                                          )
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
                                     ],
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                     ],
@@ -249,17 +400,18 @@ class _BuscarSerie extends StatefulWidget {
 }
 
 class _BuscarSerieState extends State<_BuscarSerie> {
-  late CarritoBloc carritoBloc;
+  late InventarioBloc inventarioBloc;
+  String busqueda = '';
 
   @override
   void initState() {
-    carritoBloc = BlocProvider.of<CarritoBloc>(context);
+    inventarioBloc = BlocProvider.of<InventarioBloc>(context);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final filtroCtrl = TextEditingController(text: carritoBloc.state.filter);
+    final filtroCtrl = TextEditingController(text: busqueda);
     //corregir posicion del cursos a el final.
     filtroCtrl.selection = TextSelection.fromPosition(
         TextPosition(offset: filtroCtrl.text.length));
@@ -287,10 +439,19 @@ class _BuscarSerieState extends State<_BuscarSerie> {
                     ]),
                 child: TextField(
                   onChanged: (valor) {
-                    carritoBloc.add(
-                      OnCambiarFiltroEvent(
-                        filtro: valor == "-1" ? "" : valor,
-                      ),
+                    setState(() {
+                      busqueda = valor;
+                    });
+
+                    inventarioBloc.add(
+                      OnFiltrarTipoEvent(
+                          cargando: false,
+                          tipoSeleccionado:
+                              inventarioBloc.state.tipoSeleccionado,
+                          inventarioFiltrado: filtrar(valor),
+                          tipoInfo: inventarioBloc.state.tipoInfo,
+                          modeloSeleccionado:
+                              inventarioBloc.state.modeloSeleccionado),
                     );
                   },
                   controller: filtroCtrl,
@@ -302,22 +463,6 @@ class _BuscarSerieState extends State<_BuscarSerie> {
                     focusedBorder: InputBorder.none,
                     border: InputBorder.none,
                     hintText: 'Ingrese una serie',
-                    suffixIcon: carritoBloc.state.filter.isNotEmpty
-                        ? IconButton(
-                            padding: const EdgeInsets.all(0),
-                            iconSize: 14,
-                            icon: const FaIcon(
-                              FontAwesomeIcons.filterCircleXmark,
-                              size: 14,
-                              color: Colors.grey,
-                            ),
-                            onPressed: () {
-                              carritoBloc.add(
-                                const OnCambiarFiltroEvent(filtro: ""),
-                              );
-                            },
-                          )
-                        : null,
                   ),
                 ),
               ),
@@ -335,9 +480,15 @@ class _BuscarSerieState extends State<_BuscarSerie> {
                 );
 
                 filtroCtrl.text = barcode == "-1" ? "" : barcode;
-                carritoBloc.add(OnCambiarFiltroEvent(
-                  filtro: barcode,
-                ));
+                inventarioBloc.add(
+                  OnFiltrarTipoEvent(
+                      cargando: false,
+                      tipoSeleccionado: inventarioBloc.state.tipoSeleccionado,
+                      inventarioFiltrado: filtrar(barcode),
+                      tipoInfo: inventarioBloc.state.tipoInfo,
+                      modeloSeleccionado:
+                          inventarioBloc.state.modeloSeleccionado),
+                );
               } catch (e) {
                 null;
               }
@@ -365,7 +516,15 @@ class _BuscarSerieState extends State<_BuscarSerie> {
                 ScanMode.QR,
               );
               filtroCtrl.text = barcode;
-              carritoBloc.add(OnCambiarFiltroEvent(filtro: barcode));
+              inventarioBloc.add(
+                OnFiltrarTipoEvent(
+                    cargando: false,
+                    tipoSeleccionado: inventarioBloc.state.tipoSeleccionado,
+                    inventarioFiltrado: filtrar(barcode),
+                    tipoInfo: inventarioBloc.state.tipoInfo,
+                    modeloSeleccionado:
+                        inventarioBloc.state.modeloSeleccionado),
+              );
             },
             icon: Container(
               padding: const EdgeInsets.all(5),
@@ -383,5 +542,16 @@ class _BuscarSerieState extends State<_BuscarSerie> {
         ],
       ),
     );
+  }
+
+  List<ProductoTangible> filtrar(String filtro) {
+    final filtrarTipo = widget.series
+        .where((element) =>
+            element.producto == inventarioBloc.state.tipoSeleccionado)
+        .toList();
+
+    return filtrarTipo
+        .where((element) => element.serie.toString().contains(filtro))
+        .toList();
   }
 }

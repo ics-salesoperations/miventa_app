@@ -30,10 +30,14 @@ class OnFiltrarTipoEvent extends InventarioEvent {
   final bool cargando;
   final String tipoSeleccionado;
   final List<ProductoTangible> inventarioFiltrado;
+  final List<TipoTangibleInfo> tipoInfo;
+  final String? modeloSeleccionado;
 
   const OnFiltrarTipoEvent({
     required this.cargando,
     required this.tipoSeleccionado,
     required this.inventarioFiltrado,
+    required this.tipoInfo,
+    required this.modeloSeleccionado
   });
 }
