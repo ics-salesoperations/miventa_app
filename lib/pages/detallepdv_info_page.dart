@@ -9,6 +9,7 @@ import 'package:miventa_app/pages/pages.dart';
 import 'package:miventa_app/screens/formularios_visita_screen.dart';
 import 'package:miventa_app/screens/screens.dart';
 import 'package:speed_dial_fab/speed_dial_fab.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 import '../blocs/blocs.dart';
 
@@ -27,15 +28,23 @@ class _DetallePdvInfoState extends State<DetallePdvInfo> {
   final Planning detallePdv;
   late FormularioBloc frmBloc;
   late AuthBloc _auth;
+  late ActualizarBloc _actualizarBloc;
+  late Future<List<IncentivoPdv>> _futureIncentivosPdv;
 
   _DetallePdvInfoState({
     required this.detallePdv,
   });
 
+  List<IncentivoPdv> incentivosPdv = [];
+
   @override
   void initState() {
     frmBloc = BlocProvider.of<FormularioBloc>(context);
     _auth = BlocProvider.of<AuthBloc>(context);
+    _actualizarBloc = BlocProvider.of<ActualizarBloc>(context);
+    _futureIncentivosPdv = BlocProvider.of<ActualizarBloc>(context)
+        .getIncentivosPdv(detallePdv.idPdv.toString());
+    _actualizarBloc.actualizarTangibleReasignacion(idPdv: detallePdv.idPdv!);
     super.initState();
   }
 
@@ -148,70 +157,74 @@ class _DetallePdvInfoState extends State<DetallePdvInfo> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      /*tarjetaConIcono(
-                        title: "Registrar visita",
-                        icono: 'assets/lottie/visitar_pdv.json',
-                        screenHeight: screenHeigth,
-                        screenWidth: screenHeigth,
-                        onTap: () async {
-                          await showDialog(
-                            context: context,
-                            builder: (ctx) =>
-                                ValidacionVisitaScreen(pdv: detallePdv),
-                          ).then(
-                            (value) {
-                              if (value == true) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => RealizarVisitaPage(
-                                      detallePdv: detallePdv,
-                                    ),
-                                  ),
+                      FutureBuilder<List<IncentivoPdv>>(
+                        future: _futureIncentivosPdv,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Center(
+                                child: Text('Error: ${snapshot.error}'));
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return const Center(
+                                child: Text('No hay incentivos disponibles'));
+                          } else {
+                            List<IncentivoPdv> incentivosPdv = snapshot.data!;
+                            return CarouselSlider(
+                              options: CarouselOptions(
+                                height: MediaQuery.of(context).size.height *
+                                    0.17, // Ajusta la altura según sea necesario
+                                enableInfiniteScroll: true,
+                                autoPlay: true,
+                                autoPlayInterval: const Duration(seconds: 5),
+                                autoPlayAnimationDuration:
+                                    const Duration(milliseconds: 800),
+                              ),
+                              items: incentivosPdv.map((incentivo) {
+                                var incentivoMap = incentivos.firstWhere(
+                                  (map) =>
+                                      map["tipo_incentivo"] ==
+                                      incentivo.incentivo.toString(),
+                                  orElse: () => {},
                                 );
-                              } else {
-                                Navigator.pop(context);
-                              }
-                            },
-                          );
+
+                                return cardIndicador(
+                                  title: incentivoMap["titulo"]!,
+                                  icono: incentivoMap["svg"]!,
+                                  screenWidth: screenWidth,
+                                  screenHeight: screenHeigth,
+                                  colorBorde: incentivo.incentivo.toString() ==
+                                          '90 Días'
+                                      ? kThirdColor
+                                      : kPrimaryColor,
+                                  titulo: incentivoMap["titulo"]!,
+                                  subtitulo: incentivoMap["subTitulo"]!,
+                                  detalle: incentivo.incentivo.toString() ==
+                                          '90 Días'
+                                      ? 'Total: ' + incentivo.meta.toString()
+                                      : 'Meta: ' + incentivo.meta.toString(),
+                                  onTap: incentivo.incentivo.toString() ==
+                                          '90 Días'
+                                      ? () async => {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    InventarioReasignacionPage(
+                                                  detallePdv: detallePdv,
+                                                ),
+                                              ),
+                                            )
+                                          }
+                                      : null,
+                                );
+                              }).toList(),
+                            );
+                          }
                         },
                       ),
-                      perfil != 6 && perfil != 1 && perfil != 5
-                          ? Container()
-                          : tarjetaConIconoForm(
-                              title: "Forven 13",
-                              icono: 'assets/lottie/visitar_pdv.json',
-                              screenHeight: screenHeigth,
-                              screenWidth: screenHeigth,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ModificarFormPage(
-                                      detallePdv: detallePdv,
-                                      idForm: "33",
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                      tarjetaConIconoForm(
-                        title: "Garantía de Equipo",
-                        icono: 'assets/lottie/visitar_pdv.json',
-                        screenHeight: screenHeigth,
-                        screenWidth: screenHeigth,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ModificarFormPage(
-                                detallePdv: detallePdv,
-                                idForm: "32",
-                              ),
-                            ),
-                          );
-                        },
-                      ),*/
                       buildUserInfoDisplay(
                         getValue: detallePdv.idPdv.toString(),
                         title: "ID PDV",
@@ -1106,3 +1119,137 @@ Widget tarjetaConIconoForm({
         ],
       ),
     );
+
+Widget cardIndicador({
+  required String title,
+  required String icono,
+  required double screenWidth,
+  required double screenHeight,
+  required String titulo,
+  required String subtitulo,
+  required Color colorBorde,
+  String? detalle,
+  VoidCallback? onTap, // Añade el callback onTap
+}) =>
+    GestureDetector(
+      onTap: onTap, // Asigna el onTap aquí
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        surfaceTintColor: kScaffoldBackground,
+        color: kSecondaryColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        elevation: 5,
+        child: Container(
+          width: screenWidth * 0.8,
+          height: 100,
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
+            color: kScaffoldBackground,
+            border: Border.all(
+              color: colorBorde,
+              width: 2.0,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: kSecondaryColor,
+                blurRadius: 5,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            titulo,
+                            style: const TextStyle(
+                              fontFamily: 'CronosPro',
+                              fontSize: 16,
+                              color: kSecondaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            subtitulo,
+                            style: const TextStyle(
+                              fontFamily: 'CronosLPro',
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: kPrimaryColor,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      children: [
+                        SvgPicture.asset(
+                          icono,
+                          height: 50,
+                          semanticsLabel: 'Label',
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          detalle ?? '',
+                          style: const TextStyle(
+                            fontFamily: 'CronosLPro',
+                            fontSize: 12,
+                            color: kPrimaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+//BLISTER,EPIN,COMISION AUMENTADA,90 Días
+List<Map<String, String>> incentivos = [
+  {
+    "tipo_incentivo": "EPIN",
+    "titulo": "Incentivo EPIN",
+    "subTitulo": "L25 en EPIN por cada gross adicional",
+    "Restriciones":
+        "*Aplican restricciones a un máximo de cumplimiento permitido",
+    "svg": 'assets/Iconos/SmartphoneGiftSimplified.svg',
+  },
+  {
+    "tipo_incentivo": "BLISTER",
+    "titulo": "Activación Blister",
+    "subTitulo": "SR de 7 días al cumplir la meta asignada.",
+    "Restriciones": "",
+    "svg": 'assets/Iconos/SmartphoneGiftSimplified.svg',
+  },
+  {
+    "tipo_incentivo": "COMISION AUMENTADA",
+    "titulo": "Comisión aumentada",
+    "subTitulo": "Recibe una comisión diferenciada en los WP el siguiente mes.",
+    "Restriciones": "",
+    "svg": 'assets/Iconos/SmartphoneGiftSimplified.svg',
+  },
+  {
+    "tipo_incentivo": "90 Días",
+    "titulo": "Pdv con Stock de",
+    "subTitulo": "90 días",
+    "Restriciones": "",
+    "svg": 'assets/Iconos/90_dias.svg',
+  }
+];

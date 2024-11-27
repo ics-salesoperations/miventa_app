@@ -16,3 +16,7 @@ export 'reporte_quiebre_movil_screen.dart';
 export 'reporte_quiebre_tmy_screen.dart';
 export 'reporte_solicitudes_screen.dart';
 export 'visita_content_screen.dart';
+export 'reasignacion_content_screen.dart';
+export 'detalle_modelo_reasignacion_screen.dart';
+export 'cesta_reasignacion_pdv_screen.dart';
+export 'processing_venta_reasignacion.dart';

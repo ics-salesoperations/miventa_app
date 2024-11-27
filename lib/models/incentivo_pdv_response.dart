@@ -15,26 +15,26 @@ String IncentivoPdvResponseToJson(IncentivoPdvResponse data) =>
 class IncentivoPdvResponse {
   IncentivoPdvResponse({
     this.flag,
-    this.incentivosPdv = const <IncentivoPdv>[],
+    this.incentivosPDV = const <IncentivoPdv>[],
   });
 
   String? flag;
-  List<IncentivoPdv> incentivosPdv;
+  List<IncentivoPdv> incentivosPDV;
 
   IncentivoPdvResponse copyWith({
     String? flag,
-    List<IncentivoPdv>? incentivosPdv,
+    List<IncentivoPdv>? incentivosPDV,
   }) =>
       IncentivoPdvResponse(
         flag: flag ?? this.flag,
-        incentivosPdv: incentivosPdv ?? this.incentivosPdv,
+        incentivosPDV: incentivosPDV ?? this.incentivosPDV,
       );
 
   factory IncentivoPdvResponse.fromJson(Map<String, dynamic> json) {
     return IncentivoPdvResponse(
       flag: json["flag"],
-      incentivosPdv: List<IncentivoPdv>.from(
-        json["incentivosPdv"].map(
+      incentivosPDV: List<IncentivoPdv>.from(
+        json["incentivosPDV"].map(
           (x) {
             return IncentivoPdv.fromMap(x);
           },
@@ -45,7 +45,7 @@ class IncentivoPdvResponse {
 
   Map<String, dynamic> toJson() => {
         "flag": flag,
-        "incentivosPdv":
-            List<dynamic>.from(incentivosPdv.map((x) => x.toJson())),
+        "incentivosPDV":
+            List<dynamic>.from(incentivosPDV.map((x) => x.toJson())),
       };
 }

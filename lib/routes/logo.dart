@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class Logo extends StatelessWidget {
   const Logo({
@@ -12,9 +13,8 @@ class Logo extends StatelessWidget {
     return Center(
       child: SizedBox(
         width: width * 0.3,
-        child: const Image(
-          image: AssetImage('assets/images/logo_so.png'),
-        ),
+        child: SvgPicture.asset('assets/logo_so.svg',
+            height: 50, semanticsLabel: 'Label'),
       ),
     );
   }

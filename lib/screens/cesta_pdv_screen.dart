@@ -401,24 +401,17 @@ class _CestaPdvScreenState extends State<CestaPdvScreen> {
                       height: 40,
                       alignment: Alignment.center,
                       width: double.infinity,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            kSecondaryColor,
-                            kSecondaryColor.withOpacity(0.9),
-                            kSecondaryColor.withOpacity(0.8),
-                            kPrimaryColor
-                          ],
-                        ),
-                        borderRadius: const BorderRadius.all(
+                      decoration: const BoxDecoration(
+                        color: kSecondaryColor,
+                        borderRadius: BorderRadius.all(
                           Radius.circular(10),
                         ),
                       ),
                       child: const Text(
-                        "Confirmar compra",
+                        "Confirmar Compra",
                         style: TextStyle(
                           fontSize: 18,
-                          fontFamily: 'CronosLPro',
+                          fontFamily: 'CronosPro',
                           color: Colors.white,
                         ),
                       ),

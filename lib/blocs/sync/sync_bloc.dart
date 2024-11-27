@@ -15,6 +15,8 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
   final DBService _dbService = DBService();
   final FormularioBloc _formularioBloc = FormularioBloc();
   final CarritoBloc _carritoBloc = CarritoBloc();
+  final CarritoReasignacionBloc _carritoReasignacionBloc =
+      CarritoReasignacionBloc();
 
   FormGroup? formGroup;
 
@@ -226,7 +228,7 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     }
   }
 
-  Future<void> sincronizarDatos() async {
+  Future<void> sincronizarDatos(int? tipo, int? idPdv) async {
     //Agregamos el evento para el BLOC
     add(
       const OnSincronizandoEvent(
@@ -236,7 +238,9 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
     );
 
     try {
-      await _carritoBloc.enviarDatosAlarmasBlister();
+      if (tipo != 1) {
+        await _carritoBloc.enviarDatosAlarmasBlister();
+      }
 
       final listaRespFormularios = await _dbService.leerListadoRespuestas();
 
@@ -246,7 +250,22 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
       }*/
       await _formularioBloc.enviarDatos(listaRespFormularios);
 
-      await _carritoBloc.enviarDatos();
+      if (tipo == 1) {
+        if (idPdv != null) {
+          await _carritoReasignacionBloc.enviarDatos(idPdv);
+        } else {
+          // Handle the case where idPdv is null
+          add(
+            const OnSincronizandoEvent(
+              sincronizando: false,
+              mensaje: "ID PDV is null, cannot send data.",
+            ),
+          );
+          return;
+        }
+      } else {
+        await _carritoBloc.enviarDatos();
+      }
 
       //Agregamos el evento para el BLOC
       add(

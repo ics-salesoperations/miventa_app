@@ -332,7 +332,7 @@ class _Botones extends StatelessWidget {
                 ),
                 onPressed: state.mensaje == ""
                     ? () async {
-                        await syncBloc.sincronizarDatos();
+                        await syncBloc.sincronizarDatos(0,null);
                         await syncBloc.init();
                       }
                     : null,

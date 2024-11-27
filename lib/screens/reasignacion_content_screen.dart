@@ -3,31 +3,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:miventa_app/app_styles.dart';
-import 'package:miventa_app/models/models.dart';
-import 'package:miventa_app/screens/detalle_modelo_screen.dart';
+import 'package:miventa_app/models/modelo_tangible.dart';
+import 'package:miventa_app/screens/screens.dart';
 
 import '../blocs/blocs.dart';
 
-class VisitaContentScreen extends StatefulWidget {
+class ReasignacionContentScreen extends StatefulWidget {
   final AnimationController controller;
   final List<ModeloTangible> modelos;
   final String selectedCat;
-  final Planning pdv;
 
-  const VisitaContentScreen({
+  const ReasignacionContentScreen({
     Key? key,
     required this.controller,
     required this.modelos,
     required this.selectedCat,
-    required this.pdv,
   }) : super(key: key);
 
   @override
-  State<VisitaContentScreen> createState() => _VisitaContentScreenState();
+  State<ReasignacionContentScreen> createState() =>
+      _ReasignacionContentScreenState();
 }
 
-class _VisitaContentScreenState extends State<VisitaContentScreen> {
-  late CarritoBloc _carritoBloc;
+class _ReasignacionContentScreenState extends State<ReasignacionContentScreen> {
+  late CarritoReasignacionBloc _carritoBloc;
   List<int> asignados = [];
 
   late VisitaBloc _visitaBloc;
@@ -36,7 +35,7 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
   void initState() {
     super.initState();
 
-    _carritoBloc = BlocProvider.of<CarritoBloc>(context);
+    _carritoBloc = BlocProvider.of<CarritoReasignacionBloc>(context);
     _visitaBloc = BlocProvider.of<VisitaBloc>(context);
   }
 
@@ -87,45 +86,7 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                 if (model.modelo == _carritoBloc.state.actual.modelo) {
                   modelo = _carritoBloc.state.actual;
                 }
-                if (modelo.tangible.toString() == 'BLISTER' &&
-                    widget.pdv.segmentoPdv == 'B PDA' &&
-                    widget.selectedCat.isNotEmpty) {
-                  return Container(
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: kThirdColor.withOpacity(0.9),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red.shade300,
-                          blurRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          "Asignación no Válida!",
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontFamily: 'CronosSPro',
-                            fontSize: 18,
-                          ),
-                        ),
-                        SizedBox(height: 5),
-                        Text(
-                          "El punto es PDA; la asignación de Blister es únicamente para puntos de otro segmento.",
-                          style: TextStyle(
-                            color: kSecondaryColor,
-                            fontFamily: 'CronosPro',
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+
                 return ZoomIn(
                   //duration: const Duration(milliseconds: 200),
                   child: Container(
@@ -294,149 +255,6 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                       const SizedBox(
                                         height: 4,
                                       ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () async {
-                                              final valor = modelo.asignado;
-
-                                              int nuevo = 0;
-
-                                              if (valor - 1 <= 0) {
-                                                nuevo = 0;
-                                              } else {
-                                                nuevo = valor - 1;
-                                              }
-
-                                              modelo = modelo.copyWith(
-                                                asignado: nuevo,
-                                              );
-
-                                              //Asignadndo tangible a nivel de base de datos.
-                                              await _carritoBloc
-                                                  .desAsignarProducto(
-                                                modelo: modelo,
-                                                idPdv: _visitaBloc.state.idPdv,
-                                                idVisita:
-                                                    _visitaBloc.state.idVisita,
-                                              );
-
-                                              await _carritoBloc
-                                                  .actualizaTotal();
-
-                                              _carritoBloc.add(
-                                                  OnChangeModeloActual(
-                                                      actual: modelo));
-                                              //await _carritoBloc.getModelos();
-                                              widget.controller.forward();
-                                            },
-                                            child: Container(
-                                              width: 25,
-                                              height: 25,
-                                              decoration: BoxDecoration(
-                                                color: kThirdColor
-                                                    .withOpacity(0.8),
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: kSecondaryColor
-                                                        .withOpacity(0.4),
-                                                    blurRadius: 3,
-                                                  )
-                                                ],
-                                              ),
-                                              child: const Center(
-                                                child: Text(
-                                                  "-",
-                                                  style: TextStyle(
-                                                    fontSize: 18,
-                                                    color: kSecondaryColor,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 26,
-                                            width: 60,
-                                            child: Center(
-                                              child: Text(
-                                                modelo.asignado.toString(),
-                                                style: const TextStyle(
-                                                  fontFamily: 'CronosLPro',
-                                                  color: kSecondaryColor,
-                                                  fontSize: 24,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          GestureDetector(
-                                            onTap: () async {
-                                              final valor = modelo.asignado;
-                                              int nuevo = 0;
-
-                                              if (valor + 1 >=
-                                                  modelo.disponible) {
-                                                nuevo = modelo.disponible;
-                                              } else {
-                                                nuevo = valor + 1;
-                                              }
-
-                                              modelo = modelo.copyWith(
-                                                asignado: nuevo,
-                                              );
-
-                                              //Asignadndo tangible a nivel de base de datos.
-                                              await _carritoBloc
-                                                  .asignarProducto(
-                                                modelo: modelo,
-                                                idPdv: _visitaBloc.state.idPdv,
-                                                idVisita:
-                                                    _visitaBloc.state.idVisita,
-                                              );
-
-                                              await _carritoBloc
-                                                  .actualizaTotal();
-
-                                              _carritoBloc.add(
-                                                  OnChangeModeloActual(
-                                                      actual: modelo));
-                                              //await _carritoBloc.getModelos();
-
-                                              widget.controller.forward();
-                                            },
-                                            child: Container(
-                                              width: 25,
-                                              height: 25,
-                                              decoration: BoxDecoration(
-                                                color: kThirdColor
-                                                    .withOpacity(0.8),
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: kSecondaryColor
-                                                        .withOpacity(0.4),
-                                                    blurRadius: 3,
-                                                  )
-                                                ],
-                                              ),
-                                              child: const Center(
-                                                child: Text(
-                                                  "+",
-                                                  style: TextStyle(
-                                                    fontSize: 18,
-                                                    color: kSecondaryColor,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
                                     ],
                                   ),
                                   Text(modelo.controller.text),
@@ -454,12 +272,13 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                           showDialog(
                                             context: context,
                                             builder: (context) =>
-                                                DetalleModeloScreen(
+                                                DetalleModeloReasignacionScreen(
                                               modelo: modelo,
                                             ),
                                           ).then((value) async {
-                                            final m =
-                                                await _carritoBloc.getModelos();
+                                            final m = await _carritoBloc
+                                                .getModelosReasignacion(
+                                                    _visitaBloc.state.idPdv);
                                             await _carritoBloc
                                                 .crearFrmProductos(m);
                                             await _carritoBloc.actualizaTotal();

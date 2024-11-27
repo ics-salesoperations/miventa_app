@@ -90,11 +90,12 @@ dependencies:
   huawei_map: ^6.11.2+301
   onesignal_flutter: ^3.5.1
   custom_refresh_indicator: ^4.0.1
+  carousel_slider: ^4.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -116,6 +117,7 @@ flutter:
   assets:
     - assets/user_icon_cyan.png
     - assets/logo.png
+    - assets/logo_so.svg
     - assets/pdv.svg
     - assets/celTigo.svg
     - assets/images/

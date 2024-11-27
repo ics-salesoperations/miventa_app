@@ -4,35 +4,40 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:miventa_app/app_styles.dart';
 import 'package:miventa_app/blocs/blocs.dart';
 import 'package:miventa_app/models/models.dart';
 
-class DetalleModeloScreen extends StatefulWidget {
+class DetalleModeloReasignacionScreen extends StatefulWidget {
   final ModeloTangible modelo;
 
-  const DetalleModeloScreen({
+  const DetalleModeloReasignacionScreen({
     Key? key,
     required this.modelo,
   }) : super(key: key);
 
   @override
-  State<DetalleModeloScreen> createState() => _DetalleModeloScreenState();
+  State<DetalleModeloReasignacionScreen> createState() =>
+      _DetalleModeloReasignacionScreenState();
 }
 
-class _DetalleModeloScreenState extends State<DetalleModeloScreen> {
-  late CarritoBloc carritoBloc;
+class _DetalleModeloReasignacionScreenState
+    extends State<DetalleModeloReasignacionScreen> {
+  late CarritoReasignacionBloc carritoBloc;
   late VisitaBloc visitaBloc;
   final ScrollController _seriesScrollCtrl = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    carritoBloc = BlocProvider.of<CarritoBloc>(context);
+    carritoBloc = BlocProvider.of<CarritoReasignacionBloc>(context);
     visitaBloc = BlocProvider.of<VisitaBloc>(context);
+
     carritoBloc.getTangiblePorModelo(
       modelo: widget.modelo,
+      idPdv: visitaBloc.state.idPdv,
     );
   }
 
@@ -54,7 +59,7 @@ class _DetalleModeloScreenState extends State<DetalleModeloScreen> {
           Radius.circular(20),
         ),
       ),
-      child: BlocBuilder<CarritoBloc, CarritoState>(
+      child: BlocBuilder<CarritoReasignacionBloc, CarritoReasignacionState>(
         builder: (context, state) {
           if (state.cargandoLstTangibleModelo) {
             return Column(
@@ -91,9 +96,11 @@ class _DetalleModeloScreenState extends State<DetalleModeloScreen> {
 
           final lstAsignados =
               state.lstTangibleModelo.where((e) => e.asignado == 1).toList();
+          final lstDescartados =
+              state.lstTangibleModelo.where((e) => e.descartado == 1).toList();
 
           int orden = 0;
-          List<ProductoTangible> lstSeries = [];
+          List<ProductoTangibleReasignacion> lstSeries = [];
           if (state.filter.isEmpty) {
             lstSeries = state.lstTangibleModelo;
           } else {
@@ -122,15 +129,12 @@ class _DetalleModeloScreenState extends State<DetalleModeloScreen> {
                         const SizedBox(
                           width: double.infinity,
                         ),
-                        widget.modelo.imagen == null
-                            ? const Icon(
-                                Icons.image,
-                                size: 90,
-                              )
-                            : const Icon(
-                                Icons.image,
-                                size: 90,
-                              ),
+                        SvgPicture.asset(
+                          'assets/pdv.svg',
+                          height: 125,
+                          semanticsLabel: 'Label',
+                          color: kScaffoldBackground,
+                        ),
                         Text(
                           widget.modelo.descripcion.toString(),
                           style: const TextStyle(
@@ -170,6 +174,15 @@ class _DetalleModeloScreenState extends State<DetalleModeloScreen> {
                         asignados: lstAsignados.length,
                       ),
                     ),
+                    Positioned(
+                      bottom: 0,
+                      left: 135,
+                      right:
+                          135, // Esto asegura que esté centrado horizontalmente
+                      child: _DescartadosCard(
+                        descartados: lstDescartados.length,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -182,7 +195,7 @@ class _DetalleModeloScreenState extends State<DetalleModeloScreen> {
               Container(
                 height: 45,
                 padding: const EdgeInsets.only(right: 12, bottom: 10),
-                child: AsignacionMultiple(
+                child: AsignacionMultipleReasignacion(
                   modelo: widget.modelo,
                 ),
               ),
@@ -193,99 +206,134 @@ class _DetalleModeloScreenState extends State<DetalleModeloScreen> {
                     ...lstSeries.map((p) {
                       orden++;
 
-                      ProductoTangible producto = p;
+                      ProductoTangibleReasignacion producto = p;
 
-                      return GestureDetector(
-                        onTap: () async {
-                          await carritoBloc.asignarProducto(
-                            modelo: widget.modelo,
-                            serie: producto.serie,
-                            idPdv: visitaBloc.state.idPdv,
-                            idVisita: visitaBloc.state.idVisita,
-                          );
-                        },
-                        child: FlipInX(
-                          delay: const Duration(milliseconds: 70),
-                          child: Container(
-                            margin: const EdgeInsets.all(6),
-                            decoration: const BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8),
-                                ),
-                                boxShadow: <BoxShadow>[
-                                  BoxShadow(
-                                    blurRadius: 5,
-                                    color: Colors.black12,
-                                  )
-                                ]),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 40,
-                                  height: 45,
-                                  alignment: Alignment.center,
-                                  decoration: const BoxDecoration(
-                                    color: kPrimaryColor,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(8),
-                                      bottomLeft: Radius.circular(8),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    orden.toString(),
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontFamily: 'CronosLPro',
-                                      color: Colors.white,
-                                    ),
+                      return FlipInX(
+                        delay: const Duration(milliseconds: 70),
+                        child: Container(
+                          margin: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(8),
+                              ),
+                              boxShadow: <BoxShadow>[
+                                BoxShadow(
+                                  blurRadius: 5,
+                                  color: Colors.black12,
+                                )
+                              ]),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 45,
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  color: kPrimaryColor,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(8),
+                                    bottomLeft: Radius.circular(8),
                                   ),
                                 ),
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        const Icon(
+                                child: Text(
+                                  orden.toString(),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: 'CronosLPro',
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () async {
+                                          // Logic when arrow icon is tapped
+                                          await carritoBloc.asignarProducto(
+                                            modelo: widget.modelo,
+                                            serie: producto.serie,
+                                            idPdv: visitaBloc.state.idPdv,
+                                            idVisita: visitaBloc.state.idVisita,
+                                          );
+                                        },
+                                        child: const Icon(
                                           Icons.arrow_right,
                                           color: kPrimaryColor,
                                           size: 16,
                                         ),
-                                        Text(
-                                          producto.serie.toString(),
-                                          style: const TextStyle(
-                                            fontFamily: 'CronosLPro',
-                                            fontSize: 14,
-                                            color: kSecondaryColor,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Text(
-                                      DateFormat('dd/MM/yyyy HH:mm:ss')
-                                          .format(producto.fechaAsignacion!),
-                                      style: const TextStyle(
-                                        fontFamily: 'CronosLPro',
-                                        fontSize: 14,
-                                        color: kFourColor,
                                       ),
+                                      Text(
+                                        producto.serie.toString(),
+                                        style: const TextStyle(
+                                          fontFamily: 'CronosLPro',
+                                          fontSize: 14,
+                                          color: kSecondaryColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
+                                    DateFormat('dd/MM/yyyy HH:mm:ss')
+                                        .format(producto.fechaAsignacion!),
+                                    style: const TextStyle(
+                                      fontFamily: 'CronosLPro',
+                                      fontSize: 14,
+                                      color: kFourColor,
                                     ),
-                                  ],
-                                ),
-                                const Spacer(),
-                                producto.asignado == 1
+                                  ),
+                                ],
+                              ),
+                              const Spacer(),
+                              GestureDetector(
+                                onTap: () async {
+                                  // Logic for assigning the product
+                                  await carritoBloc.asignarProducto(
+                                    modelo: widget.modelo,
+                                    serie: producto.serie,
+                                    idPdv: visitaBloc.state.idPdv,
+                                    idVisita: visitaBloc.state.idVisita,
+                                  );
+                                },
+                                child: producto.asignado == 1
                                     ? const Icon(
                                         Icons.check_circle_outline,
                                         color: kSecondaryColor,
-                                        size: 18,
+                                        size: 24,
                                       )
                                     : const Icon(
                                         Icons.radio_button_unchecked,
                                         color: kFourColor,
-                                        size: 18,
+                                        size: 24,
                                       ),
-                              ],
-                            ),
+                              ),
+                              const Spacer(),
+                              GestureDetector(
+                                onTap: () async {
+                                  // Logic for assigning the product
+                                  await carritoBloc.descartarProducto(
+                                    modelo: widget.modelo,
+                                    serie: producto.serie,
+                                    idPdv: visitaBloc.state.idPdv,
+                                    idVisita: visitaBloc.state.idVisita,
+                                  );
+                                },
+                                child: producto.descartado == 1
+                                    ? const Icon(
+                                        Icons.block_outlined,
+                                        color: kSecondaryColor,
+                                        size: 24,
+                                      )
+                                    : const Icon(
+                                        Icons.radio_button_unchecked,
+                                        color: kFourColor,
+                                        size: 24,
+                                      ),
+                              )
+                            ],
                           ),
                         ),
                       );
@@ -313,11 +361,11 @@ class _BuscarSerie extends StatefulWidget {
 }
 
 class _BuscarSerieState extends State<_BuscarSerie> {
-  late CarritoBloc carritoBloc;
+  late CarritoReasignacionBloc carritoBloc;
 
   @override
   void initState() {
-    carritoBloc = BlocProvider.of<CarritoBloc>(context);
+    carritoBloc = BlocProvider.of<CarritoReasignacionBloc>(context);
     super.initState();
   }
 
@@ -352,7 +400,7 @@ class _BuscarSerieState extends State<_BuscarSerie> {
                 child: TextField(
                   onChanged: (valor) {
                     carritoBloc.add(
-                      OnCambiarFiltroEvent(
+                      OnCambiarFiltroReasignacionEvent(
                         filtro: valor == "-1" ? "" : valor,
                       ),
                     );
@@ -377,7 +425,8 @@ class _BuscarSerieState extends State<_BuscarSerie> {
                             ),
                             onPressed: () {
                               carritoBloc.add(
-                                const OnCambiarFiltroEvent(filtro: ""),
+                                const OnCambiarFiltroReasignacionEvent(
+                                    filtro: ""),
                               );
                             },
                           )
@@ -399,7 +448,7 @@ class _BuscarSerieState extends State<_BuscarSerie> {
                 );
 
                 filtroCtrl.text = barcode == "-1" ? "" : barcode;
-                carritoBloc.add(OnCambiarFiltroEvent(
+                carritoBloc.add(OnCambiarFiltroReasignacionEvent(
                   filtro: barcode,
                 ));
               } catch (e) {
@@ -429,7 +478,8 @@ class _BuscarSerieState extends State<_BuscarSerie> {
                 ScanMode.QR,
               );
               filtroCtrl.text = barcode;
-              carritoBloc.add(OnCambiarFiltroEvent(filtro: barcode));
+              carritoBloc
+                  .add(OnCambiarFiltroReasignacionEvent(filtro: barcode));
             },
             icon: Container(
               padding: const EdgeInsets.all(5),
@@ -450,26 +500,28 @@ class _BuscarSerieState extends State<_BuscarSerie> {
   }
 }
 
-class AsignacionMultiple extends StatefulWidget {
+class AsignacionMultipleReasignacion extends StatefulWidget {
   final ModeloTangible modelo;
 
-  const AsignacionMultiple({
+  const AsignacionMultipleReasignacion({
     super.key,
     required this.modelo,
   });
 
   @override
-  State<AsignacionMultiple> createState() => _AsignacionMultipleState();
+  State<AsignacionMultipleReasignacion> createState() =>
+      _AsignacionMultipleReasignacionState();
 }
 
-class _AsignacionMultipleState extends State<AsignacionMultiple> {
-  late CarritoBloc carritoBloc;
+class _AsignacionMultipleReasignacionState
+    extends State<AsignacionMultipleReasignacion> {
+  late CarritoReasignacionBloc carritoBloc;
   late VisitaBloc visitaBloc;
   final asignacionCtrl = TextEditingController();
 
   @override
   void initState() {
-    carritoBloc = BlocProvider.of<CarritoBloc>(context);
+    carritoBloc = BlocProvider.of<CarritoReasignacionBloc>(context);
     visitaBloc = BlocProvider.of<VisitaBloc>(context);
     super.initState();
   }
@@ -600,7 +652,7 @@ class _DisponiblesCard extends StatelessWidget {
     required this.widget,
   }) : super(key: key);
 
-  final DetalleModeloScreen widget;
+  final DetalleModeloReasignacionScreen widget;
 
   @override
   Widget build(BuildContext context) {
@@ -683,7 +735,58 @@ class _AsignadosCard extends StatelessWidget {
             ),
           ),
           const Text(
-            "Asignados",
+            "Reasignados",
+            style: TextStyle(
+              color: kFourColor,
+              fontSize: 16,
+              fontFamily: 'CronosLPro',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DescartadosCard extends StatelessWidget {
+  const _DescartadosCard({
+    Key? key,
+    required this.descartados,
+  }) : super(key: key);
+
+  final int descartados;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 60,
+      width: 100,
+      padding: const EdgeInsets.all(5),
+      decoration: const BoxDecoration(
+        color: kThirdColor,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(12),
+          topRight: Radius.circular(12),
+        ),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 5,
+            color: Colors.black12,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            descartados.toString(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontFamily: 'CronosSPro',
+            ),
+          ),
+          const Text(
+            "Descartados",
             style: TextStyle(
               color: kFourColor,
               fontSize: 16,

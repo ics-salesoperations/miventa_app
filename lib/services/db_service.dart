@@ -58,6 +58,16 @@ class DBService {
     await LocalDatabase.insertListSolicitudes(datos);
   }
 
+  Future crearDetalleIncentivoPdv(List<IncentivoPdv> datos) async {
+    await LocalDatabase.init();
+    if (datos.isNotEmpty) {
+      int idPdv = datos.first.idPdv!;
+      await LocalDatabase.delete('incentivo',
+          where: 'idPdv = ?', whereArgs: [idPdv]);
+      await LocalDatabase.insertListIncentivoPdv(datos);
+    }
+  }
+
   Future<int> insertardetallePDV(Planning detpdv) async {
     await LocalDatabase.init();
     final resultado = await LocalDatabase.insert(Planning.table, detpdv);
@@ -235,7 +245,15 @@ class DBService {
                             direccion,
                             numeroPadre,
                             servicios,
-                            epinMiTienda
+                            epinMiTienda,
+                            grsBlsM0,
+                            grsBlsM1,
+                            grsBlsM2,
+                            grsBlsM3,
+                            invBls,
+                            grsBls,
+                            cnvBls,
+                            invBlsDisp
                       FROM planning a 
                       WHERE id>=0
                           $where
@@ -289,12 +307,20 @@ class DBService {
                             direccion,
                             numeroPadre,
                             servicios,
-                            epinMiTienda
+                            epinMiTienda,
+                            grsBlsM0,
+                            grsBlsM1,
+                            grsBlsM2,
+                            grsBlsM3,
+                            invBls,
+                            grsBls,
+                            cnvBls,
+                            invBlsDisp
                     """;
 
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
-
+    print('detalle_pdv: ' + maps.toString());
     return maps.map((json) {
       return Planning.fromJson(json);
     }).toList();
@@ -449,8 +475,6 @@ class DBService {
 
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
-
-    print(maps);
 
     return maps
         .map((e) => e['usuario'].toString().replaceAll('APP.DMS.', ''))
@@ -610,7 +634,7 @@ class DBService {
                   """;
 
     List<Map<String, dynamic>> maps = await LocalDatabase.customQuery(query);
-
+    print('detalle_pdv: ' + maps.toString());
     return maps.map((item) => Planning.fromJson(item)).toList()[0];
   }
 
@@ -687,9 +711,6 @@ class DBService {
 
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
-
-    print(query);
-    print(maps);
 
     return maps.map((json) => FormularioResumen.fromMap(json)).toList();
   }
@@ -1117,6 +1138,47 @@ class DBService {
     }).toList();
   }
 
+  Future<List<ModeloTangible>> leerListadoModelosReasignacion(int idPdv) async {
+    await LocalDatabase.init();
+
+    String where =
+        "And b.idPdv = $idPdv and enviado = 0"; //" AND a.instanceId = '$instanceId' ";
+
+    final query = """
+                    SELECT a.id, 
+                            a.tangible,
+                            a.modelo,
+                            a.descripcion,
+                            a.imagen, 
+                            SUM(b.asignado) asignado, 
+                            SUM(b.descartado) descartado, 
+                            COUNT(*) disponible,
+                            MIN(b.serie) serieInicial,
+                            MAX(b.serie) serieFinal
+                    FROM modelo a
+                    inner join tangible_reasignacion b
+                    on a.tangible = b.tangible
+                    and a.modelo = b.modelo
+                    WHERE 1=1
+                        $where
+                    GROUP BY a.id, 
+                            a.tangible,
+                            a.modelo,
+                            a.descripcion,
+                            a.imagen, 
+                            a.asignado
+                    ORDER BY asignado DESC
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+        await LocalDatabase.customQuery(query);
+    //return maps.map((json) => FormularioAnswer.fromMap(json)).toList();
+    print(maps);
+    return maps.map((json) {
+      return ModeloTangible.fromMap(json);
+    }).toList();
+  }
+
   Future<int> confirmarTangiblesAsignadios({
     required int idPdv,
   }) async {
@@ -1127,6 +1189,31 @@ class DBService {
 
     final query = """
                     UPDATE tangible 
+                      SET confirmado = 1
+                    WHERE 1=1
+                        $where
+                    """;
+    int resultado = 0;
+
+    try {
+      resultado = await LocalDatabase.customUpdate(query);
+    } catch (e) {
+      null;
+    }
+    //return maps.map((json) => FormularioAnswer.fromMap(json)).toList();
+    return resultado;
+  }
+
+  Future<int> confirmarTangiblesReasignadios({
+    required int idPdv,
+  }) async {
+    await LocalDatabase.init();
+
+    String where =
+        " AND idPdv = $idPdv AND confirmado = 0 AND enviado = 0 AND (asignado = 1 or descartado = 1)"; //" AND a.instanceId = '$instanceId' ";
+
+    final query = """
+                    UPDATE tangible_reasignacion
                       SET confirmado = 1
                     WHERE 1=1
                         $where
@@ -1176,6 +1263,41 @@ class DBService {
     }).toList();
   }
 
+  Future<List<ModeloTangible>> leerListadoModelosReasignados() async {
+    await LocalDatabase.init();
+
+    String where = ""; //" AND a.instanceId = '$instanceId' ";
+
+    final query = """
+                    SELECT  
+                            a.tangible, 
+                            SUM(b.asignado) asignado, 
+                            SUM(b.descartado) descartado, 
+                            COUNT(*) disponible,
+                            MIN(b.serie) serieInicial,
+                            MAX(b.serie) serieFinal
+                    FROM modelo a 
+                        INNER JOIN tangible_reasignacion b 
+                          ON a.tangible = b.tangible
+                            AND a.modelo = b.modelo
+                            AND (b.asignado = 1 or b.descartado = 1)
+                            AND b.enviado = 0
+                            AND b.confirmado = 0
+                    WHERE 1=1
+                        $where
+                    GROUP BY  
+                            a.tangible
+                    ORDER BY SUM(b.asignado) DESC
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+        await LocalDatabase.customQuery(query);
+    //return maps.map((json) => FormularioAnswer.fromMap(json)).toList();
+    return maps.map((json) {
+      return ModeloTangible.fromMap(json);
+    }).toList();
+  }
+
   Future<List<SolicitudAutomatica>> leerListadoSolicitudes(
       String idPdv, String tipo) async {
     await LocalDatabase.init();
@@ -1196,7 +1318,6 @@ class DBService {
 
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
-    print(maps);
 
     return maps.map((json) {
       return SolicitudAutomatica.fromMap(json);
@@ -1213,6 +1334,30 @@ class DBService {
                             SUM(b.asignado) asignado
                     FROM modelo a 
                         INNER JOIN tangible b 
+                          ON a.tangible = b.tangible
+                            AND a.modelo = b.modelo
+                            AND b.enviado = 0
+                            AND b.confirmado = 0
+                    WHERE 1=1
+                        $where
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+        await LocalDatabase.customQuery(query);
+    //return maps.map((json) => FormularioAnswer.fromMap(json)).toList();
+    return maps[0]["asignado"] as int;
+  }
+
+  Future<int> leerTotalModelosReasignacion() async {
+    await LocalDatabase.init();
+
+    String where = ""; //" AND a.instanceId = '$instanceId' ";
+
+    final query = """
+                    SELECT
+                            SUM(b.asignado)+SUM(b.descartado) asignado
+                    FROM modelo a 
+                        INNER JOIN tangible_reasignacion b 
                           ON a.tangible = b.tangible
                             AND a.modelo = b.modelo
                             AND b.enviado = 0
@@ -1244,7 +1389,29 @@ class DBService {
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
 
-    print(maps);
+    if (maps.isEmpty) {
+      return [];
+    } else {
+      return maps.map((e) => e['tangible'].toString()).toList();
+    }
+  }
+
+  Future<List<String>> leerTiposReasignacionDB() async {
+    await LocalDatabase.init();
+
+    String where = ""; //" AND a.instanceId = '$instanceId' ";
+
+    const query = """
+                    SELECT
+                            tangible
+                    FROM tangible_reasignacion a 
+                    WHERE 1=1
+                      AND asignado != 1
+                    GROUP BY tangible
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+        await LocalDatabase.customQuery(query);
 
     if (maps.isEmpty) {
       return [];
@@ -1253,13 +1420,12 @@ class DBService {
     }
   }
 
-
-  Future<List<TipoTangibleInfo>> leerDescripcionModelos({String? tangible}) async {
+  Future<List<TipoTangibleInfo>> leerDescripcionModelos(
+      {String? tangible}) async {
     await LocalDatabase.init();
 
     String where = ""; //" AND a.instanceId = '$instanceId' ";
 
-  
     if (tangible != null && tangible.isNotEmpty) {
       where += " AND a.tangible = '$tangible'";
     }
@@ -1280,12 +1446,39 @@ class DBService {
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
 
-
     return maps.map((json) => TipoTangibleInfo.fromMap(json)).toList();
   }
 
+  Future<List<TipoTangibleReasignacionInfo>> leerDescripcionModelosReasignacion(
+      {String? tangible}) async {
+    await LocalDatabase.init();
 
+    String where = ""; //" AND a.instanceId = '$instanceId' ";
 
+    if (tangible != null && tangible.isNotEmpty) {
+      where += " AND a.tangible = '$tangible'";
+    }
+
+    String query = """
+                     SELECT
+                       count(*) cantidad,
+                      b.descripcion tipo
+                    FROM tangible_reasignacion a
+                        INNER JOIN modelo b
+                            on a.modelo = b.modelo
+                    WHERE a.asignado != 1
+                      $where
+                      GROUP BY b.descripcion
+
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+        await LocalDatabase.customQuery(query);
+
+    return maps
+        .map((json) => TipoTangibleReasignacionInfo.fromMap(json))
+        .toList();
+  }
 
   Future<List<ProductoTangible>> leerInventarioDB() async {
     await LocalDatabase.init();
@@ -1306,11 +1499,33 @@ class DBService {
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
 
-    print(maps);
-
     return maps.map((json) => ProductoTangible.fromMap(json)).toList();
   }
 
+  Future<List<ProductoTangibleReasignacion>>
+      leerInventarioReasignadoDB() async {
+    await LocalDatabase.init();
+
+    String where = ""; //" AND a.instanceId = '$instanceId' ";
+
+    const query = """
+                    SELECT
+                      a.*,
+                      b.descripcion descModelo
+                    FROM tangible_reasignacion a
+                        INNER JOIN modelo b
+                            on a.modelo = b.modelo
+                    WHERE a.asignado != 1
+
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+        await LocalDatabase.customQuery(query);
+
+    return maps
+        .map((json) => ProductoTangibleReasignacion.fromMap(json))
+        .toList();
+  }
   /*FIN DE FUNCIONES PARA MODELOS*/
 
   /*INICIO DE FUNCIONES PARA TANGIBLES */
@@ -1321,10 +1536,25 @@ class DBService {
     await LocalDatabase.insertListTangible(tangibles);
   }
 
+  Future guardarTangiblesReasignado(
+      List<ProductoTangibleReasignacion> tangibles) async {
+    await LocalDatabase.init();
+    LocalDatabase.delete('tangible_reasignacion');
+
+    await LocalDatabase.insertListTangibleReasignacion(tangibles);
+  }
+
   Future<int> updateTangible(ProductoTangible tangible) async {
     await LocalDatabase.init();
 
     return LocalDatabase.update(ProductoTangible.table, tangible);
+  }
+
+  Future<int> updateTangibleReasignacion(
+      ProductoTangibleReasignacion tangible) async {
+    await LocalDatabase.init();
+
+    return LocalDatabase.update(ProductoTangibleReasignacion.table, tangible);
   }
 
   Future<int> updateTangibleEnviado(List<ProductoTangible> tangibles) async {
@@ -1337,6 +1567,20 @@ class DBService {
         ProductoTangible.table,
         tangible.copyWith(enviado: 1),
       );
+    }
+
+    return resp;
+  }
+
+  Future<int> updateTangibleEnviadoReasignado(
+      List<ProductoTangibleReasignacion> tangibles) async {
+    await LocalDatabase.init();
+
+    int resp = 0;
+
+    for (var tangible in tangibles) {
+      resp = await LocalDatabase.update(
+          ProductoTangibleReasignacion.table, tangible.copyWith(enviado: 1));
     }
 
     return resp;
@@ -1397,6 +1641,96 @@ class DBService {
     return maps.map((json) => ProductoTangible.fromMap(json)).toList();
   }
 
+  Future<List<ProductoTangibleReasignacion>> getTangibleReasignacion({
+    String? serie,
+    String? modelo,
+    String? tangible,
+    bool asignar = false,
+  }) async {
+    await LocalDatabase.init();
+
+    String where = "";
+    String order = " ORDER BY fechaAsignacion ASC, serie";
+    if (serie != null && serie.isNotEmpty) {
+      where += " AND serie = '$serie'";
+    }
+
+    if (tangible != null && tangible.isNotEmpty) {
+      where += " AND tangible = '$tangible'";
+    }
+
+    if (modelo != null && modelo.isNotEmpty) {
+      where += " AND modelo = '$modelo'";
+    }
+
+    if (asignar) {
+      //where += " AND asignado = 0";
+    } else {
+      where += " AND asignado = 1 AND confirmado = 0 AND enviado = 0 ";
+      order = " ORDER BY fechaAsignacion DESC, serie DESC";
+    }
+
+    final query = """
+                    SELECT *
+                    FROM tangible_reasignacion  
+                    WHERE 1=1
+                        $where
+                    $order
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+        await LocalDatabase.customQuery(query);
+    print(maps);
+    return maps
+        .map((json) => ProductoTangibleReasignacion.fromMap(json))
+        .toList();
+  }
+
+  Future<List<ProductoTangibleReasignacion>> getTangibleReasignacionDes({
+    String? serie,
+    String? modelo,
+    String? tangible,
+    bool asignar = false,
+  }) async {
+    await LocalDatabase.init();
+
+    String where = "";
+    String order = " ORDER BY fechaAsignacion ASC, serie";
+    if (serie != null && serie.isNotEmpty) {
+      where += " AND serie = '$serie'";
+    }
+
+    if (tangible != null && tangible.isNotEmpty) {
+      where += " AND tangible = '$tangible'";
+    }
+
+    if (modelo != null && modelo.isNotEmpty) {
+      where += " AND modelo = '$modelo'";
+    }
+
+    if (asignar) {
+      //where += " AND asignado = 0";
+    } else {
+      where += " AND descartado = 1 AND confirmado = 0 AND enviado = 0 ";
+      order = " ORDER BY fechaAsignacion DESC, serie DESC";
+    }
+
+    final query = """
+                    SELECT *
+                    FROM tangible_reasignacion  
+                    WHERE 1=1
+                        $where
+                    $order
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+        await LocalDatabase.customQuery(query);
+    print(maps);
+    return maps
+        .map((json) => ProductoTangibleReasignacion.fromMap(json))
+        .toList();
+  }
+
   Future<List<Map<String, dynamic>>> getPendienteConfirmar(
       {required String idPdv}) async {
     await LocalDatabase.init();
@@ -1439,6 +1773,52 @@ class DBService {
     return maps.map((json) => ProductoTangible.fromMap(json)).toList();
   }
 
+  Future<List<ProductoTangibleReasignacion>> getTangibleConfirmadoReasignacion(
+      int idPdv) async {
+    await LocalDatabase.init();
+
+    String where = " AND idPdv = $idPdv";
+    String order = " ORDER BY fechaVenta ";
+
+    final query = """
+                    SELECT *
+                    FROM tangible_reasignacion 
+                    WHERE 1=1
+                        $where
+                    $order
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+        await LocalDatabase.customQuery(query);
+
+    return maps
+        .map((json) => ProductoTangibleReasignacion.fromMap(json))
+        .toList();
+  }
+
+  Future<List<ProductoTangibleReasignacion>> getTangibleReasingacion(
+      int idPdv) async {
+    await LocalDatabase.init();
+
+    String where = "and idPdv = $idPdv";
+    String order = " ORDER BY fechaVenta ";
+
+    final query = """
+                    SELECT *
+                    FROM tangible_reasignacion  
+                    WHERE 1=1
+                        $where
+                    $order
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+        await LocalDatabase.customQuery(query);
+
+    return maps
+        .map((json) => ProductoTangibleReasignacion.fromMap(json))
+        .toList();
+  }
+
   Future<List<ProductoTangible>> getTangibleModelo({
     required ModeloTangible modelo,
   }) async {
@@ -1462,6 +1842,35 @@ class DBService {
         await LocalDatabase.customQuery(query);
 
     return maps.map((json) => ProductoTangible.fromMap(json)).toList();
+  }
+
+  Future<List<ProductoTangibleReasignacion>> getTangibleModeloReasignacion({
+    required ModeloTangible modelo,
+    required int idPdv,
+  }) async {
+    await LocalDatabase.init();
+
+    String where = """ AND tangible = '${modelo.tangible}' 
+                       AND modelo = '${modelo.modelo}'
+                       AND enviado = 0
+                       AND idPdv = $idPdv
+                    """;
+    String order = " ORDER BY fechaAsignacion ASC, serie, asignado DESC";
+
+    final query = """
+                    SELECT *
+                    FROM tangible_reasignacion
+                    WHERE 1=1
+                        $where
+                    $order
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+        await LocalDatabase.customQuery(query);
+
+    return maps
+        .map((json) => ProductoTangibleReasignacion.fromMap(json))
+        .toList();
   }
 
   Future<List<ProductoTangible>> getAllTangible() async {
@@ -1779,4 +2188,24 @@ class DBService {
   }
 
   /*FIN TRACKING DE RED*/
+
+  /*INICIO DE FUNCIONES PARA INCENTIVOS */
+  Future<List<IncentivoPdv>> leerIncentivosPorPdv(String idPdv) async {
+    await LocalDatabase.init();
+
+    String where = " AND idPdv = '$idPdv' ";
+
+    final query = """
+                    SELECT *
+                    FROM incentivo 
+                    WHERE 1=1
+                        $where
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+        await LocalDatabase.customQuery(query);
+
+    print(maps);
+    return maps.map((json) => IncentivoPdv.fromMap(json)).toList();
+  }
 }

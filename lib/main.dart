@@ -48,6 +48,9 @@ void main() async {
           create: (context) => CarritoBloc(),
         ),
         BlocProvider(
+          create: (context) => CarritoReasignacionBloc(),
+        ),
+        BlocProvider(
           create: (context) => NetworkInfoBloc(),
         ),
         BlocProvider(
@@ -55,6 +58,9 @@ void main() async {
         ),
         BlocProvider(
           create: (context) => InventarioBloc(),
+        ),
+        BlocProvider(
+          create: (context) => InventarioReasignadoBloc(),
         ),
         BlocProvider(
           create: (context) => MapBloc(

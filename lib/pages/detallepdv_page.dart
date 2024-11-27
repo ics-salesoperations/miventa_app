@@ -4,6 +4,7 @@ import 'package:miventa_app/models/models.dart';
 import 'package:miventa_app/pages/detallepdv_info_page.dart';
 import 'package:miventa_app/pages/detallepdv_prepago_page.dart';
 import 'package:miventa_app/pages/detallepdv_tmy_page.dart';
+import 'package:miventa_app/pages/detallepdv_ejecucion_page.dart';
 import 'package:miventa_app/widgets/widgets.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -58,6 +59,7 @@ class _DetallePdvPageState extends State<DetallePdvPage> {
                     children: [
                       DetallePdvInfo(detallePdv: detallePdv),
                       DetallePdvPre(detallePdv: detallePdv),
+                      DetallePdvEjecucion(detallePdv: detallePdv),
                       DetallePdvTmy(detallePdv: detallePdv),
                       //DetallePdvAct(detallePdv: detallePdv),
                     ],
