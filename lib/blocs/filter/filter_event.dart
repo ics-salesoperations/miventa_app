@@ -56,3 +56,38 @@ class OnSelectPDVEvent extends FilterEvent {
     required this.isSelectedPDV,
   });
 }
+
+
+
+class OnActualizarFiltrosEvent extends FilterEvent {
+  final String idSucursal;
+  final String nombreCircuito;
+  final String segmento;
+  final String servicio;
+
+  const OnActualizarFiltrosEvent({
+    required this.idSucursal,
+    required this.nombreCircuito,
+    required this.segmento,
+    required this.servicio,
+  });
+}
+
+class OnCargarSegmentosEvent extends FilterEvent {
+  final List<String> segmentos;
+  final bool cargandoSegmentos;
+
+  const OnCargarSegmentosEvent({
+    required this.segmentos,
+    required this.cargandoSegmentos,
+  });
+}
+class OnCargarServiciosEvent extends FilterEvent {
+  final List<String> servicios;
+//  final bool cargandoServicios;
+
+  const OnCargarServiciosEvent({
+    required this.servicios,
+//    required this.cargandoSegmentos,
+  });
+}

@@ -33,6 +33,9 @@ export 'package:miventa_app/models/usuario.dart';
 export 'package:miventa_app/models/usuario_response.dart';
 export 'package:miventa_app/models/visita.dart';
 
+export 'package:miventa_app/models/solicitudes_ger.dart';
+export 'package:miventa_app/models/sucursal_response.dart';
+
 export 'fordis11.dart';
 export 'modelo_tangible.dart';
 export 'modelo_tangible_response.dart';
@@ -41,3 +44,5 @@ export 'producto_tangible.dart';
 export 'producto_tangible_response.dart';
 export 'reporte_quiebre.dart';
 export 'resumen_sincronizar.dart';
+
+

@@ -58,6 +58,13 @@ class DBService {
     await LocalDatabase.insertListSolicitudes(datos);
   }
 
+//crear detalle de la tabla de generentes
+  Future crearDetalleGerente(List<SolicitudesGer> datos) async {
+    await LocalDatabase.init();
+    await LocalDatabase.delete('gerentes');
+    await LocalDatabase.insertListSolicitudesGer(datos);
+  }
+
   Future<int> insertardetallePDV(Planning detpdv) async {
     await LocalDatabase.init();
     final resultado = await LocalDatabase.insert(Planning.table, detpdv);
@@ -126,6 +133,9 @@ class DBService {
     DateTime? fecha,
     String? usuario,
     bool mapa = false,
+    String? nombreCircuito,
+    String? segmento,
+    String? servicio,
   }) async {
     String where = "";
     String fechaFormatted = "";
@@ -133,6 +143,24 @@ class DBService {
     if (idSucursal != null && idSucursal.isNotEmpty) {
       where = " AND idSucursal = $idSucursal";
     }
+// inicio nuevo -----------------------------------------------------------------
+    if (segmento != null && segmento.isNotEmpty) {
+      where += """ AND CASE 
+                              WHEN segmentoPdv = 'N/A' THEN 'OTRO'
+                              WHEN segmentoPdv = 'null' THEN 'OTRO'
+                              WHEN segmentoPdv IS NULL THEN 'OTRO'
+                              ELSE segmentoPdv
+                           END = '$segmento'""";
+    }
+
+    // if (nombreCircuito != null && nombreCircuito.isNotEmpty) {
+    //   where = where + " AND nombreCircuito = '$nombreCircuito'";
+    // }
+    if (servicio != null && servicio.isNotEmpty) {
+      where = where + " AND servicios LIKE '%${servicio.toUpperCase()}%'";
+    }
+
+    //fin nuevo: ----------------------------------------------------
 
     if (codigoCircuito != null && codigoCircuito.isNotEmpty) {
       where = where + " AND nombreCircuito = '$codigoCircuito'";
@@ -159,6 +187,7 @@ class DBService {
 
     if (usuario != "" && usuario != null) {
       where = where + " AND nombreEmpleadoDms = '$usuario'";
+      
     }
 
     String query = "";
@@ -612,6 +641,103 @@ class DBService {
     List<Map<String, dynamic>> maps = await LocalDatabase.customQuery(query);
 
     return maps.map((item) => Planning.fromJson(item)).toList()[0];
+  }
+
+  Future<List<String>> leerSegmentos({
+    String? idSucursal,
+    String? nombreCircuito,
+    String? segmento,
+  }) async {
+    await LocalDatabase.init();
+
+    String where = "";
+
+    if (idSucursal != null && idSucursal.isNotEmpty) {
+      where = " AND idSucursal = $idSucursal";
+    }
+
+    if (segmento != null && segmento.isNotEmpty) {
+      where = " AND segmentoPdv = '$segmento'";
+    }
+
+    if (nombreCircuito != null && nombreCircuito.isNotEmpty) {
+      where = where + " AND nombreCircuito = '$nombreCircuito'";
+    }
+
+    String query = """
+                    SELECT CASE 
+                              WHEN segmentoPdv = 'N/A' THEN 'OTRO'
+                              WHEN segmentoPdv = 'null' THEN 'OTRO'
+                              WHEN segmentoPdv IS NULL THEN 'OTRO'
+                              ELSE segmentoPdv
+                           END segmentoPdv
+                    FROM planning
+                    WHERE id>=0
+                        $where
+                    GROUP BY 
+                          CASE 
+                              WHEN segmentoPdv = 'N/A' THEN 'OTRO'
+                              WHEN segmentoPdv = 'null' THEN 'OTRO'
+                              WHEN segmentoPdv IS NULL THEN 'OTRO'
+                              ELSE segmentoPdv
+                           END
+                  """;
+
+    List<Map<String, dynamic>> maps = await LocalDatabase.customQuery(query);
+
+    print('maps $maps');
+
+    return maps.fold<List<String>>(
+        [],
+        (previousValue, element) =>
+            List.from(previousValue)..add(element['segmentoPdv']));
+  }
+
+  Future<List<String>> leerServicios({
+    String? idSucursal,
+    String? nombreCircuito,
+    String? segmento,
+    String? servicio,
+  }) async {
+    await LocalDatabase.init();
+
+    String where = "";
+
+    if (idSucursal != null && idSucursal.isNotEmpty) {
+      where = " AND idSucursal = $idSucursal";
+    }
+
+    if (segmento != null && segmento.isNotEmpty) {
+      where = " AND segmentoPdv = '$segmento'";
+    }
+
+    if (nombreCircuito != null && nombreCircuito.isNotEmpty) {
+      where = where + " AND nombreCircuito = '$nombreCircuito'";
+    }
+    if (servicio != null && servicio.isNotEmpty) {
+      where = where + " AND servicios LIKE '%${servicio.toUpperCase()}%'";
+    }
+
+    String query = """
+                    SELECT servicios
+                    FROM planning
+                    WHERE id>=0
+                        $where
+                    GROUP BY 
+                          servicios
+                  """;
+
+    List<Map<String, dynamic>> maps = await LocalDatabase.customQuery(query);
+
+    print('servicio: $maps');
+
+    final arreglo = maps.fold<List<String>>(
+        [],
+        (previousValue, element) =>
+            List.from(previousValue)..add(element['servicios']));
+    final String arregloUnificado = arreglo.join(",");
+
+    return arregloUnificado.split(",").toSet().toList();
   }
 
   /*FIN DE EVENTOS PARA PLANNING */
@@ -1253,13 +1379,12 @@ class DBService {
     }
   }
 
-
-  Future<List<TipoTangibleInfo>> leerDescripcionModelos({String? tangible}) async {
+  Future<List<TipoTangibleInfo>> leerDescripcionModelos(
+      {String? tangible}) async {
     await LocalDatabase.init();
 
     String where = ""; //" AND a.instanceId = '$instanceId' ";
 
-  
     if (tangible != null && tangible.isNotEmpty) {
       where += " AND a.tangible = '$tangible'";
     }
@@ -1280,12 +1405,8 @@ class DBService {
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
 
-
     return maps.map((json) => TipoTangibleInfo.fromMap(json)).toList();
   }
-
-
-
 
   Future<List<ProductoTangible>> leerInventarioDB() async {
     await LocalDatabase.init();

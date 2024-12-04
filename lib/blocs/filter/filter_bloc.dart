@@ -50,15 +50,115 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
         ),
       );
     });
+    on<OnCargarSegmentosEvent>((event, emit) {
+      emit(
+        state.copyWith(
+          segmentos: event.segmentos,
+          cargandoSegmentos: event.cargandoSegmentos,
+          isSelectedPDV: false,
+        ),
+      );
+    });
+    on<OnCargarServiciosEvent>((event, emit) {
+      emit(
+        state.copyWith(
+          servicios: event.servicios,
+          //cargandoServicio: event.cargandoServicio,
+          isSelectedPDV: false,
+        ),
+      );
+    });
+      
+      on<OnActualizarFiltrosEvent>((event, emit) {
+      emit(
+        state.copyWith(
+          idSucursal: event.idSucursal,
+          nombreCircuito: event.nombreCircuito,
+          segmento: event.segmento,
+          servicio: event.servicio,
+          isSelectedPDV: false,
+        ),
+      );
+    });
 
     init();
   }
 
-  Future<void> init() async {
+  Future<void> init({
+    String? idSucursal,
+    String? nombreCircuito,
+    String? segmento,
+    String? servicio,
+  }) async {
     await getDealers();
     await getSucursales();
     await getCircuitos();
     await getPDVS();
+
+    await getSegmentos(
+      idSucursal: idSucursal,
+      nombreCircuito: nombreCircuito,
+    );
+    await getServicios(
+        idSucursal: idSucursal,
+        nombreCircuito: nombreCircuito,
+        servicio: servicio);
+  }
+
+  Future<void> getSegmentos({
+    String? idSucursal,
+    String? idDealer,
+    String? nombreCircuito,
+  }) async {
+    add(const OnCargarSegmentosEvent(
+      cargandoSegmentos: true,
+      segmentos: [],
+    ));
+
+    List<String> segmentos;
+    try {
+      segmentos = await _dbService.leerSegmentos(
+        idSucursal: idSucursal,
+        nombreCircuito: nombreCircuito,
+      );
+    } catch (e) {
+      segmentos = <String>[];
+    }
+    add(OnCargarSegmentosEvent(
+      cargandoSegmentos: false,
+      segmentos: segmentos,
+    ));
+  }
+
+  Future<void> getServicios({
+    String? idSucursal,
+    String? idDealer,
+    String? nombreCircuito,
+    String? segmento,
+    String? servicio,
+  }) async {
+    add(const OnCargarServiciosEvent(
+      //cargandoSegmentos: true,
+      servicios: [],
+    ));
+
+    List<String> servicios;
+    try {
+      servicios = await _dbService.leerServicios(
+        idSucursal: idSucursal,
+        nombreCircuito: nombreCircuito,
+        segmento: segmento,
+        servicio: servicio,
+      );
+    } catch (e) {
+      print("error ");
+      print(e);
+      servicios = <String>[];
+    }
+    add(OnCargarServiciosEvent(
+      //cargandoSegmentos: false,
+      servicios: servicios,
+    ));
   }
 
   Future<void> getDealers() async {
@@ -117,6 +217,9 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
 
   Future<void> getPDVS({
     String? idSucursal,
+    String? nombreCircuito,
+    String? segmento,
+    String? servicio,
     String? codigoCircuito,
     DateTime? fecha,
   }) async {
@@ -135,7 +238,10 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
         usuario:
             (usuario.perfil == 6 || usuario.perfil == 5 || usuario.perfil == 1)
                 ? ""
-                : usuario.usuario.toString(),
+                : (usuario.perfil == 152 || usuario.perfil == 153 || usuario.perfil == 155 || usuario.perfil == 156) ? 'GERENTE': usuario.usuario.toString(),
+        nombreCircuito: nombreCircuito,
+        segmento: segmento,
+        servicio: servicio,
       );
     } catch (e) {
       pdvs = <Planning>[];

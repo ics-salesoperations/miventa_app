@@ -215,6 +215,65 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
     }
   }
 
+// planning gerencia
+  Future<void> actualizarPlanningGer(
+      {required List<Tabla> currentTablas}) async {
+    add(
+      OnActualizarPlanningEvent(
+        actualizandoPlanning: true,
+        mensaje: "Espere un momento, estamos actualizando tu planificación.",
+        tablas: currentTablas,
+      ),
+    );
+
+    try {
+      final token = await _authService.getToken();
+      Usuario usuario = await _userService.getInfoUsuario();
+
+      if (usuario.perfil == 1) {
+        usuario = usuario.copyWith(idDms: '23');
+      }
+
+      final resp = await http.get(
+          Uri.parse(
+            '${Environment.apiURL}/appmiventa/planificacion_ger/' +
+                usuario.usuario.toString(),
+          ),
+          headers: {
+            'Content-Type': 'application/json',
+            'token': token,
+          }).timeout(const Duration(minutes: 10));
+
+      final planningResponse = planningResponseFromJson(
+        utf8.decode(resp.bodyBytes),
+      );
+
+      //guardar en base de datos local
+      await _dbService.crearDetallePdv(planningResponse.planning);
+
+      await _dbService.updateTabla(tbl: 'planning');
+      final tablas = await _dbService.leerListadoTablas();
+      add(OnActualizarPlanningEvent(
+        actualizandoPlanning: false,
+        mensaje: "Planificación actualizada exitosamente",
+        tablas: tablas,
+      ));
+    } on TimeoutException catch (_) {
+      add(OnActualizarPlanningEvent(
+        actualizandoPlanning: false,
+        mensaje: "Error: Tiempo de conexion excedido.",
+        tablas: currentTablas,
+      ));
+    } catch (e) {
+     add(OnActualizarPlanningEvent(
+        actualizandoPlanning: false,
+        mensaje:
+            'Ocurrió un error al actualizar tu planificación', //"Ocurrio un error al actualizar tu planificacion ",
+        tablas: currentTablas,
+      ));
+    }
+  }
+
   Future<void> actualizarModelos({required List<Tabla> currentTablas}) async {
     add(
       OnActualizarModelosEvent(
@@ -481,4 +540,76 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
       ));
     }
   }
+
+  // by: edy
+  // Future<void> actualizarSolicitudesGer() async {
+  //   add(
+  //     const OnActualizarSolicitudesEvent(
+  //       actualizandoSolicitudes: true,
+  //       mensaje: "Espere un momento, estamos actualizando las solicitudes.",
+  //     ),
+  //   );
+
+  //   try {
+  //     final token = await _authService.getToken();
+  //     Usuario usuario = await _userService.getInfoUsuario();
+
+  //     if (usuario.perfil == 1) {
+  //       usuario = usuario.copyWith(idDms: '19'); //PERFIL DE GERENCIA
+  //     }
+
+  //     // final resp = await http.get(
+  //     //     Uri.parse(
+  //     //       '${Environment.apiURL}/appmiventa/sucursales/asignadas/' +
+  //     //           usuario.usuario.toString(),
+  //     //     ),
+  //     //     headers: {
+  //     //       'Content-Type': 'application/json',
+  //     //       'token': token,
+  //     //     }).timeout(const Duration(
+  //     //   minutes: 5,
+  //     // ));
+  //     final resp = await http.get(
+  //         Uri.parse(
+  //           '${Environment.apiURL}/appmiventa/sucursales/asignadas/KEVIN.SANCHEZ', // usuario.usuario.toString(),
+  //         ),
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           'token': token,
+  //         }).timeout(const Duration(
+  //       minutes: 5,
+  //     ));
+
+  //     final solicitudesResponse = solicitudesGerResponseFromJson(
+  //       utf8.decode(resp.bodyBytes),
+  //     );
+
+  //     //guardar en base de datos local
+
+  //     if (solicitudesResponse.data.isNotEmpty) {
+  //       await _dbService.crearDetalleGerente(solicitudesResponse.data);
+  //       add(const OnActualizarSolicitudesEvent(
+  //         actualizandoSolicitudes: false,
+  //         mensaje: "Solicitudes actualizadas exitosamente. data del gerente",
+  //       ));
+  //     } else {
+  //       add(const OnActualizarSolicitudesEvent(
+  //         actualizandoSolicitudes: false,
+  //         mensaje: "Ocurrió un error al actualizar sus solicitudes. gerente",
+  //       ));
+  //     }
+  //   } on TimeoutException catch (_) {
+  //     add(const OnActualizarSolicitudesEvent(
+  //       actualizandoSolicitudes: false,
+  //       mensaje: "Ocurrió un error al actualizar sus solicitudes. gerente",
+  //     ));
+  //   } catch (e) {
+  //     add(const OnActualizarSolicitudesEvent(
+  //       actualizandoSolicitudes: false,
+  //       mensaje: "Ocurrió un error al actualizar sus solicitudes. gerente",
+  //     ));
+  //   }
+  // }
+
 }
+

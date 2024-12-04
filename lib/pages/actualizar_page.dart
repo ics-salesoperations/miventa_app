@@ -29,7 +29,6 @@ class _ActualizarPageState extends State<ActualizarPage>
     _auth = BlocProvider.of<AuthBloc>(context);
     _actualizarBloc.init();
 
-
     btnController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -101,7 +100,7 @@ class _ActualizarPageState extends State<ActualizarPage>
               Expanded(
                 child: Container(
                   width: double.infinity,
-                  height: 300,
+                  // height: 600,
                   margin: const EdgeInsets.only(bottom: 10),
                   padding: const EdgeInsets.all(20),
                   decoration: const BoxDecoration(
@@ -168,6 +167,14 @@ class _ActualizarPageState extends State<ActualizarPage>
                                         .contains(_auth.state.usuario.perfil)) {
                                       fnActualizar = () {
                                         _actualizarBloc.actualizarPlanningSup(
+                                          currentTablas: state.tablas,
+                                        );
+                                      };
+                                    }
+                                    else if ([152, 153, 155, 156]
+                                        .contains(_auth.state.usuario.perfil)) {
+                                      fnActualizar = () {
+                                        _actualizarBloc.actualizarPlanningGer(
                                           currentTablas: state.tablas,
                                         );
                                       };

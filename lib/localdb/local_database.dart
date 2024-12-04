@@ -10,7 +10,7 @@ class LocalDatabase {
 
   LocalDatabase._init();
 
-  static int get _version => 2;
+  static int get _version => 3;
 
   static Future<void> init() async {
     try {
@@ -64,6 +64,27 @@ class LocalDatabase {
                                     )
             """;
     await db.execute(sql);
+
+    //creando tabla de gerentes
+    sql = """
+              CREATE TABLE gerentes (
+                                    id $idType,
+                                    usuario $stringType,
+                                    idDealer $stringType,
+                                    idSucursal $stringType
+                                    )
+            """;
+    await db.execute(sql);
+
+    //insertando en tabla tabla de control de Actualizaciones
+    // sql = """
+    //           INSERT INTO tablas (
+    //                                 tabla,
+    //                                 descripcion
+    //                                 )
+    //                                 VALUES ('gerentes', 'Sucursales asignadas')
+    //         """;
+    // await db.execute(sql);
 
     /*CREANDO TABLA DE TRACKING DEL USUARIO HEAD*/
     sql = """
@@ -794,6 +815,31 @@ class LocalDatabase {
     return resp;
   }
 
+  // gerentes
+  static Future<int> insertListSolicitudesGer(
+      List<SolicitudesGer> datos) async {
+    Batch ba = _db!.batch();
+    String query = """
+    INSERT INTO gerentes 
+    (
+      idDealer, 
+      idSucursal
+    )
+    VALUES
+    (
+      ?,
+      ?
+    )
+    """;
+
+    for (var dato in datos) {
+      ba.rawInsert(query, [dato.idDealer, dato.idSucursal]);
+    }
+    await ba.commit(noResult: true);
+  
+    return datos.length;
+  }
+
   static Future<int> update(String table, Model model) async {
     return _db!
         .update(table, model.toJson(), where: 'id=?', whereArgs: [model.id]);
@@ -823,3 +869,5 @@ class LocalDatabase {
     return _db!.delete(table, where: " enviado = ?", whereArgs: ["SI"]);
   }
 }
+
+

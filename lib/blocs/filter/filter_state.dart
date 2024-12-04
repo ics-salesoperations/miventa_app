@@ -4,6 +4,10 @@ class FilterState extends Equatable {
   final List<Dealer> dealers;
   final List<Sucursal> sucursales;
   final List<Circuito> circuitos;
+
+  final List<String> segmentos;
+  final List<String> servicios;
+
   final List<Planning> pdvs;
   final List<Planning> selectedPDV;
   final bool cargandoDealers;
@@ -12,17 +16,30 @@ class FilterState extends Equatable {
   final bool cargandoPDVs;
   final bool isSelectedPDV;
 
+  final bool cargandoSegmentos;
+  final String idSucursal;
+  final String nombreCircuito;
+  final String segmento;
+  final String servicio;
+
   const FilterState({
     this.selectedPDV = const <Planning>[],
     this.pdvs = const <Planning>[],
     this.circuitos = const <Circuito>[],
     this.sucursales = const <Sucursal>[],
     this.dealers = const <Dealer>[],
+    this.segmentos = const <String>[],
+    this.servicios = const <String>[],
     this.cargandoDealers = false,
     this.cargandoSucursales = false,
     this.cargandoCircuitos = false,
     this.cargandoPDVs = false,
     this.isSelectedPDV = false,
+    this.cargandoSegmentos = false,
+    this.idSucursal = "",
+    this.nombreCircuito = "",
+    this.segmento = "",
+    this.servicio = "",
   });
 
   FilterState copyWith({
@@ -31,11 +48,18 @@ class FilterState extends Equatable {
     List<Circuito>? circuitos,
     List<Sucursal>? sucursales,
     List<Dealer>? dealers,
+    List<String>? segmentos,
+    List<String>? servicios,
     bool? cargandoDealers,
     bool? cargandoSucursales,
     bool? cargandoCircuitos,
     bool? cargandoPDVs,
     bool? isSelectedPDV,
+    bool? cargandoSegmentos,
+    String? idSucursal,
+    String? nombreCircuito,
+    String? segmento,
+    String? servicio,
   }) =>
       FilterState(
         selectedPDV: selectedPDV ?? this.selectedPDV,
@@ -43,11 +67,18 @@ class FilterState extends Equatable {
         circuitos: circuitos ?? this.circuitos,
         sucursales: sucursales ?? this.sucursales,
         dealers: dealers ?? this.dealers,
+        segmentos: segmentos ?? this.segmentos,
+        servicios: servicios ?? this.servicios,
         cargandoDealers: cargandoDealers ?? this.cargandoDealers,
         cargandoSucursales: cargandoSucursales ?? this.cargandoSucursales,
         cargandoCircuitos: cargandoCircuitos ?? this.cargandoCircuitos,
         cargandoPDVs: cargandoPDVs ?? this.cargandoPDVs,
         isSelectedPDV: isSelectedPDV ?? this.isSelectedPDV,
+        cargandoSegmentos: cargandoSegmentos ?? this.cargandoSegmentos,
+        idSucursal: idSucursal ?? this.idSucursal,
+        nombreCircuito: nombreCircuito ?? this.nombreCircuito,
+        segmento: segmento ?? this.segmento,
+        servicio: servicio ?? this.servicio,
       );
 
   @override
@@ -59,5 +90,10 @@ class FilterState extends Equatable {
         cargandoPDVs,
         isSelectedPDV,
         selectedPDV,
+        segmentos,
+        servicios,
+        cargandoSegmentos,
+        segmento,
+        servicio,
       ];
 }
