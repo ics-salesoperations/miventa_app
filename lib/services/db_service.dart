@@ -1090,6 +1090,15 @@ class DBService {
     }
   }
 
+  Future guardarModelosSaldos(List<ModeloTangible> modelos) async {
+    await LocalDatabase.init();
+    for (var modelo in modelos) {
+      LocalDatabase.delete('modelo',
+          where: 'modelo = ?', whereArgs: [modelo.modelo]);
+      await LocalDatabase.insert('modelo', modelo);
+    }
+  }
+
   Future actualizarModelos(List<ModeloTangible> modelos) async {
     await LocalDatabase.init();
 
@@ -1105,7 +1114,9 @@ class DBService {
         " AND confirmado = 0 AND enviado = 0"; //" AND a.instanceId = '$instanceId' ";
 
     final query = """
-                    SELECT a.id, 
+                    SELECT
+                    *
+                    FROM (SELECT a.id, 
                             a.tangible,
                             a.modelo,
                             a.descripcion,
@@ -1127,8 +1138,12 @@ class DBService {
                             a.imagen, 
                             a.asignado, 
                             a.disponible
-                    ORDER BY disponible DESC
-                    """;
+                    UNION ALL
+                    SELECT -1 AS id, 'EPIN' AS tangible, 'EPIN' AS modelo, 'SALDO EPIN' AS descripcion, '' AS imagen, 0 AS asignado, 1 AS disponible, '0' AS serieInicial, '0' AS serieFinal
+                    UNION ALL
+                    SELECT -2 AS id, 'TMY' AS tangible, 'TMY' AS modelo, 'SALDO TIGO MONEY' AS descripcion, '' AS imagen, 0 AS asignado, 1 AS disponible, '0' AS serieInicial, '0' AS serieFinal
+                    )
+                    ORDER BY disponible DESC""";
 
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
@@ -1237,12 +1252,12 @@ class DBService {
     final query = """
                     SELECT  
                             a.tangible, 
-                            SUM(b.asignado) asignado, 
+                            SUM(IFNULL(b.asignado,a.asignado)) asignado, 
                             COUNT(*) disponible,
                             MIN(b.serie) serieInicial,
                             MAX(b.serie) serieFinal
                     FROM modelo a 
-                        INNER JOIN tangible b 
+                        LEFT JOIN tangible b 
                           ON a.tangible = b.tangible
                             AND a.modelo = b.modelo
                             AND b.asignado = 1
@@ -1252,6 +1267,7 @@ class DBService {
                         $where
                     GROUP BY  
                             a.tangible
+                    HAVING SUM(IFNULL(b.asignado, a.asignado)) > 0
                     ORDER BY SUM(b.asignado) DESC
                     """;
 
@@ -1628,11 +1644,14 @@ class DBService {
     }
 
     final query = """
-                    SELECT *
+                  SELECT
+                  *
+                  FROM  
+                    (SELECT *
                     FROM tangible 
                     WHERE 1=1
                         $where
-                    $order
+                    )$order
                     """;
 
     final List<Map<String, dynamic>> maps =

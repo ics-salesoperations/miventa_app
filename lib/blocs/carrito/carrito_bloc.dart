@@ -526,6 +526,43 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     return valor;
   }
 
+  Future<int> guardarModeloSaldo({
+    required ModeloTangible modelo,
+  }) async {
+    int valor = -1;
+
+    List<ModeloTangible> modelos = [];
+    modelos.add(modelo);
+    try {
+      await _dbService.guardarModelosSaldos(modelos);
+      valor = 1;
+    } catch (e) {
+      valor = -1;
+    }
+
+    return valor;
+  }
+
+  Future<int> asignarSaldos({
+    int cantidad = 0,
+    required ModeloTangible modelo,
+    required int idPdv,
+    required String idVisita,
+  }) async {
+    int valor = -1;
+
+    if (cantidad > 0) {
+      valor = 1;
+      modelo.asignado = cantidad;
+      await _dbService.updateModeloTangible(modelo);
+      add(OnChangeModeloActual(
+        actual: modelo,
+      ));
+    }
+
+    return valor;
+  }
+
   Future<int> desasignarProductoMasivo({
     int cantidad = 0,
     required ModeloTangible modelo,

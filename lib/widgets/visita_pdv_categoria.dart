@@ -115,8 +115,16 @@ class _VisitaPDVCategoriaState extends State<VisitaPDVCategoria> {
                                                               "ACCESS CARD MFS"
                                                           ? FontAwesomeIcons
                                                               .creditCard
-                                                          : FontAwesomeIcons
-                                                              .cartPlus,
+                                                          : elemento.toString() ==
+                                                                  "EPIN"
+                                                              ? FontAwesomeIcons
+                                                                  .phone
+                                                              : elemento.toString() ==
+                                                                      'TMY'
+                                                                  ? FontAwesomeIcons
+                                                                      .moneyCheckDollar
+                                                                  : FontAwesomeIcons
+                                                                      .cartPlus,
                                       color: state.selectedCat ==
                                               elemento.toString()
                                           ? kSecondaryColor

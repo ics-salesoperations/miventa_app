@@ -198,8 +198,19 @@ class _CestaPdvScreenState extends State<CestaPdvScreen> {
                                                               "ACCESS CARD MFS"
                                                           ? FontAwesomeIcons
                                                               .creditCard
-                                                          : FontAwesomeIcons
-                                                              .cartPlus,
+                                                          : modelo
+                                                                      .tangible
+                                                                      .toString() ==
+                                                                  'EPIN'
+                                                              ? FontAwesomeIcons
+                                                                  .phone
+                                                              : modelo.tangible
+                                                                          .toString() ==
+                                                                      'TMY'
+                                                                  ? FontAwesomeIcons
+                                                                      .moneyCheckDollar
+                                                                  : FontAwesomeIcons
+                                                                      .cartPlus,
                                       color: Colors.white,
                                       size: 22,
                                     ),
@@ -242,8 +253,19 @@ class _CestaPdvScreenState extends State<CestaPdvScreen> {
                                                               "ACCESS CARD MFS"
                                                           ? FontAwesomeIcons
                                                               .creditCard
-                                                          : FontAwesomeIcons
-                                                              .cartPlus,
+                                                          : modelo
+                                                                      .tangible
+                                                                      .toString() ==
+                                                                  'EPIN'
+                                                              ? FontAwesomeIcons
+                                                                  .phone
+                                                              : modelo.tangible
+                                                                          .toString() ==
+                                                                      'TMY'
+                                                                  ? FontAwesomeIcons
+                                                                      .moneyCheckDollar
+                                                                  : FontAwesomeIcons
+                                                                      .cartPlus,
                                       color: Colors.black12,
                                       size: 90,
                                     ),

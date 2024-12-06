@@ -10,6 +10,7 @@ import 'package:miventa_app/screens/formularios_visita_screen.dart';
 import 'package:miventa_app/screens/screens.dart';
 import 'package:speed_dial_fab/speed_dial_fab.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:miventa_app/pages/checkin_visita_page.dart';
 
 import '../blocs/blocs.dart';
 
@@ -831,7 +832,7 @@ class _DetallePdvInfoState extends State<DetallePdvInfo> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => RealizarVisitaPage(
+                                builder: (context) => VisitaScreen(
                                   detallePdv: detallePdv,
                                 ),
                               ),
@@ -1247,7 +1248,7 @@ List<Map<String, String>> incentivos = [
   },
   {
     "tipo_incentivo": "90 Días",
-    "titulo": "Pdv con Stock de",
+    "titulo": "Pdv con Stock Blister de",
     "subTitulo": "90 días",
     "Restriciones": "",
     "svg": 'assets/Iconos/90_dias.svg',
