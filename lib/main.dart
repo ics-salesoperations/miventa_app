@@ -5,7 +5,7 @@ import 'package:miventa_app/blocs/blocs.dart';
 import 'package:miventa_app/routes/routes.dart';
 
 bool? seenOnboard;
-
+// !Levantar uvicorn... 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(

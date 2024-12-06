@@ -167,7 +167,29 @@ class _BusquedaPageState extends State<BusquedaPage> {
                                   filtrarSucursal(sucursal),
                               itemAsString: (Sucursal sucursal) =>
                                   sucursal.nombreSucursal,
-                              onChanged: (Sucursal? sucursal) {},
+                              onChanged: (Sucursal? sucursal) async {
+// filtros de segmento al seleccionar una sucursal
+                                if (sucursal != null) {
+                                  filterBloc.add(OnActualizarFiltrosEvent(
+                                    idSucursal: sucursal.idSucursal,
+                                    nombreCircuito: "",
+                                    segmento: "",
+                                    servicio: "",
+                                  ));
+
+                                  await filterBloc.getPDVS(
+                                    idSucursal: sucursal.idSucursal,
+                                  );
+
+                                  await filterBloc.getCircuitos(
+                                    idSucursal: sucursal.idSucursal,
+                                  );
+
+                                  await filterBloc.getSegmentos(
+                                    idSucursal: sucursal.idSucursal,
+                                  );
+                                }
+                              },
                             ),
                             const SizedBox(
                               height: 10,
@@ -208,6 +230,102 @@ class _BusquedaPageState extends State<BusquedaPage> {
                                   await filterBloc.getPDVS(
                                     codigoCircuito:
                                         circuito.nombreCircuito.toString(),
+                                  );
+                                  // se agrega
+                                  await filterBloc.getSegmentos(
+                                    idSucursal: filterBloc.state.idSucursal,
+                                    nombreCircuito:
+                                        circuito.nombreCircuito.toString(),
+                                  );
+                                }
+                              },
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            const Text(
+                              "Segmento",
+                              style: TextStyle(
+                                fontFamily: 'CronosLPro',
+                                fontSize: 18,
+                                color: kSecondaryColor,
+                              ),
+                            ),
+                            DropdownSearch<String>(
+                              popupProps: const PopupProps.menu(
+                                showSearchBox: true,
+                              ),
+                              asyncItems: (String segmento) {
+                                return filtrarSegmento(segmento);
+                              },
+                              selectedItem: state.segmento.isEmpty
+                                  ? null
+                                  : state.segmento,
+                              itemAsString: (String? segmento) => segmento!,
+                              onChanged: (String? segmento) async {
+                                if (segmento != null) {
+                                  filterBloc.add(OnActualizarFiltrosEvent(
+                                    idSucursal: filterBloc.state.idSucursal,
+                                    nombreCircuito:
+                                        filterBloc.state.nombreCircuito,
+                                    segmento: segmento,
+                                    servicio: "",
+                                  ));
+
+                                  await filterBloc.getPDVS(
+                                    idSucursal: filterBloc.state.idSucursal,
+                                    nombreCircuito:
+                                        filterBloc.state.nombreCircuito,
+                                    segmento: segmento,
+                                  );
+                                  await filterBloc.getServicios(
+                                    idSucursal: filterBloc.state.idSucursal,
+                                    nombreCircuito:
+                                        filterBloc.state.nombreCircuito,
+                                    segmento: segmento,
+                                    servicio: "",
+                                  );
+                                }
+                              },
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            const Text(
+                              "Servicio",
+                              style: TextStyle(
+                                fontFamily: 'CronosLPro',
+                                fontSize: 18,
+                                color: kSecondaryColor,
+                              ),
+                            ),
+                            DropdownSearch<String>(
+                              popupProps: const PopupProps.menu(
+                                showSearchBox: true,
+                              ),
+                              asyncItems: (String servicio) {
+                                return filtrarServicio(servicio);
+                              },
+                              selectedItem: state.servicio.isEmpty
+                                  ? null
+                                  : state.servicio,
+                              itemAsString: (String? servicio) => servicio!,
+                              onChanged: (String? servicio) async {
+                                if (servicio != null) {
+                                  filterBloc.add(OnActualizarFiltrosEvent(
+                                    idSucursal: filterBloc.state.idSucursal,
+                                    nombreCircuito:
+                                        filterBloc.state.nombreCircuito,
+                                    segmento: filterBloc.state.segmento,
+                                    servicio: servicio,
+                                  ));
+
+                                  await filterBloc.getPDVS(
+                                    idSucursal: filterBloc.state.idSucursal,
+                                    nombreCircuito:
+                                        filterBloc.state.nombreCircuito,
+                                    segmento: filterBloc.state.segmento,
+                                    servicio: servicio,
                                   );
                                 }
                               },
@@ -349,6 +467,18 @@ class _BusquedaPageState extends State<BusquedaPage> {
     return filterBloc.state.circuitos;
   }
 
+  // !
+  Future<List<String>> filtrarSegmento(String filtro) async {
+    final filterBloc = BlocProvider.of<FilterBloc>(context);
+    return filterBloc.state.segmentos;
+  }
+
+  Future<List<String>> filtrarServicio(String filtro) async {
+    final filterBloc = BlocProvider.of<FilterBloc>(context);
+    return filterBloc.state.servicios;
+  }
+
+// !
   Future<List<Planning>> filtrarPDVS(String filtro) async {
     final filterBloc = BlocProvider.of<FilterBloc>(context);
     return filterBloc.state.pdvs;
