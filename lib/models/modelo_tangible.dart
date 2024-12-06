@@ -14,6 +14,7 @@ class ModeloTangible extends Model {
     this.disponible = 0,
     this.serieInicial = '0',
     this.serieFinal = '0',
+    this.descartado = 0,
   }) : super(id);
 
   String? tangible;
@@ -24,6 +25,7 @@ class ModeloTangible extends Model {
   int disponible;
   String? serieInicial;
   String? serieFinal;
+  int descartado;
   TextEditingController controller = TextEditingController();
 
   ModeloTangible copyWith({
@@ -36,6 +38,7 @@ class ModeloTangible extends Model {
     int? disponible,
     String? serieInicial,
     String? serieFinal,
+    int? descartado,
   }) =>
       ModeloTangible(
         id: id ?? this.id,
@@ -47,6 +50,7 @@ class ModeloTangible extends Model {
         disponible: disponible ?? this.disponible,
         serieInicial: serieInicial ?? this.serieInicial,
         serieFinal: serieFinal ?? this.serieFinal,
+        descartado: descartado ?? this.descartado,
       );
 
   factory ModeloTangible.fromMap(Map<String, dynamic> json) => ModeloTangible(
@@ -59,6 +63,7 @@ class ModeloTangible extends Model {
         disponible: json["disponible"] ?? 0,
         serieInicial: json["serieInicial"],
         serieFinal: json["serieFinal"],
+        descartado: json["descartado"] ?? 0,
       );
 
   @override
@@ -72,5 +77,6 @@ class ModeloTangible extends Model {
         "disponible": disponible,
         "serieInicial": serieInicial,
         "serieFinal": serieFinal,
+        "descartado": descartado,
       };
 }

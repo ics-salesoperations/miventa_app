@@ -7,6 +7,7 @@ const Color kFourColor = Color(0xFF808184);
 const Color kThirdColor = Color(0xFFffbe00);
 const Color kScaffoldBackground = Color(0xffffffff);
 const Color kScaffoldSecondaryBackground = Color(0xFF00377d);
+const Color kCardColor=Color(0xff3264dc);
 
 final kTitle = TextStyle(
   fontFamily: 'CronosSPro',

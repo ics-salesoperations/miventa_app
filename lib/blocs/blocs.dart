@@ -12,5 +12,7 @@ export 'package:miventa_app/blocs/planning/planning_bloc.dart';
 export 'package:miventa_app/blocs/speed_test/speed_test_bloc.dart';
 export 'package:miventa_app/blocs/sync/sync_bloc.dart';
 export 'package:miventa_app/blocs/visita/visita_bloc.dart';
+export 'package:miventa_app/blocs/inventario_reasignado/inventario_reasignado_bloc.dart';
 
 export 'carrito/carrito_bloc.dart';
+export 'carrito_reasignacion/carrito_reasignacion_bloc.dart';

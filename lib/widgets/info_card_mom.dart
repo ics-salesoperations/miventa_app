@@ -9,6 +9,8 @@ class BuildKpiInfoDisplay extends StatelessWidget {
   final String title;
   final String icono;
   final double screenWidth;
+  final String valor_1;
+  final String valor_2;
 
   const BuildKpiInfoDisplay(
       {Key? key,
@@ -17,7 +19,9 @@ class BuildKpiInfoDisplay extends StatelessWidget {
       required this.mom,
       required this.title,
       required this.icono,
-      required this.screenWidth})
+      required this.screenWidth,
+      this.valor_1 = '',
+      this.valor_2 = ''})
       : super(key: key);
 
   @override
@@ -66,16 +70,16 @@ class BuildKpiInfoDisplay extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          const Text(
-                            "Mes Anterior",
-                            style: TextStyle(
+                          Text(
+                            valor_1 == '' ? "Mes Anterior" : valor_1,
+                            style: const TextStyle(
                               fontFamily: 'CronosLPro',
                               color: kSecondaryColor,
                             ),
                           ),
-                          const Text(
-                            "MoM",
-                            style: TextStyle(
+                          Text(
+                            valor_2 == '' ? "MoM" : valor_2,
+                            style: const TextStyle(
                               fontFamily: 'CronosLPro',
                               color: kSecondaryColor,
                             ),

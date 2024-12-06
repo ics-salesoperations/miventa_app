@@ -7,7 +7,9 @@ class ActualizarState extends Equatable {
   final bool actualizandoSolicitudes;
   final bool actualizandoModelos;
   final bool actualizandoTangible;
+  final bool actualizandoIncentivosPdv;
   final String mensaje;
+  final String tabla;
 
   const ActualizarState({
     this.actualizandoForms = false,
@@ -15,8 +17,10 @@ class ActualizarState extends Equatable {
     this.actualizandoSolicitudes = false,
     this.actualizandoModelos = false,
     this.actualizandoTangible = false,
+    this.actualizandoIncentivosPdv = false,
     this.mensaje = "",
     this.tablas = const [],
+    this.tabla = "",
   });
 
   ActualizarState copyWith({
@@ -25,8 +29,10 @@ class ActualizarState extends Equatable {
     bool? actualizandoSolicitudes,
     bool? actualizandoModelos,
     bool? actualizandoTangible,
+    bool? actualizandoIncentivosPdv,
     String? mensaje,
     List<Tabla>? tablas,
+    String? tabla,
   }) =>
       ActualizarState(
         actualizandoForms: actualizandoForms ?? this.actualizandoForms,
@@ -35,8 +41,11 @@ class ActualizarState extends Equatable {
             actualizandoSolicitudes ?? this.actualizandoSolicitudes,
         actualizandoModelos: actualizandoModelos ?? this.actualizandoModelos,
         actualizandoTangible: actualizandoTangible ?? this.actualizandoTangible,
+        actualizandoIncentivosPdv:
+            actualizandoIncentivosPdv ?? this.actualizandoIncentivosPdv,
         mensaje: mensaje ?? this.mensaje,
         tablas: tablas ?? this.tablas,
+        tabla: tabla ?? this.tabla,
       );
 
   @override
@@ -46,7 +55,9 @@ class ActualizarState extends Equatable {
         actualizandoSolicitudes,
         actualizandoModelos,
         actualizandoTangible,
+        actualizandoIncentivosPdv,
         mensaje,
         tablas,
+        tabla,
       ];
 }

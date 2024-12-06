@@ -63,12 +63,34 @@ class OnActualizarTangiblesEvent extends ActualizarEvent {
   });
 }
 
+class OnActualizarTangiblesReasignacionEvent extends ActualizarEvent {
+  final String mensaje;
+  final bool actualizandoTangible;
+  final String tabla;
+
+  const OnActualizarTangiblesReasignacionEvent({
+    required this.actualizandoTangible,
+    required this.mensaje,
+    required this.tabla,
+  });
+}
+
 class OnActualizarSolicitudesEvent extends ActualizarEvent {
   final String mensaje;
   final bool actualizandoSolicitudes;
 
   const OnActualizarSolicitudesEvent({
     required this.actualizandoSolicitudes,
+    required this.mensaje,
+  });
+}
+
+class OnActualizarIncentivosPdvEvent extends ActualizarEvent {
+  final String mensaje;
+  final bool actualizandoIncentivosPdv;
+
+  const OnActualizarIncentivosPdvEvent({
+    required this.actualizandoIncentivosPdv,
     required this.mensaje,
   });
 }

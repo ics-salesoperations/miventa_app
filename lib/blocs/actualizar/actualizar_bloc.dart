@@ -52,6 +52,14 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
         ),
       );
     });
+    on<OnActualizarIncentivosPdvEvent>((event, emit) {
+      emit(
+        state.copyWith(
+          mensaje: event.mensaje,
+          actualizandoIncentivosPdv: event.actualizandoIncentivosPdv,
+        ),
+      );
+    });
     on<OnActualizarModelosEvent>((event, emit) {
       emit(
         state.copyWith(
@@ -67,6 +75,15 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
           mensaje: event.mensaje,
           actualizandoTangible: event.actualizandoTangible,
           tablas: event.tablas,
+        ),
+      );
+    });
+    on<OnActualizarTangiblesReasignacionEvent>((event, emit) {
+      emit(
+        state.copyWith(
+          mensaje: event.mensaje,
+          actualizandoTangible: event.actualizandoTangible,
+          tabla: event.tabla,
         ),
       );
     });
@@ -90,6 +107,18 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
     return tablas;
   }
 
+  Future<List<IncentivoPdv>> getIncentivosPdv(idPdv) async {
+    List<IncentivoPdv> incentivoPdv =
+        await _dbService.leerIncentivosPorPdv(idPdv);
+
+    if (incentivoPdv.isEmpty) {
+      await actualizarIncentivosPdv(idPdv);
+      incentivoPdv = await _dbService.leerIncentivosPorPdv(idPdv);
+    }
+
+    return incentivoPdv;
+  }
+
   Future<void> actualizarPlanning({required List<Tabla> currentTablas}) async {
     add(
       OnActualizarPlanningEvent(
@@ -104,7 +133,7 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
       Usuario usuario = await _userService.getInfoUsuario();
 
       if (usuario.perfil == 1) {
-        usuario = usuario.copyWith(idDms: '5609');
+        usuario = usuario.copyWith(idDms: '3768');
       }
 
       final resp = await http.get(
@@ -370,6 +399,63 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
     }
   }
 
+  Future<void> actualizarTangibleReasignacion({required int idPdv}) async {
+    add(const OnActualizarTangiblesReasignacionEvent(
+      actualizandoTangible: true,
+      mensaje: "Espere un momento, estamos actualizando los tangibles.",
+      tabla: 'tangible_reasignacion',
+    ));
+
+    try {
+      final token = await _authService.getToken();
+
+      final tangibleConfirmado =
+          await _dbService.getTangibleReasingacion(idPdv);
+
+      if (tangibleConfirmado.isNotEmpty) {
+        add(const OnActualizarTangiblesReasignacionEvent(
+          actualizandoTangible: false,
+          mensaje: "[ERROR]. Tienes producto pendiente de sincronizar.",
+          tabla: 'tangible_reasignacion',
+        ));
+        return;
+      }
+
+      final resp = await http.get(
+          Uri.parse('${Environment.apiURL}/appmiventa/tangibles_pdv/' +
+              idPdv.toString()),
+          headers: {
+            'Content-Type': 'application/json',
+            'token': token,
+          }).timeout(
+        const Duration(
+          minutes: 10,
+        ),
+      );
+
+      final productoResponse = productoTangibleReasignacionResponseFromJson(
+        utf8.decode(resp.bodyBytes),
+      );
+
+      //guardar en base de datos local
+      await _dbService
+          .guardarTangiblesReasignado(productoResponse.tangiblesReasignados);
+      await _dbService.updateTabla(tbl: 'tangible_reasignacion');
+      final tablas = await _dbService.leerListadoTablas();
+      add(const OnActualizarTangiblesReasignacionEvent(
+        actualizandoTangible: false,
+        mensaje: "Producto asignado actualizado exitosamente.",
+        tabla: 'tangible_reasignacion',
+      ));
+    } catch (e) {
+      add(const OnActualizarTangiblesReasignacionEvent(
+        actualizandoTangible: false,
+        mensaje: "Ocurrió un error al actualizar el producto asignado",
+        tabla: 'tangible_reasignacion',
+      ));
+    }
+  }
+
   Future<void> actualizarSolicitudes() async {
     add(
       const OnActualizarSolicitudesEvent(
@@ -478,6 +564,58 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
       add(const OnActualizarSolicitudesEvent(
         actualizandoSolicitudes: false,
         mensaje: "Ocurrió un error al actualizar sus solicitudes.",
+      ));
+    }
+  }
+
+  Future<void> actualizarIncentivosPdv(idPdv) async {
+    add(
+      const OnActualizarIncentivosPdvEvent(
+        actualizandoIncentivosPdv: true,
+        mensaje: "Espere un momento, estamos actualizando las IncentivosPdv.",
+      ),
+    );
+
+    try {
+      final token = await _authService.getToken();
+      final resp = await http.get(
+          Uri.parse(
+            '${Environment.apiURL}/appmiventa/incentivos_pdv/' +
+                idPdv.toString(),
+          ),
+          headers: {
+            'Content-Type': 'application/json',
+            'token': token,
+          }).timeout(const Duration(
+        minutes: 5,
+      ));
+      final incentivosPdvResponse = IncentivoPdvResponseFromJson(
+        utf8.decode(resp.bodyBytes),
+      );
+      //guardar en base de datos local
+
+      if (incentivosPdvResponse.incentivosPDV.isNotEmpty) {
+        await _dbService
+            .crearDetalleIncentivoPdv(incentivosPdvResponse.incentivosPDV);
+        add(const OnActualizarIncentivosPdvEvent(
+          actualizandoIncentivosPdv: false,
+          mensaje: "IncentivosPdv actualizadas exitosamente.",
+        ));
+      } else {
+        add(const OnActualizarIncentivosPdvEvent(
+          actualizandoIncentivosPdv: false,
+          mensaje: "Ocurrió un error al actualizar sus IncentivosPdv.",
+        ));
+      }
+    } on TimeoutException catch (_) {
+      add(const OnActualizarIncentivosPdvEvent(
+        actualizandoIncentivosPdv: false,
+        mensaje: "Ocurrió un error al actualizar sus IncentivosPdv.",
+      ));
+    } catch (e) {
+      add(const OnActualizarIncentivosPdvEvent(
+        actualizandoIncentivosPdv: false,
+        mensaje: "Ocurrió un error al actualizar sus IncentivosPdv.",
       ));
     }
   }

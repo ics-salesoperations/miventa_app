@@ -141,7 +141,7 @@ class LoginPageState extends State<LoginPage> {
                       height: 60,
                     ),
                     const Text(
-                      "from",
+                      "Powered by",
                       style: TextStyle(
                         color: kFourColor,
                         fontFamily: 'CronosLPro',

@@ -171,6 +171,19 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
     return esRuta;
   }
 
+  Future<String> validarSegmento(Planning pdv) async {
+    String segmentoPdv = 'no definido';
+    final datos = await _dbService.leerDetallePdv(pdv.idPdv ?? 0);
+    final fechaActual = DateTime.now();
+    for (var d in datos) {
+      if (d.segmentoPdv != null) {
+        segmentoPdv = d.segmentoPdv.toString();
+        return segmentoPdv;
+      }
+    }
+    return segmentoPdv;
+  }
+
   Future<FormGroup> createCurrentFormGroup({
     required List<Formulario> formulario,
     required Planning pdv,
@@ -530,7 +543,7 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
 
     try {
       final body = {"data": datos};
-
+      print(body);
       final resp = await http
           .post(
             Uri.parse('${Environment.apiURL}/appdms/newform_json'),
