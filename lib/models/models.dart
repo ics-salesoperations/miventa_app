@@ -45,4 +45,8 @@ export 'producto_tangible_response.dart';
 export 'reporte_quiebre.dart';
 export 'resumen_sincronizar.dart';
 
-
+export 'incentivo_pdv.dart';
+export 'incentivo_pdv_response.dart';
+export 'producto_tangible_pdv.dart';
+export 'producto_tangible_pdv_response.dart';
+export 'tipo_tangible_reasignacion_info.dart';

@@ -8,38 +8,52 @@ import 'package:miventa_app/models/models.dart';
 import 'package:miventa_app/screens/screens.dart';
 import 'package:miventa_app/widgets/widgets.dart';
 
-class RealizarVisitaPage extends StatefulWidget {
+class InventarioReasignacionPage extends StatefulWidget {
   final Planning detallePdv;
 
-  const RealizarVisitaPage({
+  const InventarioReasignacionPage({
     super.key,
     required this.detallePdv,
   });
 
   @override
-  State<RealizarVisitaPage> createState() => _RealizarVisitaPageState();
+  State<InventarioReasignacionPage> createState() =>
+      _InventarioReasignacionPageState();
 }
 
-class _RealizarVisitaPageState extends State<RealizarVisitaPage>
+class _InventarioReasignacionPageState extends State<InventarioReasignacionPage>
     with SingleTickerProviderStateMixin {
   late Planning detallePdv;
   late AnimationController controller;
+  late ActualizarBloc _actualizarBloc;
+  late VisitaBloc _visitaBloc;
+  late AuthBloc _authBloc;
+  _InventarioReasignacionPageState();
 
-  _RealizarVisitaPageState();
-
-  late CarritoBloc _carritoBloc;
-
+  late CarritoReasignacionBloc _carritoBloc;
   @override
   void initState() {
     super.initState();
     detallePdv = widget.detallePdv;
-    _carritoBloc = BlocProvider.of<CarritoBloc>(context);
+    _carritoBloc = BlocProvider.of<CarritoReasignacionBloc>(context);
+    _actualizarBloc = BlocProvider.of<ActualizarBloc>(context);
+    _visitaBloc = BlocProvider.of<VisitaBloc>(context);
+    _authBloc = BlocProvider.of<AuthBloc>(context);
+
+    if (detallePdv.idPdv != null) {
+      _actualizarBloc.actualizarTangibleReasignacion(idPdv: detallePdv.idPdv!);
+    }
     controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
     );
+    _carritoBloc.init(detallePdv.idPdv!);
 
-    _carritoBloc.init();
+    _visitaBloc.iniciarVisita(
+      detallePdv,
+      "20",
+      _authBloc.state.usuario.usuario.toString(),
+    );
 
     controller.addListener(() {
       setState(() {});
@@ -83,11 +97,12 @@ class _RealizarVisitaPageState extends State<RealizarVisitaPage>
                 onTap: () {
                   showDialog(
                     context: context,
-                    builder: (context) => CestaPdvScreen(
+                    builder: (context) => CestaReasignacionPdvScreen(
                       pdv: widget.detallePdv,
                     ),
                   ).then((value) async {
-                    final m = await _carritoBloc.getModelos();
+                    final m = await _carritoBloc
+                        .getModelosReasignacion(widget.detallePdv.idPdv!);
                     await _carritoBloc.crearFrmProductos(m);
                     await _carritoBloc.actualizaTotal();
                   });
@@ -103,7 +118,8 @@ class _RealizarVisitaPageState extends State<RealizarVisitaPage>
                     Positioned(
                       right: -5,
                       top: -5,
-                      child: BlocBuilder<CarritoBloc, CarritoState>(
+                      child: BlocBuilder<CarritoReasignacionBloc,
+                          CarritoReasignacionState>(
                         builder: (context, state) {
                           if (state.cargandoModelos ||
                               state.cargandoFrmProductos) {
@@ -143,23 +159,22 @@ class _RealizarVisitaPageState extends State<RealizarVisitaPage>
                 ),
               ),
             ),
-            VisitaPDVHeader(detalle: detallePdv, titulo: "Gestion del PDV"),
-            BlocBuilder<CarritoBloc, CarritoState>(
+            VisitaPDVHeader(detalle: detallePdv, titulo: "Reasignación a PDV"),
+            BlocBuilder<CarritoReasignacionBloc, CarritoReasignacionState>(
               builder: (context, state) {
                 if (state.cargandoModelos || state.cargandoFrmProductos) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
-                return VisitaContentScreen(
+                return ReasignacionContentScreen(
                   controller: controller,
                   modelos: state.modelos,
                   selectedCat: state.selectedCat,
-                  pdv: widget.detallePdv,
                 );
               },
             ),
-            const VisitaPDVCategoria(),
+            const ReasignacionPDVCategoria(),
           ],
         ),
       ),

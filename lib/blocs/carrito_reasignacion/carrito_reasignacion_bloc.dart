@@ -11,10 +11,11 @@ import 'package:miventa_app/models/models.dart';
 import 'package:miventa_app/services/services.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 
-part 'carrito_event.dart';
-part 'carrito_state.dart';
+part 'carrito_reasignacion_event.dart';
+part 'carrito_reasignacion_state.dart';
 
-class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
+class CarritoReasignacionBloc
+    extends Bloc<CarritoReasignacionEvent, CarritoReasignacionState> {
   final DBService _dbService = DBService();
   final UsuarioService _usuarioService = UsuarioService();
   final AuthService _authService = AuthService();
@@ -22,19 +23,19 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     'mensaje': FormControl<String>(value: 'Cargando datos'),
   });
 
-  CarritoBloc()
+  CarritoReasignacionBloc()
       : super(
-          CarritoState(
+          CarritoReasignacionState(
             frmProductos: FormGroup(
               {
                 'mensaje': FormControl<String>(value: 'Cargando datos'),
               },
             ),
             actual: ModeloTangible(),
-            serieActual: ProductoTangible(),
+            serieActual: ProductoTangibleReasignacion(),
           ),
         ) {
-    on<OnCargarModelosEvent>((event, emit) {
+    on<OnCargarModelosReasignacionEvent>((event, emit) {
       emit(
         state.copyWith(
           mensaje: event.mensaje,
@@ -44,35 +45,35 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
         ),
       );
     });
-    on<OnCargarModelosAsignadosoEvent>((event, emit) {
+    on<OnCargarModelosAsignadosoReasignacionEvent>((event, emit) {
       emit(
         state.copyWith(
           modelosAsignados: event.modelosAsignados,
         ),
       );
     });
-    on<OnUpdateTotalEvent>((event, emit) {
+    on<OnUpdateTotalReasignacionEvent>((event, emit) {
       emit(
         state.copyWith(
           total: event.total,
         ),
       );
     });
-    on<OnCambiarCategoriaEvent>((event, emit) {
+    on<OnCambiarCategoriaReasignacionEvent>((event, emit) {
       emit(
         state.copyWith(
           selectedCat: event.categoria,
         ),
       );
     });
-    on<OnCambiarFiltroEvent>((event, emit) {
+    on<OnCambiarFiltroReasignacionEvent>((event, emit) {
       emit(
         state.copyWith(
           filter: event.filtro,
         ),
       );
     });
-    on<OnCargarFrmProductoEvent>((event, emit) {
+    on<OnCargarFrmProductoReasignacionEvent>((event, emit) {
       emit(
         state.copyWith(
           cargandoFrmProductos: event.cargandoFrmProducto,
@@ -80,7 +81,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
         ),
       );
     });
-    on<OnCargarLstTangibleModeloEvent>((event, emit) {
+    on<OnCargarLstTangibleModeloReasignacionEvent>((event, emit) {
       emit(
         state.copyWith(
           cargandoLstTangibleModelo: event.cargandoLstTangibleModelo,
@@ -88,7 +89,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
         ),
       );
     });
-    on<OnEnviarTangiblesEvent>((event, emit) {
+    on<OnEnviarTangiblesReasignacionEvent>((event, emit) {
       emit(
         state.copyWith(
           mensaje: event.mensaje,
@@ -96,7 +97,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
         ),
       );
     });
-    on<OnChangeModeloActual>((event, emit) {
+    on<OnChangeModeloActualReasignacion>((event, emit) {
       emit(
         state.copyWith(
           actual: event.actual,
@@ -108,7 +109,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
         ),
       );
     });
-    on<OnChangeSerieActual>((event, emit) {
+    on<OnChangeSerieActualReasignacion>((event, emit) {
       emit(
         state.copyWith(
           serieActual: event.actual,
@@ -120,7 +121,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
         ),
       );
     });
-    on<OnUpdateBlisterEvent>((event, emit) {
+    on<OnUpdateBlisterReasignacionEvent>((event, emit) {
       emit(
         state.copyWith(
           blisterValidado: event.blisterValidado,
@@ -133,14 +134,14 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     //init();
   }
 
-  Future<void> init() async {
-    final m = await getModelos();
+  Future<void> init(int idPdv) async {
+    final m = await getModelosReasignacion(idPdv);
     await crearFrmProductos(m);
     await actualizaTotal();
   }
 
   Future<List<ModeloTangible>> getModelos() async {
-    add(OnCargarModelosEvent(
+    add(OnCargarModelosReasignacionEvent(
       modelos: state.modelos,
       cargandoModelos: true,
       mensaje: "",
@@ -152,13 +153,41 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
       modelos = await _dbService.leerListadoModelos();
     } catch (e) {
       modelos = const [];
-      add(OnCargarModelosEvent(
+      add(OnCargarModelosReasignacionEvent(
           modelos: modelos,
           cargandoModelos: false,
           mensaje: "Ocurrió un error al actualizar modelos"));
     }
 
-    add(OnCargarModelosEvent(
+    add(OnCargarModelosReasignacionEvent(
+      modelos: modelos,
+      cargandoModelos: false,
+      mensaje: "",
+    ));
+
+    return modelos;
+  }
+
+  Future<List<ModeloTangible>> getModelosReasignacion(int idPDv) async {
+    add(OnCargarModelosReasignacionEvent(
+      modelos: state.modelos,
+      cargandoModelos: true,
+      mensaje: "",
+    ));
+
+    List<ModeloTangible> modelos;
+
+    try {
+      modelos = await _dbService.leerListadoModelosReasignacion(idPDv);
+    } catch (e) {
+      modelos = const [];
+      add(OnCargarModelosReasignacionEvent(
+          modelos: modelos,
+          cargandoModelos: false,
+          mensaje: "Ocurrió un error al actualizar modelos"));
+    }
+
+    add(OnCargarModelosReasignacionEvent(
       modelos: modelos,
       cargandoModelos: false,
       mensaje: "",
@@ -173,26 +202,26 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
   }) async {
     SyncBloc _sincronizar = SyncBloc();
 
-    add(const OnEnviarTangiblesEvent(
+    add(const OnEnviarTangiblesReasignacionEvent(
       enviando: true,
       mensaje: "Datos guardados correctamente.",
     ));
 
-    await confirmarTangiblesAsignados(
+    await confirmarTangibleReasignados(
       idPdv: idPdv,
     );
 
-    add(const OnEnviarTangiblesEvent(
+    add(const OnEnviarTangiblesReasignacionEvent(
       enviando: true,
       mensaje: "Datos guardados correctamente, Enviando datos...",
     ));
 
-    await enviarDatos();
-    await _sincronizar.sincronizarDatos(0, null);
+    await enviarDatos(idPdv);
+    await _sincronizar.sincronizarDatos(1, idPdv);
 
-    add(const OnEnviarTangiblesEvent(
+    add(const OnEnviarTangiblesReasignacionEvent(
       enviando: false,
-      mensaje: "Visita procesada correctamente.",
+      mensaje: "Proceso realizado correctamente.",
     ));
   }
 
@@ -204,39 +233,63 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
         idPdv: idPdv,
       );
     } catch (e) {
-      add(const OnEnviarTangiblesEvent(
+      add(const OnEnviarTangiblesReasignacionEvent(
         enviando: false,
         mensaje: "Ocurrió un error al procesar la venta.",
       ));
     }
   }
 
-  Future<void> enviarDatos() async {
+  Future<void> confirmarTangibleReasignados({
+    required int idPdv,
+  }) async {
+    try {
+      await _dbService.confirmarTangiblesReasignadios(
+        idPdv: idPdv,
+      );
+    } catch (e) {
+      add(const OnEnviarTangiblesReasignacionEvent(
+        enviando: false,
+        mensaje: "Ocurrió un error al procesar la venta.",
+      ));
+    }
+  }
+
+  Future<void> enviarDatos(int idPdv) async {
     add(
-      const OnEnviarTangiblesEvent(
+      const OnEnviarTangiblesReasignacionEvent(
         enviando: true,
-        mensaje:
-            "Datos guardados exitosamente. Estamos sincronizando los datos... ",
+        mensaje: "Estamos sincronizando los datos... ",
       ),
     );
 
     final usuario = await _usuarioService.getInfoUsuario();
     final token = await _authService.getToken();
-    final registros = await _dbService.getTangibleConfirmado();
+    final registros = await _dbService.getTangibleConfirmadoReasignacion(idPdv);
     final List<Map<String, dynamic>> datos = [];
 
     for (var venta in registros) {
+      if (venta.fechaVenta == null) continue;
+
       final id = DateFormat('ddMMyyyyHHmmss').format(venta.fechaVenta!) +
           usuario.usuario.toString() +
           venta.serie.toString();
+      String tipoGestion = "";
+
+      if (venta.asignado == 1) {
+        tipoGestion = "REASIGNADO";
+      } else if (venta.descartado == 1) {
+        tipoGestion = "NO ENCONTRADO";
+      }
 
       final data = {
-        'captureId': id,
+        'captureId': id.toString(),
         'fechaAsignacion': venta.fechaVenta?.toIso8601String(),
         'usuario': usuario.usuario,
-        'idPdv': venta.idPdv,
-        'idVisita': venta.idVisita,
+        'idPdv': venta.idPdv.toString(),
+        'idVisita': venta.idVisita.toString(),
         'serie': venta.serie,
+        'tipoGestion': tipoGestion.toString()
       };
 
       datos.add(data);
@@ -247,11 +300,15 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
         "data": datos,
       };
 
+      final jsonString = jsonEncode(body);
+
+      print('string: ' + jsonString);
+
       final resp = await http
           .post(
             Uri.parse(
-                '${Environment.apiURL}/appmiventa/guardar_asignacion_json'),
-            body: jsonEncode(body),
+                '${Environment.apiURL}/appmiventa/guardar_venta_tipo_gestion_json'),
+            body: jsonString,
             headers: {'Content-Type': 'application/json', 'token': token},
             encoding: Encoding.getByName('utf-8'),
           )
@@ -261,23 +318,23 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
 
       if (resp.statusCode == 200) {
         add(
-          const OnEnviarTangiblesEvent(
+          const OnEnviarTangiblesReasignacionEvent(
             enviando: true,
             mensaje: 'Actualizando datos sincronizados.',
           ),
         );
-        await _dbService.updateTangibleEnviado(
+        await _dbService.updateTangibleEnviadoReasignado(
           registros,
         );
         add(
-          const OnEnviarTangiblesEvent(
+          const OnEnviarTangiblesReasignacionEvent(
             enviando: false,
             mensaje: 'Datos enviados exitosamente.',
           ),
         );
       } else {
         add(
-          const OnEnviarTangiblesEvent(
+          const OnEnviarTangiblesReasignacionEvent(
             enviando: false,
             mensaje: 'Ocurrió un error al realizar la asignación.',
           ),
@@ -286,7 +343,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
       }
     } catch (e) {
       add(
-        const OnEnviarTangiblesEvent(
+        const OnEnviarTangiblesReasignacionEvent(
           enviando: false,
           mensaje: 'Ocurrió un error al realizar la asignación.',
         ),
@@ -298,22 +355,22 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
   Future<List<ModeloTangible>> getModelosAsignados({
     required Planning pdv,
   }) async {
-    add(const OnCargarModelosAsignadosoEvent(
+    add(const OnCargarModelosAsignadosoReasignacionEvent(
       modelosAsignados: [],
     ));
 
     List<ModeloTangible> modelos;
 
     try {
-      modelos = await _dbService.leerListadoModelosAsignados();
+      modelos = await _dbService.leerListadoModelosReasignados();
     } catch (e) {
       modelos = const [];
-      add(OnCargarModelosAsignadosoEvent(
+      add(OnCargarModelosAsignadosoReasignacionEvent(
         modelosAsignados: modelos,
       ));
     }
 
-    add(OnCargarModelosAsignadosoEvent(
+    add(OnCargarModelosAsignadosoReasignacionEvent(
       modelosAsignados: modelos,
     ));
 
@@ -329,26 +386,28 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     int total = 0;
 
     try {
-      total = await _dbService.leerTotalModelos();
+      total = await _dbService.leerTotalModelosReasignacion();
     } catch (e) {
       total = 0;
     }
 
-    add(OnUpdateTotalEvent(
+    add(OnUpdateTotalReasignacionEvent(
       total: total,
     ));
   }
 
-  Future<void> getTangiblePorModelo({required ModeloTangible modelo}) async {
-    add(const OnCargarLstTangibleModeloEvent(
+  Future<void> getTangiblePorModelo(
+      {required ModeloTangible modelo, required int idPdv}) async {
+    add(const OnCargarLstTangibleModeloReasignacionEvent(
       lstTangibleModelo: [],
       cargandoLstTangibleModelo: true,
     ));
 
-    List<ProductoTangible> tangibles;
+    List<ProductoTangibleReasignacion> tangibles;
 
     try {
-      tangibles = await _dbService.getTangibleModelo(modelo: modelo);
+      tangibles = await _dbService.getTangibleModeloReasignacion(
+          modelo: modelo, idPdv: idPdv);
       tangibles.sort(
         (a, b) {
           return (DateFormat('yyyyMMdd').format(a.fechaAsignacion!) + a.serie!)
@@ -356,12 +415,12 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
                   DateFormat('yyyyMMdd').format(b.fechaAsignacion!) + b.serie!);
         },
       );
-      add(OnCargarLstTangibleModeloEvent(
+      add(OnCargarLstTangibleModeloReasignacionEvent(
         lstTangibleModelo: tangibles,
         cargandoLstTangibleModelo: false,
       ));
     } catch (e) {
-      add(const OnCargarLstTangibleModeloEvent(
+      add(const OnCargarLstTangibleModeloReasignacionEvent(
         lstTangibleModelo: [],
         cargandoLstTangibleModelo: false,
       ));
@@ -369,7 +428,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
   }
 
   Future<void> crearFrmProductos(List<ModeloTangible> modelos) async {
-    add(OnCargarFrmProductoEvent(
+    add(OnCargarFrmProductoReasignacionEvent(
       cargandoFrmProducto: true,
       frmProducto: formulario,
     ));
@@ -391,7 +450,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
       elementos.addEntries(elemento.entries);
     }
 
-    add(OnCargarFrmProductoEvent(
+    add(OnCargarFrmProductoReasignacionEvent(
       cargandoFrmProducto: false,
       frmProducto: FormGroup(elementos),
     ));
@@ -405,7 +464,8 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
   }) async {
     int valor = -1;
 
-    List<ProductoTangible> lstTangibleDet = await _dbService.getTangible(
+    List<ProductoTangibleReasignacion> lstTangibleDet =
+        await _dbService.getTangibleReasignacion(
       serie: serie,
       modelo: modelo.modelo,
       tangible: modelo.tangible,
@@ -423,7 +483,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     if (lstTangibleDet.isEmpty) {
       valor = -1;
     } else {
-      ProductoTangible? tangibleDet;
+      ProductoTangibleReasignacion? tangibleDet;
 
       if (serie != null) {
         tangibleDet = lstTangibleDet.first;
@@ -434,7 +494,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
         tangibleDet = filtrado.isEmpty ? null : filtrado.first;
       }
 
-      if (tangibleDet != null) {
+      if (tangibleDet != null && tangibleDet.descartado == 0) {
         valor = tangibleDet.asignado == 1 ? 0 : 1;
 
         tangibleDet = tangibleDet.copyWith(
@@ -444,7 +504,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
           fechaVenta: tangibleDet.asignado == 1 ? null : DateTime.now(),
         );
 
-        await _dbService.updateTangible(tangibleDet);
+        await _dbService.updateTangibleReasignacion(tangibleDet);
 
         var sum = tangibleDet.asignado == 1 ? 1 : -1;
 
@@ -454,8 +514,8 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
 
         await _dbService.updateModeloTangible(modeloNuevo);
 
-        add(OnChangeSerieActual(actual: tangibleDet));
-        add(OnChangeModeloActual(
+        add(OnChangeSerieActualReasignacion(actual: tangibleDet));
+        add(OnChangeModeloActualReasignacion(
           actual: modelo,
         ));
       }
@@ -463,15 +523,17 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     return valor;
   }
 
-  Future<int> asignarProductoMasivo({
-    int cantidad = 0,
+  Future<int> descartarProducto({
+    String? serie,
     required ModeloTangible modelo,
     required int idPdv,
     required String idVisita,
   }) async {
     int valor = -1;
 
-    List<ProductoTangible> lstTangibleDet = await _dbService.getTangible(
+    List<ProductoTangibleReasignacion> lstTangibleDet =
+        await _dbService.getTangibleReasignacionDes(
+      serie: serie,
       modelo: modelo.modelo,
       tangible: modelo.tangible,
       asignar: true,
@@ -488,7 +550,75 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     if (lstTangibleDet.isEmpty) {
       valor = -1;
     } else {
-      final List<ProductoTangible> filtrado = lstTangibleDet.isEmpty
+      ProductoTangibleReasignacion? tangibleDet;
+
+      if (serie != null) {
+        tangibleDet = lstTangibleDet.first;
+      } else {
+        final filtrado = lstTangibleDet.isEmpty
+            ? []
+            : lstTangibleDet
+                .where((element) => element.descartado == 0)
+                .toList();
+        tangibleDet = filtrado.isEmpty ? null : filtrado.first;
+      }
+
+      if (tangibleDet != null && tangibleDet.asignado == 0) {
+        valor = tangibleDet.descartado == 1 ? 0 : 1;
+
+        tangibleDet = tangibleDet.copyWith(
+          descartado: tangibleDet.descartado == 1 ? 0 : 1,
+          idPdv: tangibleDet.descartado == 1 ? null : idPdv,
+          idVisita: tangibleDet.descartado == 1 ? null : idVisita,
+          fechaVenta: tangibleDet.descartado == 1 ? null : DateTime.now(),
+        );
+
+        await _dbService.updateTangibleReasignacion(tangibleDet);
+
+        var sum = tangibleDet.descartado == 1 ? 1 : -1;
+
+        var modeloNuevo = modelo.copyWith(
+          descartado: modelo.asignado + sum,
+        );
+
+        await _dbService.updateModeloTangible(modeloNuevo);
+
+        add(OnChangeSerieActualReasignacion(actual: tangibleDet));
+        add(OnChangeModeloActualReasignacion(
+          actual: modelo,
+        ));
+      }
+    }
+    return valor;
+  }
+
+  Future<int> asignarProductoMasivo({
+    int cantidad = 0,
+    required ModeloTangible modelo,
+    required int idPdv,
+    required String idVisita,
+  }) async {
+    int valor = -1;
+
+    List<ProductoTangibleReasignacion> lstTangibleDet =
+        await _dbService.getTangibleReasignacion(
+      modelo: modelo.modelo,
+      tangible: modelo.tangible,
+      asignar: true,
+    );
+
+    lstTangibleDet.sort(
+      (a, b) {
+        return (DateFormat('yyyyMMdd').format(a.fechaAsignacion!) + a.serie!)
+            .compareTo(
+                DateFormat('yyyyMMdd').format(b.fechaAsignacion!) + b.serie!);
+      },
+    );
+
+    if (lstTangibleDet.isEmpty) {
+      valor = -1;
+    } else {
+      final List<ProductoTangibleReasignacion> filtrado = lstTangibleDet.isEmpty
           ? []
           : lstTangibleDet
               .where((element) => (element.asignado == 0) //||
@@ -508,7 +638,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
           fechaVenta: tangibleDet.asignado == 1 ? null : DateTime.now(),
         );
 
-        await _dbService.updateTangible(tangibleDet);
+        await _dbService.updateTangibleReasignacion(tangibleDet);
 
         var sum = tangibleDet.asignado == 1 ? 1 : -1;
 
@@ -517,49 +647,12 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
         );
 
         await _dbService.updateModeloTangible(modeloNuevo);
-        add(OnChangeSerieActual(actual: tangibleDet));
-        add(OnChangeModeloActual(
+        add(OnChangeSerieActualReasignacion(actual: tangibleDet));
+        add(OnChangeModeloActualReasignacion(
           actual: modelo,
         ));
       }
     }
-    return valor;
-  }
-
-  Future<int> guardarModeloSaldo({
-    required ModeloTangible modelo,
-  }) async {
-    int valor = -1;
-
-    List<ModeloTangible> modelos = [];
-    modelos.add(modelo);
-    try {
-      await _dbService.guardarModelosSaldos(modelos);
-      valor = 1;
-    } catch (e) {
-      valor = -1;
-    }
-
-    return valor;
-  }
-
-  Future<int> asignarSaldos({
-    int cantidad = 0,
-    required ModeloTangible modelo,
-    required int idPdv,
-    required String idVisita,
-  }) async {
-    int valor = -1;
-
-    if (cantidad > 0) {
-      valor = 1;
-      modelo.asignado = cantidad;
-      await _dbService.updateModeloTangible(modelo);
-      add(OnChangeModeloActual(
-        actual: modelo,
-      ));
-    }
-
     return valor;
   }
 
@@ -571,7 +664,8 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
   }) async {
     int valor = -1;
 
-    List<ProductoTangible> lstTangibleDet = await _dbService.getTangible(
+    List<ProductoTangibleReasignacion> lstTangibleDet =
+        await _dbService.getTangibleReasignacion(
       modelo: modelo.modelo,
       tangible: modelo.tangible,
       asignar: false,
@@ -588,7 +682,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     if (lstTangibleDet.isEmpty) {
       valor = -1;
     } else {
-      final List<ProductoTangible> filtrado = lstTangibleDet.isEmpty
+      final List<ProductoTangibleReasignacion> filtrado = lstTangibleDet.isEmpty
           ? []
           : lstTangibleDet
               .where((element) => (element.asignado == 1) //||
@@ -608,7 +702,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
           fechaVenta: tangibleDet.asignado == 1 ? null : DateTime.now(),
         );
 
-        await _dbService.updateTangible(tangibleDet);
+        await _dbService.updateTangibleReasignacion(tangibleDet);
 
         var sum = tangibleDet.asignado == 1 ? 1 : -1;
 
@@ -617,8 +711,8 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
         );
 
         await _dbService.updateModeloTangible(modeloNuevo);
-        add(OnChangeSerieActual(actual: tangibleDet));
-        add(OnChangeModeloActual(
+        add(OnChangeSerieActualReasignacion(actual: tangibleDet));
+        add(OnChangeModeloActualReasignacion(
           actual: modelo,
         ));
       }
@@ -634,7 +728,8 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
   }) async {
     int valor = -1;
 
-    List<ProductoTangible> lstTangibleDet = await _dbService.getTangible(
+    List<ProductoTangibleReasignacion> lstTangibleDet =
+        await _dbService.getTangibleReasignacion(
       serie: serie,
       modelo: modelo.modelo,
       tangible: modelo.tangible,
@@ -652,7 +747,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     if (lstTangibleDet.isEmpty) {
       valor = -1;
     } else {
-      ProductoTangible? tangibleDet;
+      ProductoTangibleReasignacion? tangibleDet;
 
       if (serie != null) {
         tangibleDet = lstTangibleDet.first;
@@ -669,7 +764,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
           idVisita: tangibleDet.asignado == 1 ? null : idVisita,
         );
 
-        await _dbService.updateTangible(tangibleDet);
+        await _dbService.updateTangibleReasignacion(tangibleDet);
 
         await _dbService.updateModeloTangible(modelo);
       }
@@ -684,7 +779,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     bool validado = true;
     List<String> asignados = [];
     add(
-      OnUpdateBlisterEvent(
+      OnUpdateBlisterReasignacionEvent(
         blisterValidado: validado,
         mensaje: 'Validando PDV',
         validandoBlister: true,
@@ -716,7 +811,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     }
 
     add(
-      OnUpdateBlisterEvent(
+      OnUpdateBlisterReasignacionEvent(
         blisterValidado: validado,
         mensaje: 'Blister validado',
         validandoBlister: false,
@@ -733,7 +828,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     bool almacenado = false;
 
     add(
-      OnUpdateBlisterEvent(
+      OnUpdateBlisterReasignacionEvent(
         blisterValidado: validado,
         mensaje: 'Enviando alarma de Blister.',
         validandoBlister: true,
@@ -791,7 +886,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     }
 
     add(
-      OnUpdateBlisterEvent(
+      OnUpdateBlisterReasignacionEvent(
         blisterValidado: validado,
         mensaje: 'Blister validado',
         validandoBlister: false,

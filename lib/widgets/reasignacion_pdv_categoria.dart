@@ -6,20 +6,23 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:miventa_app/app_styles.dart';
 import 'package:miventa_app/blocs/blocs.dart';
 
-class VisitaPDVCategoria extends StatefulWidget {
-  const VisitaPDVCategoria({super.key});
+class ReasignacionPDVCategoria extends StatefulWidget {
+  const ReasignacionPDVCategoria({super.key});
 
   @override
-  State<VisitaPDVCategoria> createState() => _VisitaPDVCategoriaState();
+  State<ReasignacionPDVCategoria> createState() =>
+      _ReasignacionPDVCategoriaState();
 }
 
-class _VisitaPDVCategoriaState extends State<VisitaPDVCategoria> {
-  late CarritoBloc _carritoBloc;
+class _ReasignacionPDVCategoriaState extends State<ReasignacionPDVCategoria> {
+  late CarritoReasignacionBloc _carritoBloc;
+  late VisitaBloc _visitaBloc;
 
   @override
   void initState() {
     super.initState();
-    _carritoBloc = BlocProvider.of<CarritoBloc>(context);
+    _carritoBloc = BlocProvider.of<CarritoReasignacionBloc>(context);
+    _visitaBloc = BlocProvider.of<VisitaBloc>(context);
   }
 
   @override
@@ -51,7 +54,7 @@ class _VisitaPDVCategoriaState extends State<VisitaPDVCategoria> {
               color: Colors.black26,
             )
           ]),
-      child: BlocBuilder<CarritoBloc, CarritoState>(
+      child: BlocBuilder<CarritoReasignacionBloc, CarritoReasignacionState>(
         builder: (context, state) {
           if (state.cargandoModelos) {
             return const CircularProgressIndicator();
@@ -101,30 +104,7 @@ class _VisitaPDVCategoriaState extends State<VisitaPDVCategoria> {
                                           )
                                         ]),
                                     child: FaIcon(
-                                      elemento.toString() == "SMARTHPHONES"
-                                          ? FontAwesomeIcons.mobileScreen
-                                          : elemento.toString() == "SCRATCHCARD"
-                                              ? FontAwesomeIcons.creditCard
-                                              : elemento.toString() == "SIMCARD"
-                                                  ? FontAwesomeIcons.simCard
-                                                  : elemento.toString() ==
-                                                          "BLISTER"
-                                                      ? FontAwesomeIcons
-                                                          .addressCard
-                                                      : elemento.toString() ==
-                                                              "ACCESS CARD MFS"
-                                                          ? FontAwesomeIcons
-                                                              .creditCard
-                                                          : elemento.toString() ==
-                                                                  "EPIN"
-                                                              ? FontAwesomeIcons
-                                                                  .phone
-                                                              : elemento.toString() ==
-                                                                      'TMY'
-                                                                  ? FontAwesomeIcons
-                                                                      .moneyCheckDollar
-                                                                  : FontAwesomeIcons
-                                                                      .cartPlus,
+                                      FontAwesomeIcons.addressCard,
                                       color: state.selectedCat ==
                                               elemento.toString()
                                           ? kSecondaryColor
@@ -133,11 +113,13 @@ class _VisitaPDVCategoriaState extends State<VisitaPDVCategoria> {
                                     ),
                                   ),
                                   onTap: () async {
-                                    final m = await _carritoBloc.getModelos();
+                                    final m = await _carritoBloc
+                                        .getModelosReasignacion(
+                                            _visitaBloc.state.idPdv);
                                     await _carritoBloc.crearFrmProductos(m);
                                     await _carritoBloc.actualizaTotal();
                                     _carritoBloc.add(
-                                      OnCambiarCategoriaEvent(
+                                      OnCambiarCategoriaReasignacionEvent(
                                         categoria: elemento.toString(),
                                       ),
                                     );

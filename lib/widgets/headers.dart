@@ -171,15 +171,14 @@ class HeaderPicoPainter extends CustomPainter {
     );
 
     //Creamos el gradiente
-    Gradient gradiente = LinearGradient(
+    Gradient gradiente = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: <Color>[
         kSecondaryColor,
-        kSecondaryColor.withOpacity(0.9),
-        kSecondaryColor.withOpacity(0.8),
-        kSecondaryColor.withOpacity(0.7),
-        kPrimaryColor,
+        kSecondaryColor,
+        kSecondaryColor,
+        kSecondaryColor,
       ],
     );
 

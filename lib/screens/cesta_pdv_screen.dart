@@ -198,8 +198,19 @@ class _CestaPdvScreenState extends State<CestaPdvScreen> {
                                                               "ACCESS CARD MFS"
                                                           ? FontAwesomeIcons
                                                               .creditCard
-                                                          : FontAwesomeIcons
-                                                              .cartPlus,
+                                                          : modelo
+                                                                      .tangible
+                                                                      .toString() ==
+                                                                  'EPIN'
+                                                              ? FontAwesomeIcons
+                                                                  .phone
+                                                              : modelo.tangible
+                                                                          .toString() ==
+                                                                      'TMY'
+                                                                  ? FontAwesomeIcons
+                                                                      .moneyCheckDollar
+                                                                  : FontAwesomeIcons
+                                                                      .cartPlus,
                                       color: Colors.white,
                                       size: 22,
                                     ),
@@ -242,8 +253,19 @@ class _CestaPdvScreenState extends State<CestaPdvScreen> {
                                                               "ACCESS CARD MFS"
                                                           ? FontAwesomeIcons
                                                               .creditCard
-                                                          : FontAwesomeIcons
-                                                              .cartPlus,
+                                                          : modelo
+                                                                      .tangible
+                                                                      .toString() ==
+                                                                  'EPIN'
+                                                              ? FontAwesomeIcons
+                                                                  .phone
+                                                              : modelo.tangible
+                                                                          .toString() ==
+                                                                      'TMY'
+                                                                  ? FontAwesomeIcons
+                                                                      .moneyCheckDollar
+                                                                  : FontAwesomeIcons
+                                                                      .cartPlus,
                                       color: Colors.black12,
                                       size: 90,
                                     ),
@@ -401,24 +423,17 @@ class _CestaPdvScreenState extends State<CestaPdvScreen> {
                       height: 40,
                       alignment: Alignment.center,
                       width: double.infinity,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            kSecondaryColor,
-                            kSecondaryColor.withOpacity(0.9),
-                            kSecondaryColor.withOpacity(0.8),
-                            kPrimaryColor
-                          ],
-                        ),
-                        borderRadius: const BorderRadius.all(
+                      decoration: const BoxDecoration(
+                        color: kSecondaryColor,
+                        borderRadius: BorderRadius.all(
                           Radius.circular(10),
                         ),
                       ),
                       child: const Text(
-                        "Confirmar compra",
+                        "Confirmar Compra",
                         style: TextStyle(
                           fontSize: 18,
-                          fontFamily: 'CronosLPro',
+                          fontFamily: 'CronosPro',
                           color: Colors.white,
                         ),
                       ),

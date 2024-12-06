@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:intl/intl.dart';
 import 'package:miventa_app/models/models.dart';
 import 'package:path/path.dart' as p;
@@ -10,7 +12,7 @@ class LocalDatabase {
 
   LocalDatabase._init();
 
-  static int get _version => 3;
+  static int get _version => 5;
 
   static Future<void> init() async {
     try {
@@ -188,7 +190,15 @@ class LocalDatabase {
                 direccion $textType,
                 numeroPadre $textType,
                 servicios $textType,
-                epinMiTienda $textType
+                epinMiTienda $textType,
+                grsBlsM0 $textType,
+                grsBlsM1 $textType,
+                grsBlsM2 $textType,
+                grsBlsM3 $textType,
+                invBls $textType,
+                grsBls $textType,
+                cnvBls $textType,
+                invBlsDisp $textType
                 )
       """;
     await db.execute(sql);
@@ -251,7 +261,8 @@ class LocalDatabase {
                 asignado $integerType,
                 disponible $integerType,
                 serieInicial $textType,
-                serieFinal $textType
+                serieFinal $textType,
+                descartado $integerType
                 )
       """;
     await db.execute(sql);
@@ -282,6 +293,26 @@ class LocalDatabase {
                 idPdv $integerType,
                 idVisita $textType,
                 fechaVenta $textType
+                )
+      """;
+    await db.execute(sql);
+
+    sql = """
+                CREATE TABLE tangible_reasignacion
+                (
+                id $idType,
+                idPdv $integerType,
+                tangible $textType,
+                modelo $textType,
+                descModelo $textType,
+                serie $textType,
+                fechaAsignacion $textType,
+                asignado $integerType,
+                confirmado $integerType,
+                enviado $integerType,
+                idVisita $textType,
+                fechaVenta $textType,
+                descartado $integerType
                 )
       """;
     await db.execute(sql);
@@ -390,7 +421,7 @@ class LocalDatabase {
                                     mbBajada $realType
                                     )
             """;
-    //creando tabla de solicitudes ingresadas
+    //creando tabla de IncentivoPdv ingresadas
     await db.execute(sql);
 
     sql = """
@@ -423,6 +454,17 @@ class LocalDatabase {
                 )
       """;
     await db.execute(sql);
+
+    /*CREANDO TABLA DE INCENTIVOS*/
+    sql = """
+                CREATE TABLE incentivo
+                (
+                id $idType,
+                idPdv $integerType,
+                incentivo $textType,
+                meta $integerType)
+      """;
+    await db.execute(sql);
   }
 
   static void onUpgrade(Database db, int oldVersion, int version) async {
@@ -447,6 +489,63 @@ class LocalDatabase {
                     enviado $integerType
                     )
           """;
+        /*CREANDO TABLA DE INCENTIVOS*/
+        sql = """
+                    CREATE TABLE incentivo
+                    (
+                    id $idType,
+                    idPdv $integerType,
+                    incentivo $textType,
+                    meta $integerType)
+          """;
+        await db.execute(sql);
+      } catch (_) {}
+    } else if (oldVersion <= 2) {
+      try {
+        /*CREANDO TABLA DE REASIGNACION*/
+        sql = """
+                    CREATE TABLE tangible_reasignacion
+                    (
+                    id $idType,
+                    idPdv $integerType,
+                    tangible $textType,
+                    modelo $textType,
+                    descModelo $textType,
+                    serie $textType,
+                    fechaAsignacion $textType,
+                    asignado $integerType,
+                    confirmado $integerType,
+                    enviado $integerType,
+                    idVisita $textType,
+                    fechaVenta $textType
+                    )
+          """;
+        await db.execute(sql);
+      } catch (_) {}
+    } else if (oldVersion <= 3) {
+      try {
+        /*CREANDO TABLA DE REASIGNACION*/
+        sql = """
+                    alter table tangible_reasignacion add column descartado integer
+          """;
+        await db.execute(sql);
+        sql = """
+                    alter table modelo add column descartado integer
+          """;
+        await db.execute(sql);
+      } catch (_) {}
+    } else if (oldVersion <= 4) {
+      try {
+        sql = """
+                    alter table plannig add column (
+                    grsBlsM0 text, 
+                    grsBlsM1 text, 
+                    grsBlsM2 text, 
+                    grsBlsM3 text, 
+                    invBls text, 
+                    grsBls text, 
+                    cnvBls text, 
+                    invBlsDisp text)""";
         await db.execute(sql);
       } catch (_) {}
     }
@@ -554,7 +653,15 @@ class LocalDatabase {
                         direccion,
                         numeroPadre,
                         servicios,
-                        epinMiTienda
+                        epinMiTienda,
+                        grsBlsM0,
+                        grsBlsM1,
+                        grsBlsM2,
+                        grsBlsM3,
+                        invBls,
+                        grsBls,
+                        cnvBls,
+                        invBlsDisp
                       )
                       VALUES
                       (
@@ -615,6 +722,14 @@ class LocalDatabase {
                         ?,
                         ?,
                         ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?, 
                         ?,
                         ?,
                         ?,
@@ -690,7 +805,15 @@ class LocalDatabase {
         dato.servicios,
         dato.epinMiTienda.toString() == 'null'
             ? '0'
-            : dato.epinMiTienda.toString()
+            : dato.epinMiTienda.toString(),
+        dato.grsBlsM0.toString() == 'null' ? '0' : dato.grsBlsM0.toString(),
+        dato.grsBlsM1.toString() == 'null' ? '0' : dato.grsBlsM1.toString(),
+        dato.grsBlsM2.toString() == 'null' ? '0' : dato.grsBlsM2.toString(),
+        dato.grsBlsM3.toString() == 'null' ? '0' : dato.grsBlsM3.toString(),
+        dato.invBls.toString() == 'null' ? '0' : dato.invBls.toString(),
+        dato.grsBls.toString() == 'null' ? '0' : dato.grsBls.toString(),
+        dato.cnvBls.toString() == 'null' ? '0' : dato.cnvBls.toString(),
+        dato.invBlsDisp.toString() == 'null' ? '0' : dato.invBlsDisp.toString()
       ]);
     }
     //await _db!.execute(query, datos);
@@ -748,6 +871,71 @@ class LocalDatabase {
         dato.confirmado,
         dato.enviado,
         dato.idPdv,
+        dato.idVisita,
+        //dato.fechaVenta?.toIso8601String()
+        (dato.fechaVenta == null)
+            ? null
+            : DateFormat('dd-MM-yyyy HH:mm:ss').format(dato.fechaVenta!),
+      ]);
+    }
+    //await _db!.execute(query, datos);
+    await ba.commit(noResult: true);
+
+    return resp;
+  }
+
+  static Future<int> insertListTangibleReasignacion(
+      List<ProductoTangibleReasignacion> datos) async {
+    int resp = 0;
+
+    Batch ba = _db!.batch();
+    String query = """
+                      INSERT INTO tangible_reasignacion 
+                      (
+                        idPdv,
+                        tangible,
+                        modelo,
+                        descModelo,
+                        serie,
+                        fechaAsignacion,
+                        asignado,
+                        confirmado,
+                        enviado,
+                        idVisita,
+                        fechaVenta
+                      )
+                      VALUES
+                      (
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?
+                      )
+                    """;
+
+    for (var dato in datos) {
+      print('Insertando reasignacion');
+      print(dato.toString());
+      ba.rawInsert(query, [
+        dato.idPdv,
+        dato.producto,
+        dato.modelo,
+        dato.descModelo,
+        dato.serie,
+        //dato.fechaAsignacion?.toIso8601String(),
+        (dato.fechaAsignacion == null)
+            ? null
+            : DateFormat('dd-MM-yyyy HH:mm:ss').format(dato.fechaAsignacion!),
+        dato.asignado,
+        dato.confirmado,
+        dato.enviado,
         dato.idVisita,
         //dato.fechaVenta?.toIso8601String()
         (dato.fechaVenta == null)
@@ -839,6 +1027,35 @@ class LocalDatabase {
   
     return datos.length;
   }
+  
+  static Future<int> insertListIncentivoPdv(List<IncentivoPdv> datos) async {
+    int resp = 0;
+
+    Batch ba = _db!.batch();
+    String query = """
+                      INSERT INTO incentivo 
+                      (
+                        idPdv,
+                        incentivo,
+                        meta
+                      ) 
+                      VALUES
+                      (
+                        ?,
+                        ?,
+                        ?
+                      )
+                    """;
+
+    for (var dato in datos) {
+      ba.rawInsert(query, [dato.idPdv, dato.incentivo, dato.meta]);
+    }
+    //await _db!.execute(query, datos);
+
+    await ba.commit(noResult: true);
+
+    return resp;
+  }
 
   static Future<int> update(String table, Model model) async {
     return _db!
@@ -851,8 +1068,9 @@ class LocalDatabase {
         whereArgs: [model.tangible, model.modelo]);
   }
 
-  static Future<int> delete(String table) async {
-    return _db!.delete(table);
+  static Future<int> delete(String table,
+      {String? where, List<Object?>? whereArgs}) async {
+    return _db!.delete(table, where: where, whereArgs: whereArgs);
   }
 
   static Future<int> deleteForm(String table, Model model) async {
