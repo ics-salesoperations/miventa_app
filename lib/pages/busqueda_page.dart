@@ -160,15 +160,12 @@ class _BusquedaPageState extends State<BusquedaPage> {
                                   fontSize: 30,
                                 ),*/
                               ),
-                              selectedItem: state.sucursales.isEmpty
-                                  ? null
-                                  : state.sucursales[0],
+                              selectedItem: state.sucursalSeleccionada,
                               asyncItems: (String sucursal) =>
                                   filtrarSucursal(sucursal),
                               itemAsString: (Sucursal sucursal) =>
                                   sucursal.nombreSucursal,
                               onChanged: (Sucursal? sucursal) async {
-// filtros de segmento al seleccionar una sucursal
                                 if (sucursal != null) {
                                   filterBloc.add(OnActualizarFiltrosEvent(
                                     idSucursal: sucursal.idSucursal,
@@ -176,6 +173,8 @@ class _BusquedaPageState extends State<BusquedaPage> {
                                     segmento: "",
                                     servicio: "",
                                   ));
+
+                                  filterBloc.add(OnSucursalSeleccionadaEvent(sucursal));
 
                                   await filterBloc.getPDVS(
                                     idSucursal: sucursal.idSucursal,

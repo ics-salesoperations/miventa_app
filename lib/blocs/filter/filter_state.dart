@@ -22,6 +22,8 @@ class FilterState extends Equatable {
   final String segmento;
   final String servicio;
 
+  final Sucursal? sucursalSeleccionada;
+
   const FilterState({
     this.selectedPDV = const <Planning>[],
     this.pdvs = const <Planning>[],
@@ -40,6 +42,7 @@ class FilterState extends Equatable {
     this.nombreCircuito = "",
     this.segmento = "",
     this.servicio = "",
+    this.sucursalSeleccionada,
   });
 
   FilterState copyWith({
@@ -60,6 +63,7 @@ class FilterState extends Equatable {
     String? nombreCircuito,
     String? segmento,
     String? servicio,
+    Sucursal? sucursalSeleccionada,
   }) =>
       FilterState(
         selectedPDV: selectedPDV ?? this.selectedPDV,
@@ -79,10 +83,11 @@ class FilterState extends Equatable {
         nombreCircuito: nombreCircuito ?? this.nombreCircuito,
         segmento: segmento ?? this.segmento,
         servicio: servicio ?? this.servicio,
+        sucursalSeleccionada: sucursalSeleccionada ?? this.sucursalSeleccionada,
       );
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         pdvs,
         cargandoDealers,
         cargandoSucursales,
@@ -95,5 +100,6 @@ class FilterState extends Equatable {
         cargandoSegmentos,
         segmento,
         servicio,
+        sucursalSeleccionada,
       ];
 }

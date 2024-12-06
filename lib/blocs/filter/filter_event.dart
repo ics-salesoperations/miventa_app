@@ -57,8 +57,6 @@ class OnSelectPDVEvent extends FilterEvent {
   });
 }
 
-
-
 class OnActualizarFiltrosEvent extends FilterEvent {
   final String idSucursal;
   final String nombreCircuito;
@@ -82,6 +80,7 @@ class OnCargarSegmentosEvent extends FilterEvent {
     required this.cargandoSegmentos,
   });
 }
+
 class OnCargarServiciosEvent extends FilterEvent {
   final List<String> servicios;
 //  final bool cargandoServicios;
@@ -90,4 +89,13 @@ class OnCargarServiciosEvent extends FilterEvent {
     required this.servicios,
 //    required this.cargandoSegmentos,
   });
+}
+
+class OnSucursalSeleccionadaEvent extends FilterEvent {
+  final Sucursal sucursalSeleccionada;
+
+  const OnSucursalSeleccionadaEvent(this.sucursalSeleccionada);
+
+  @override
+  List<Object> get props => [sucursalSeleccionada];
 }
