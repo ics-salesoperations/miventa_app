@@ -173,8 +173,11 @@ class _BusquedaPageState extends State<BusquedaPage> {
                                     segmento: "",
                                     servicio: "",
                                   ));
-
-                                  filterBloc.add(OnSucursalSeleccionadaEvent(sucursal));
+                                  if (sucursal != null) {
+                                    filterBloc.add(
+                                        OnSucursalSeleccionadaEvent(sucursal));
+                                  }
+                                  ;
 
                                   await filterBloc.getPDVS(
                                     idSucursal: sucursal.idSucursal,
@@ -201,7 +204,7 @@ class _BusquedaPageState extends State<BusquedaPage> {
                                 color: kSecondaryColor,
                               ),
                             ),
-                            DropdownSearch<Circuito>(
+                            /*DropdownSearch<Circuito>(
                               popupProps: const PopupProps.menu(
                                 showSearchBox: true,
                                 searchFieldProps: TextFieldProps(
@@ -231,6 +234,46 @@ class _BusquedaPageState extends State<BusquedaPage> {
                                         circuito.nombreCircuito.toString(),
                                   );
                                   // se agrega
+                                  await filterBloc.getSegmentos(
+                                    idSucursal: filterBloc.state.idSucursal,
+                                    nombreCircuito:
+                                        circuito.nombreCircuito.toString(),
+                                  );
+                                }
+                              },
+                            ),*/
+                            DropdownSearch<Circuito>(
+                              popupProps: const PopupProps.menu(
+                                showSearchBox: true,
+                              ),
+                              asyncItems: (String circuito) {
+                                return filtrarCircuito(circuito);
+                              },
+                              selectedItem: state.nombreCircuito.isEmpty
+                                  ? null
+                                  : state.circuitos
+                                      .map((e) =>
+                                          e.nombreCircuito == e.nombreCircuito
+                                              ? e
+                                              : null)
+                                      .toList()[0],
+                              itemAsString: (Circuito circuito) =>
+                                  circuito.nombreCircuito!,
+                              onChanged: (Circuito? circuito) async {
+                                if (circuito != null) {
+                                  filterBloc.add(OnActualizarFiltrosEvent(
+                                    idSucursal: filterBloc.state.idSucursal,
+                                    nombreCircuito:
+                                        circuito.nombreCircuito.toString(),
+                                    segmento: "",
+                                    servicio: "",
+                                  ));
+
+                                  await filterBloc.getPDVS(
+                                    idSucursal: filterBloc.state.idSucursal,
+                                    nombreCircuito:
+                                        circuito.nombreCircuito.toString(),
+                                  );
                                   await filterBloc.getSegmentos(
                                     idSucursal: filterBloc.state.idSucursal,
                                     nombreCircuito:
