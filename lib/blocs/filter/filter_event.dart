@@ -92,10 +92,7 @@ class OnCargarServiciosEvent extends FilterEvent {
 }
 
 class OnSucursalSeleccionadaEvent extends FilterEvent {
-  final Sucursal sucursalSeleccionada;
+  final Sucursal sucursal;
 
-  const OnSucursalSeleccionadaEvent(this.sucursalSeleccionada);
-
-  @override
-  List<Object> get props => [sucursalSeleccionada];
+  const OnSucursalSeleccionadaEvent(this.sucursal);
 }

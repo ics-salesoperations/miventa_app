@@ -81,6 +81,12 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
       );
     });
 
+    on<OnSucursalSeleccionadaEvent>((event, emit) {
+      emit(state.copyWith(
+        sucursalSeleccionada: event.sucursal,
+      ));
+    });
+
     init();
   }
 
@@ -205,7 +211,7 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
     );
     List<Circuito> circuito;
     try {
-      circuito = await _dbService.leerCircuitosFilter();
+      circuito = await _dbService.leerCircuitosFilter(idSucursal: idSucursal);
     } catch (e) {
       circuito = <Circuito>[];
     }

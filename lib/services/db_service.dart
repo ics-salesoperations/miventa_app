@@ -64,7 +64,7 @@ class DBService {
     await LocalDatabase.delete('gerentes');
     await LocalDatabase.insertListSolicitudesGer(datos);
   }
-  
+
   Future crearDetalleIncentivoPdv(List<IncentivoPdv> datos) async {
     await LocalDatabase.init();
     if (datos.isNotEmpty) {
@@ -197,7 +197,6 @@ class DBService {
 
     if (usuario != "" && usuario != null) {
       where = where + " AND nombreEmpleadoDms = '$usuario'";
-      
     }
 
     String query = "";
@@ -634,15 +633,25 @@ class DBService {
     return maps.map((item) => Circuito.fromJson(item)).toList();
   }
 
-  Future<List<Circuito>> leerCircuitosFilter() async {
+  Future<List<Circuito>> leerCircuitosFilter({
+    String? idSucursal
+    
+    }) async {
+    
     await LocalDatabase.init();
+    String where = "";
 
-    const query = """
+    if (idSucursal != null && idSucursal.isNotEmpty) {
+      where = " AND idSucursal = $idSucursal";
+    }
+    String query = """
                     SELECT MAX(fecha) fecha 
                           ,codigoCircuito
                           ,nombreCircuito
                           ,COUNT(1) cantidad
                     FROM planning
+                      WHERE id>0
+                      $where
                     GROUP BY 
                           codigoCircuito
                           ,nombreCircuito
@@ -1561,6 +1570,7 @@ class DBService {
       return maps.map((e) => e['tangible'].toString()).toList();
     }
   }
+
   Future<List<TipoTangibleInfo>> leerDescripcionModelos(
       {String? tangible}) async {
     await LocalDatabase.init();
