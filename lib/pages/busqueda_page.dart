@@ -204,7 +204,7 @@ class _BusquedaPageState extends State<BusquedaPage> {
                                 color: kSecondaryColor,
                               ),
                             ),
-                            /*DropdownSearch<Circuito>(
+                            DropdownSearch<Circuito>(
                               popupProps: const PopupProps.menu(
                                 showSearchBox: true,
                                 searchFieldProps: TextFieldProps(
@@ -241,8 +241,8 @@ class _BusquedaPageState extends State<BusquedaPage> {
                                   );
                                 }
                               },
-                            ),*/
-                            DropdownSearch<Circuito>(
+                            ),
+                           /* DropdownSearch<Circuito>(
                               popupProps: const PopupProps.menu(
                                 showSearchBox: true,
                               ),
@@ -281,7 +281,7 @@ class _BusquedaPageState extends State<BusquedaPage> {
                                   );
                                 }
                               },
-                            ),
+                            ),*/
                             const SizedBox(
                               height: 10,
                             ),
