@@ -108,13 +108,9 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
   }
 
   Future<List<IncentivoPdv>> getIncentivosPdv(idPdv) async {
-    List<IncentivoPdv> incentivoPdv =
-        await _dbService.leerIncentivosPorPdv(idPdv);
-
-    if (incentivoPdv.isEmpty) {
-      await actualizarIncentivosPdv(idPdv);
-      incentivoPdv = await _dbService.leerIncentivosPorPdv(idPdv);
-    }
+    List<IncentivoPdv> incentivoPdv;
+    await actualizarIncentivosPdv(idPdv);
+    incentivoPdv = await _dbService.leerIncentivosPorPdv(idPdv);
 
     return incentivoPdv;
   }
@@ -294,7 +290,7 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
         tablas: currentTablas,
       ));
     } catch (e) {
-     add(OnActualizarPlanningEvent(
+      add(OnActualizarPlanningEvent(
         actualizandoPlanning: false,
         mensaje:
             'Ocurrió un error al actualizar tu planificación', //"Ocurrio un error al actualizar tu planificacion ",
@@ -479,7 +475,7 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
         ));
         return;
       }
-
+    
       final resp = await http.get(
           Uri.parse('${Environment.apiURL}/appmiventa/tangibles_pdv/' +
               idPdv.toString()),
@@ -679,4 +675,3 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
     }
   }
 }
-

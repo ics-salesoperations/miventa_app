@@ -305,7 +305,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     List<ModeloTangible> modelos;
 
     try {
-      modelos = await _dbService.leerListadoModelosAsignados();
+      modelos = await _dbService.leerListadoModelosAsignados(pdv.idPdv);
     } catch (e) {
       modelos = const [];
       add(OnCargarModelosAsignadosoEvent(

@@ -754,7 +754,7 @@ class _DetallePdvInfoState extends State<DetallePdvInfo> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => RealizarVisitaPage(
+                                builder: (context) => VisitaScreen(
                                   detallePdv: detallePdv,
                                 ),
                               ),
@@ -1208,7 +1208,7 @@ Widget cardIndicador({
                           detalle ?? '',
                           style: const TextStyle(
                             fontFamily: 'CronosLPro',
-                            fontSize: 12,
+                            fontSize: 16,
                             color: kPrimaryColor,
                           ),
                         ),

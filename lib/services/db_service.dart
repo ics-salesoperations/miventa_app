@@ -633,11 +633,7 @@ class DBService {
     return maps.map((item) => Circuito.fromJson(item)).toList();
   }
 
-  Future<List<Circuito>> leerCircuitosFilter({
-    String? idSucursal
-    
-    }) async {
-    
+  Future<List<Circuito>> leerCircuitosFilter({String? idSucursal}) async {
     await LocalDatabase.init();
     String where = "";
 
@@ -1245,6 +1241,9 @@ class DBService {
   Future<List<ModeloTangible>> leerListadoModelos() async {
     await LocalDatabase.init();
 
+    await LocalDatabase.delete('modelo',
+        where: 'tangible IN (\'EPIN\',\'TMY\')');
+
     String where =
         " AND confirmado = 0 AND enviado = 0"; //" AND a.instanceId = '$instanceId' ";
 
@@ -1379,11 +1378,16 @@ class DBService {
     return resultado;
   }
 
-  Future<List<ModeloTangible>> leerListadoModelosAsignados() async {
+  Future<List<ModeloTangible>> leerListadoModelosAsignados(int? idPdv) async {
     await LocalDatabase.init();
+    String where = "";
+    if (idPdv != null) {
+      where = "AND idPdv = $idPdv";
+    }
 
-    String where = ""; //" AND a.instanceId = '$instanceId' ";
+    print('filtro: $where');
 
+    //" AND a.instanceId = '$instanceId' ";
     final query = """
                     SELECT  
                             a.tangible, 
@@ -1392,14 +1396,12 @@ class DBService {
                             MIN(b.serie) serieInicial,
                             MAX(b.serie) serieFinal
                     FROM modelo a 
-                        LEFT JOIN tangible b 
+                        LEFT JOIN (select * from tangible where 1=1 $where)  b 
                           ON a.tangible = b.tangible
                             AND a.modelo = b.modelo
                             AND b.asignado = 1
                             AND b.enviado = 0
                             AND b.confirmado = 0
-                    WHERE 1=1
-                        $where
                     GROUP BY  
                             a.tangible
                     HAVING SUM(IFNULL(b.asignado, a.asignado)) > 0

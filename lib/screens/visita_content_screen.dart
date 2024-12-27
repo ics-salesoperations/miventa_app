@@ -32,14 +32,13 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
 
   late VisitaBloc _visitaBloc;
 
-  late TextEditingController _numberController;
+  final TextEditingController _numberController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _carritoBloc = BlocProvider.of<CarritoBloc>(context);
     _visitaBloc = BlocProvider.of<VisitaBloc>(context);
-    _numberController = TextEditingController();
   }
 
   @override
@@ -86,7 +85,6 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
             ...filtrado.map(
               (model) {
                 var modelo = model;
-                _numberController.text = modelo.asignado.toString();
                 if (model.modelo == _carritoBloc.state.actual.modelo) {
                   modelo = _carritoBloc.state.actual;
                 }

@@ -41,6 +41,14 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
         ),
       );
     });
+    on<OnCheckinVisitaEvent>((event, emit) {
+      emit(
+        state.copyWith(
+          guardado: event.guardado,
+          enviado: event.enviado,
+        ),
+      );
+    });
     on<OnGuardandoFormularioEvent>((event, emit) {
       emit(
         state.copyWith(
@@ -594,4 +602,172 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
       return;
     }
   }
+
+  Future<void> enviarCheckinVisita({
+    required String idPdv,
+    required String usuario,
+    required String vendio,
+    required String motivo,
+    required DateTime fecha,
+  }) async {
+    // Generar el evento inicial
+    add(
+      const OnCheckinVisitaEvent(
+        enviado: false,
+        guardado: true,
+      ),
+    );
+
+    // Formatear la fecha en el formato esperado
+    final fechaFormateada = fecha.toIso8601String();
+
+    // Crear el mapa con los datos requeridos
+    final Map<String, dynamic> datos = {
+      "idPdv": idPdv,
+      "usuario": usuario,
+      "vendio": vendio,
+      "motivo": motivo,
+      "fecha": fechaFormateada,
+    };
+
+    try {
+      final body = datos;
+      print(body);
+
+      // Enviar los datos mediante una petición HTTP POST
+      final resp = await http
+          .post(
+            Uri.parse('${Environment.apiURL}/appmiventa/visita/registro'),
+            body: jsonEncode(body),
+            headers: {'Content-Type': 'application/json'},
+            encoding: Encoding.getByName('utf-8'),
+          )
+          .timeout(const Duration(minutes: 5));
+
+      print(resp.body);
+
+      // Verificar la respuesta del servidor
+      if (resp.statusCode == 200) {
+        // Actualizar estado local o base de datos, si es necesario
+        add(
+          const OnCheckinVisitaEvent(
+            enviado: true,
+            guardado: true,
+          ),
+        );
+      } else {
+        add(
+          const OnCheckinVisitaEvent(
+            enviado: false,
+            guardado: true,
+          ),
+        );
+        return;
+      }
+    } on TimeoutException catch (_) {
+      add(
+        const OnCheckinVisitaEvent(
+          enviado: false,
+          guardado: true,
+        ),
+      );
+      return;
+    } catch (e) {
+      print(e.toString());
+      add(
+        const OnCheckinVisitaEvent(
+          enviado: false,
+          guardado: true,
+        ),
+      );
+      return;
+    }
+  }
+  // Guardar asignación de saldo
+  Future<void> enviarCheckinSaldos({
+    required String idPdv,
+    required String usuario,
+    required String vendio,
+    required String motivo,
+    required DateTime fecha,
+    required String tipoTransaccion,
+    required String producto,
+  }) async {
+    // Generar el evento inicial
+    add(
+      const OnCheckinVisitaEvent(
+        enviado: false,
+        guardado: true,
+      ),
+    );
+
+    // Formatear la fecha en el formato esperado
+    final fechaFormateada = fecha.toIso8601String();
+
+    // Crear el mapa con los datos requeridos
+    final Map<String, dynamic> datos = {
+      "usuario": usuario,
+      "idPdv": idPdv,
+      "tipoTransaccion": tipoTransaccion,
+      "producto": producto,
+      "tipoValor": "CANTIDAD",
+      "valor": "1",
+      "fecha": fechaFormateada
+    };
+
+    try {
+      final body = datos;
+      print(body);
+
+      // Enviar los datos mediante una petición HTTP POST
+      final resp = await http
+          .post(
+            Uri.parse('${Environment.apiURL}/appmiventa/checkin/venta'),
+            body: jsonEncode(body),
+            headers: {'Content-Type': 'application/json'},
+            encoding: Encoding.getByName('utf-8'),
+          )
+          .timeout(const Duration(minutes: 5));
+
+      print(resp.body);
+
+      // Verificar la respuesta del servidor
+      if (resp.statusCode == 200) {
+        // Actualizar estado local o base de datos, si es necesario
+        add(
+          const OnCheckinVisitaEvent(
+            enviado: true,
+            guardado: true,
+          ),
+        );
+      } else {
+        add(
+          const OnCheckinVisitaEvent(
+            enviado: false,
+            guardado: true,
+          ),
+        );
+        return;
+      }
+    } on TimeoutException catch (_) {
+      add(
+        const OnCheckinVisitaEvent(
+          enviado: false,
+          guardado: true,
+        ),
+      );
+      return;
+    } catch (e) {
+      print(e.toString());
+      add(
+        const OnCheckinVisitaEvent(
+          enviado: false,
+          guardado: true,
+        ),
+      );
+      return;
+    }
+  }
+
+
 }

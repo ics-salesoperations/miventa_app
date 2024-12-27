@@ -43,6 +43,16 @@ class OnFinalizarVisitaEvent extends VisitaEvent {
   });
 }
 
+class OnCheckinVisitaEvent extends VisitaEvent {
+  final bool guardado;
+  final bool enviado;
+
+  const OnCheckinVisitaEvent({
+    required this.guardado,
+    required this.enviado,
+  });
+}
+
 class OnGuardandoFormularioEvent extends VisitaEvent {
   final bool guardandoFormulario;
   const OnGuardandoFormularioEvent({

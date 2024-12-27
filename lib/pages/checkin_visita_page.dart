@@ -5,6 +5,8 @@ import 'package:miventa_app/app_styles.dart';
 import 'package:miventa_app/widgets/widgets.dart';
 import 'package:miventa_app/pages/pages.dart';
 import 'package:miventa_app/models/models.dart';
+import 'package:miventa_app/blocs/blocs.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class VisitaScreen extends StatelessWidget {
   final Planning detallePdv;
@@ -17,6 +19,9 @@ class VisitaScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final VisitaBloc _visitaBloc = BlocProvider.of<VisitaBloc>(context);
+    final AuthBloc _authBloc = BlocProvider.of<AuthBloc>(context);
+
     return Scaffold(
       body: CustomPaint(
         painter: HeaderPicoPainter(),
@@ -157,11 +162,25 @@ class VisitaScreen extends StatelessWidget {
                                   form.control('seRealizoVenta').value as bool;
                               final razon =
                                   form.control('razon').value as String?;
+                              final vendio =
+                                  form.control('seRealizoVenta').value
+                                      ? "SI"
+                                      : "NO";
 
                               final mensaje = seRealizoVenta
                                   ? "Venta se realizó"
                                   : "Venta no se realizó por: $razon";
-
+                              _visitaBloc.enviarCheckinVisita(
+                                idPdv:
+                                    (detallePdv.idPdv?.toInt() ?? 0).toString(),
+                                usuario:
+                                    _authBloc.state.usuario.usuario.toString(),
+                                vendio: vendio,
+                                motivo:
+                                    form.control('razon').value?.toString() ??
+                                        "No Aplica",
+                                fecha: DateTime.now(),
+                              );
                               if (seRealizoVenta) {
                                 Navigator.push(
                                   context,
