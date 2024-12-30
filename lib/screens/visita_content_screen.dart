@@ -39,6 +39,7 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
     super.initState();
     _carritoBloc = BlocProvider.of<CarritoBloc>(context);
     _visitaBloc = BlocProvider.of<VisitaBloc>(context);
+    _visitaBloc.initSaldos();
   }
 
   @override
@@ -288,9 +289,12 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.center,
                                           children: [
-                                            const Text(
-                                              "DISPONIBLE: ",
-                                              style: TextStyle(
+                                            Text(
+                                              modelo.modelo == 'EPIN' ||
+                                                      modelo.modelo == 'TMY'
+                                                  ? "MONTO A VENDER: "
+                                                  : "DISPONIBLE: ",
+                                              style: const TextStyle(
                                                 color: kSecondaryColor,
                                                 fontFamily: 'CronosLPro',
                                                 fontSize: 14,

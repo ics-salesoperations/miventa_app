@@ -1238,12 +1238,15 @@ class DBService {
     }
   }
 
-  Future<List<ModeloTangible>> leerListadoModelos() async {
+  Future<void> limpiarSaldos() async {
     await LocalDatabase.init();
 
     await LocalDatabase.delete('modelo',
         where: 'tangible IN (\'EPIN\',\'TMY\')');
+  }
 
+  Future<List<ModeloTangible>> leerListadoModelos() async {
+    await LocalDatabase.init();
     String where =
         " AND confirmado = 0 AND enviado = 0"; //" AND a.instanceId = '$instanceId' ";
 
@@ -1402,6 +1405,45 @@ class DBService {
                             AND b.asignado = 1
                             AND b.enviado = 0
                             AND b.confirmado = 0
+                    GROUP BY  
+                            a.tangible
+                    HAVING SUM(IFNULL(b.asignado, a.asignado)) > 0
+                    ORDER BY SUM(b.asignado) DESC
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+        await LocalDatabase.customQuery(query);
+    //return maps.map((json) => FormularioAnswer.fromMap(json)).toList();
+    return maps.map((json) {
+      return ModeloTangible.fromMap(json);
+    }).toList();
+  }
+
+  Future<List<ModeloTangible>> leerListadoModelosSaldo(int? idPdv) async {
+    await LocalDatabase.init();
+    String where = "";
+    if (idPdv != null) {
+      where = "AND idPdv = $idPdv";
+    }
+
+    print('filtro: $where');
+
+    //" AND a.instanceId = '$instanceId' ";
+    final query = """
+                    SELECT  
+                            a.tangible, 
+                            SUM(IFNULL(b.asignado,a.asignado)) asignado, 
+                            COUNT(*) disponible,
+                            MIN(b.serie) serieInicial,
+                            MAX(b.serie) serieFinal
+                    FROM modelo a 
+                        LEFT JOIN (select * from tangible where 1=1 $where)  b 
+                          ON a.tangible = b.tangible
+                            AND a.modelo = b.modelo
+                            AND b.asignado = 1
+                            AND b.enviado = 0
+                            AND b.confirmado = 0
+                    WHERE A.MODELO IN ('EPIN', 'TMY')
                     GROUP BY  
                             a.tangible
                     HAVING SUM(IFNULL(b.asignado, a.asignado)) > 0

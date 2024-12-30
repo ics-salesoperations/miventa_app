@@ -325,6 +325,31 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     return modelos;
   }
 
+  Future<List<ModeloTangible>> getModelosSaldo({
+    required Planning pdv,
+  }) async {
+    add(const OnCargarModelosAsignadosoEvent(
+      modelosAsignados: [],
+    ));
+
+    List<ModeloTangible> modelos;
+
+    try {
+      modelos = await _dbService.leerListadoModelosSaldo(pdv.idPdv);
+    } catch (e) {
+      modelos = const [];
+      add(OnCargarModelosAsignadosoEvent(
+        modelosAsignados: modelos,
+      ));
+    }
+
+    add(OnCargarModelosAsignadosoEvent(
+      modelosAsignados: modelos,
+    ));
+
+    return modelos;
+  }
+
   Future<void> actualizaTotal() async {
     int total = 0;
 

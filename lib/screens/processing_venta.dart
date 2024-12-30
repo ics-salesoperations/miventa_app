@@ -20,12 +20,14 @@ class ProcessingVenta extends StatefulWidget {
 class _ProcessingVentaState extends State<ProcessingVenta> {
   late CarritoBloc _carritoBloc;
   late VisitaBloc _visitaBloc;
+  late AuthBloc _authBloc;
 
   @override
   void initState() {
     super.initState();
     _carritoBloc = BlocProvider.of<CarritoBloc>(context);
     _visitaBloc = BlocProvider.of<VisitaBloc>(context);
+    _authBloc = BlocProvider.of<AuthBloc>(context);
     _visitaBloc.enviarDatos(
       formId: _visitaBloc.state.formId,
       instanceId: _visitaBloc.state.instanceId,
@@ -33,10 +35,20 @@ class _ProcessingVentaState extends State<ProcessingVenta> {
       respondentId: _visitaBloc.state.respondentId,
       pdv: widget.pdv,
     );
+    _carritoBloc.getModelosSaldo(pdv: widget.pdv).then((modelos) {
+      _visitaBloc.enviarCheckinSaldos(
+        idPdv: widget.pdv.idPdv.toString(),
+        usuario: _authBloc.state.usuario.usuario!,
+        fecha: DateTime.now(),
+        tipoTransaccion: 'VENTA',
+        modelos: modelos,
+      );
+    });
     _carritoBloc.procesarVisita(
       idPdv: _visitaBloc.state.idPdv,
       idVisita: _visitaBloc.state.idVisita,
     );
+    ;
   }
 
   @override

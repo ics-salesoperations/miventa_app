@@ -192,6 +192,10 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
     return segmentoPdv;
   }
 
+  Future<void> initSaldos() async {
+    await _dbService.limpiarSaldos();
+  }
+
   Future<FormGroup> createCurrentFormGroup({
     required List<Formulario> formulario,
     required Planning pdv,
@@ -683,15 +687,14 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
       return;
     }
   }
+
   // Guardar asignación de saldo
   Future<void> enviarCheckinSaldos({
     required String idPdv,
     required String usuario,
-    required String vendio,
-    required String motivo,
     required DateTime fecha,
     required String tipoTransaccion,
-    required String producto,
+    required List<ModeloTangible> modelos,
   }) async {
     // Generar el evento inicial
     add(
@@ -701,23 +704,24 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
       ),
     );
 
-    // Formatear la fecha en el formato esperado
-    final fechaFormateada = fecha.toIso8601String();
+    // Crear el arreglo de datos para enviar
+    final List<Map<String, dynamic>> data = modelos.map((modelo) {
+      return {
+        "usuario": usuario,
+        "idPdv": idPdv,
+        "tipoTransaccion": tipoTransaccion,
+        "producto": modelo.tangible.toString(),
+        "tipoValor": "CANTIDAD",
+        "valor": modelo.asignado.toString(),
+        "fecha": fecha.toIso8601String(),
+      };
+    }).toList();
 
-    // Crear el mapa con los datos requeridos
-    final Map<String, dynamic> datos = {
-      "usuario": usuario,
-      "idPdv": idPdv,
-      "tipoTransaccion": tipoTransaccion,
-      "producto": producto,
-      "tipoValor": "CANTIDAD",
-      "valor": "1",
-      "fecha": fechaFormateada
-    };
+    // Crear el cuerpo completo de la solicitud
+    final Map<String, dynamic> body = {"data": data};
 
     try {
-      final body = datos;
-      print(body);
+      print('Enviando datos: $body');
 
       // Enviar los datos mediante una petición HTTP POST
       final resp = await http
@@ -768,6 +772,4 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
       return;
     }
   }
-
-
 }
