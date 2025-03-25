@@ -13,7 +13,7 @@ class DetallePdvPre extends StatefulWidget {
 
   @override
   State<DetallePdvPre> createState() =>
-      _DetallePdvPreState(detallePdv: this.detallePdv);
+      _DetallePdvPreState(detallePdv: detallePdv);
 }
 
 class _DetallePdvPreState extends State<DetallePdvPre> {
@@ -23,7 +23,6 @@ class _DetallePdvPreState extends State<DetallePdvPre> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
     double screenHeigth = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -190,7 +189,7 @@ class _DetallePdvPreState extends State<DetallePdvPre> {
                         icono: 'assets/Iconos/frecuencia.svg',
                         screenWidth: screenHeigth,
                       ),
-                      BuildLocalKpiInfoDisplay(
+                      buildLocalKpiInfoDisplay(
                         getValue:
                             detallePdv.fd11 == "null" || detallePdv.fd11 == null
                                 ? "SIN DATOS"
@@ -224,7 +223,7 @@ class _DetallePdvPreState extends State<DetallePdvPre> {
   }
 }
 
-Widget BuildLocalKpiInfoDisplay({
+Widget buildLocalKpiInfoDisplay({
   required String getValue,
   required String title,
   required String icono,

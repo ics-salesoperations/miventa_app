@@ -1267,8 +1267,6 @@ class FormularioBloc extends Bloc<FormularioEvent, FormularioState> {
             encoding: Encoding.getByName('utf-8'),
           )
           .timeout(const Duration(minutes: 5));
-      print(resp);
-      print(resp.body);
 
       if (resp.statusCode == 200) {
         add(
@@ -1318,8 +1316,6 @@ class FormularioBloc extends Bloc<FormularioEvent, FormularioState> {
       );
       return;
     } catch (e) {
-      print("error");
-      print(e);
       add(
         OnProcessingEvent(
           mensaje:

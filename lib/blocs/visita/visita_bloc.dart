@@ -30,6 +30,7 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
           formGroupVisita: event.formGroupVisita,
           frmVisitaListo: event.frmVisitaListo,
           errores: event.errores,
+          mostrarTangible: event.mostrarTangible,
         ),
       );
     });
@@ -87,12 +88,14 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
         frmControlVisita: [],
         frmVisitaListo: false,
         errores: [],
+        mostrarTangible: false, // Nuevo flag
       ),
     );
 
     List<String> errores = [];
     final localizacionHabilitada = await _checkGpsStatus();
     final position = await Geolocator.getCurrentPosition();
+    bool mostrarTangible = true; // Se asume que se muestra por defecto
 
     if (localizacionHabilitada == 'Deshabilitado') {
       errores.add("Tienes la localización deshabilitada.");
@@ -114,6 +117,8 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
 
     if (distancia >= 100) {
       errores.add("No estas en el Punto de Venta.");
+      mostrarTangible =
+          false; // Si está muy lejos, ocultamos los tangibles fisicos.
     }
 
     final sinConfirmar = await _dbService.getPendienteConfirmar(
@@ -149,6 +154,7 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
           formGroupVisita: formGroup,
           frmVisitaListo: true,
           errores: errores,
+          mostrarTangible: mostrarTangible, // Pasamos el flag
         ),
       );
     } catch (e) {
@@ -158,6 +164,7 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
           frmControlVisita: [],
           frmVisitaListo: false,
           errores: [],
+          mostrarTangible: false,
         ),
       );
     }
@@ -182,7 +189,6 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
   Future<String> validarSegmento(Planning pdv) async {
     String segmentoPdv = 'no definido';
     final datos = await _dbService.leerDetallePdv(pdv.idPdv ?? 0);
-    final fechaActual = DateTime.now();
     for (var d in datos) {
       if (d.segmentoPdv != null) {
         segmentoPdv = d.segmentoPdv.toString();
@@ -555,7 +561,6 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
 
     try {
       final body = {"data": datos};
-      print(body);
       final resp = await http
           .post(
             Uri.parse('${Environment.apiURL}/appdms/newform_json'),
@@ -564,9 +569,6 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
             encoding: Encoding.getByName('utf-8'),
           )
           .timeout(const Duration(minutes: 5));
-
-      print(resp.body);
-
       if (resp.statusCode == 200) {
         await _dbService.updateEnviados(
           respuestas,
@@ -596,7 +598,6 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
       );
       return;
     } catch (e) {
-      print(e.toString());
       add(
         const OnFinalizarVisitaEvent(
           enviado: false,
@@ -636,7 +637,6 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
 
     try {
       final body = datos;
-      print(body);
 
       // Enviar los datos mediante una petición HTTP POST
       final resp = await http
@@ -647,8 +647,6 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
             encoding: Encoding.getByName('utf-8'),
           )
           .timeout(const Duration(minutes: 5));
-
-      print(resp.body);
 
       // Verificar la respuesta del servidor
       if (resp.statusCode == 200) {
@@ -677,7 +675,6 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
       );
       return;
     } catch (e) {
-      print(e.toString());
       add(
         const OnCheckinVisitaEvent(
           enviado: false,
@@ -721,7 +718,6 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
     final Map<String, dynamic> body = {"data": data};
 
     try {
-      print('Enviando datos: $body');
 
       // Enviar los datos mediante una petición HTTP POST
       final resp = await http
@@ -732,8 +728,6 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
             encoding: Encoding.getByName('utf-8'),
           )
           .timeout(const Duration(minutes: 5));
-
-      print(resp.body);
 
       // Verificar la respuesta del servidor
       if (resp.statusCode == 200) {
@@ -762,7 +756,6 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
       );
       return;
     } catch (e) {
-      print(e.toString());
       add(
         const OnCheckinVisitaEvent(
           enviado: false,

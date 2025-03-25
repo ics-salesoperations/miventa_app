@@ -29,10 +29,11 @@ class VisitaContentScreen extends StatefulWidget {
 class _VisitaContentScreenState extends State<VisitaContentScreen> {
   late CarritoBloc _carritoBloc;
   List<int> asignados = [];
-
   late VisitaBloc _visitaBloc;
 
-  final TextEditingController _numberController = TextEditingController();
+  // Define los TextEditingController para EPIN y TMY
+  final TextEditingController _epinController = TextEditingController();
+  final TextEditingController _tmyController = TextEditingController();
 
   @override
   void initState() {
@@ -471,7 +472,9 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                                 child: Center(
                                                   child: TextField(
                                                     controller:
-                                                        _numberController,
+                                                        modelo.modelo == 'EPIN'
+                                                            ? _epinController
+                                                            : _tmyController,
                                                     keyboardType:
                                                         TextInputType.number,
                                                     textAlign: TextAlign
@@ -536,8 +539,11 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                               ),
                                               onPressed: () async {
                                                 final int? number =
-                                                    int.tryParse(
-                                                        _numberController.text);
+                                                    int.tryParse(modelo
+                                                                .modelo ==
+                                                            'EPIN'
+                                                        ? _epinController.text
+                                                        : _tmyController.text);
                                                 if (number == null ||
                                                     number <= 0) {
                                                   const snackBar = SnackBar(
@@ -598,7 +604,9 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                                   ),
                                                 ).then((value) async {
                                                   final m = await _carritoBloc
-                                                      .getModelos();
+                                                      .getModelos(_visitaBloc
+                                                          .state
+                                                          .mostrarTangible);
                                                   await _carritoBloc
                                                       .crearFrmProductos(m);
                                                   await _carritoBloc

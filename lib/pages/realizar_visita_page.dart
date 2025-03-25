@@ -28,18 +28,20 @@ class _RealizarVisitaPageState extends State<RealizarVisitaPage>
   _RealizarVisitaPageState();
 
   late CarritoBloc _carritoBloc;
+  late VisitaBloc _visitaBloc;
 
   @override
   void initState() {
     super.initState();
     detallePdv = widget.detallePdv;
     _carritoBloc = BlocProvider.of<CarritoBloc>(context);
+    _visitaBloc = BlocProvider.of<VisitaBloc>(context);
     controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
     );
 
-    _carritoBloc.init();
+    _carritoBloc.init(_visitaBloc.state.mostrarTangible);
 
     controller.addListener(() {
       setState(() {});
@@ -87,7 +89,9 @@ class _RealizarVisitaPageState extends State<RealizarVisitaPage>
                       pdv: widget.detallePdv,
                     ),
                   ).then((value) async {
-                    final m = await _carritoBloc.getModelos();
+                    final m = await _carritoBloc
+                        .getModelos(_visitaBloc.state.mostrarTangible);
+                    print('modelos:$m');
                     await _carritoBloc.crearFrmProductos(m);
                     await _carritoBloc.actualizaTotal();
                   });

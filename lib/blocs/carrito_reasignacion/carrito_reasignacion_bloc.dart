@@ -302,8 +302,6 @@ class CarritoReasignacionBloc
 
       final jsonString = jsonEncode(body);
 
-      print('string: ' + jsonString);
-
       final resp = await http
           .post(
             Uri.parse(
@@ -786,15 +784,9 @@ class CarritoReasignacionBloc
       ),
     );
 
-    print("Servicios asignados");
-    print(pdv.servicios);
-    print(modelos.length);
     for (var e in modelos) {
       asignados.add(e.tangible.toString().toUpperCase());
     }
-
-    print("asignados");
-    print(asignados.toString());
 
     if (asignados.contains('BLISTER') &&
         !pdv.servicios.toString().toUpperCase().contains('BLISTER')) {
@@ -824,7 +816,6 @@ class CarritoReasignacionBloc
     required String usuario,
   }) async {
     bool validado = true;
-    List<String> asignados = [];
     bool almacenado = false;
 
     add(
@@ -895,14 +886,9 @@ class CarritoReasignacionBloc
   }
 
   Future<void> enviarDatosAlarmasBlister() async {
-    print(":::::::Hola:::::");
     try {
       final solicitudes = await _dbService.leerSolicitudesAutomaticas();
       final token = await _authService.getToken();
-
-      print("LSITA D ESOLICITUDES PENDIENTES");
-
-      print(solicitudes.length);
 
       for (var solicitud in solicitudes) {
         final body = {

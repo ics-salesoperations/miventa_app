@@ -29,7 +29,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   StreamSubscription<LocationState>? locationStateSubscription;
 
   MapBloc({required this.locationBloc}) : super(const MapState()) {
-    on<onMapInitializedEvent>(_onInitMap);
+    on<OnMapInitializedEvent>(_onInitMap);
     on<OnStartFollowingUserEvent>(_onStartFollowingUser);
     on<OnStopFollowingUserEvent>(
         (event, emit) => emit(state.copyWith(isFollowingUser: false)));
@@ -71,7 +71,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
   }
 
-  void _onInitMap(onMapInitializedEvent event, Emitter<MapState> emit) {
+  void _onInitMap(OnMapInitializedEvent event, Emitter<MapState> emit) {
     _mapController = event.controller;
     _context = event.context;
     _mapController!.setMapStyle(jsonEncode(uberMapTheme));

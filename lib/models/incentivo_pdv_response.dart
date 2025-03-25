@@ -6,10 +6,10 @@ import 'dart:convert';
 
 import 'package:miventa_app/models/models.dart';
 
-IncentivoPdvResponse IncentivoPdvResponseFromJson(String str) =>
+IncentivoPdvResponse incentivoPdvResponseFromJson(String str) =>
     IncentivoPdvResponse.fromJson(json.decode(str));
 
-String IncentivoPdvResponseToJson(IncentivoPdvResponse data) =>
+String incentivoPdvResponseToJson(IncentivoPdvResponse data) =>
     json.encode(data.toJson());
 
 class IncentivoPdvResponse {

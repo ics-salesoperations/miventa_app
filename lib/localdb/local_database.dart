@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:intl/intl.dart';
 import 'package:miventa_app/models/models.dart';
 import 'package:path/path.dart' as p;
@@ -472,7 +470,6 @@ class LocalDatabase {
     const textType = 'TEXT';
     const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
     const integerType = 'INTEGER';
-    const realType = 'REAL';
     String sql = "";
 
     if (oldVersion <= 1) {
@@ -921,8 +918,6 @@ class LocalDatabase {
                     """;
 
     for (var dato in datos) {
-      print('Insertando reasignacion');
-      print(dato.toString());
       ba.rawInsert(query, [
         dato.idPdv,
         dato.producto,
@@ -1024,10 +1019,10 @@ class LocalDatabase {
       ba.rawInsert(query, [dato.idDealer, dato.idSucursal]);
     }
     await ba.commit(noResult: true);
-  
+
     return datos.length;
   }
-  
+
   static Future<int> insertListIncentivoPdv(List<IncentivoPdv> datos) async {
     int resp = 0;
 
@@ -1087,5 +1082,3 @@ class LocalDatabase {
     return _db!.delete(table, where: " enviado = ?", whereArgs: ["SI"]);
   }
 }
-
-

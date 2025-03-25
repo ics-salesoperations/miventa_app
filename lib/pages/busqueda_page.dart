@@ -173,11 +173,8 @@ class _BusquedaPageState extends State<BusquedaPage> {
                                     segmento: "",
                                     servicio: "",
                                   ));
-                                  if (sucursal != null) {
-                                    filterBloc.add(
-                                        OnSucursalSeleccionadaEvent(sucursal));
-                                  }
-                                  ;
+                                  filterBloc.add(
+                                      OnSucursalSeleccionadaEvent(sucursal));
 
                                   await filterBloc.getPDVS(
                                     idSucursal: sucursal.idSucursal,

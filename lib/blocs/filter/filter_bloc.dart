@@ -157,8 +157,6 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
         servicio: servicio,
       );
     } catch (e) {
-      print("error ");
-      print(e);
       servicios = <String>[];
     }
     add(OnCargarServiciosEvent(

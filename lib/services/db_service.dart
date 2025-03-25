@@ -67,10 +67,11 @@ class DBService {
 
   Future crearDetalleIncentivoPdv(List<IncentivoPdv> datos) async {
     await LocalDatabase.init();
+
+    int idPdv = datos.first.idPdv!;
+    await LocalDatabase.delete('incentivo',
+        where: 'idPdv = ?', whereArgs: [idPdv]);
     if (datos.isNotEmpty) {
-      int idPdv = datos.first.idPdv!;
-      await LocalDatabase.delete('incentivo',
-          where: 'idPdv = ?', whereArgs: [idPdv]);
       await LocalDatabase.insertListIncentivoPdv(datos);
     }
   }
@@ -1245,12 +1246,14 @@ class DBService {
         where: 'tangible IN (\'EPIN\',\'TMY\')');
   }
 
-  Future<List<ModeloTangible>> leerListadoModelos() async {
+  Future<List<ModeloTangible>> leerListadoModelos(
+      [bool mostarTengible = true]) async {
     await LocalDatabase.init();
     String where =
         " AND confirmado = 0 AND enviado = 0"; //" AND a.instanceId = '$instanceId' ";
-
-    final query = """
+    final String query;
+    if (mostarTengible) {
+      query = """
                     SELECT
                     *
                     FROM (SELECT a.id, 
@@ -1281,6 +1284,17 @@ class DBService {
                     SELECT -2 AS id, 'TMY' AS tangible, 'TMY' AS modelo, 'SALDO TIGO MONEY' AS descripcion, '' AS imagen, 0 AS asignado, 1 AS disponible, '0' AS serieInicial, '0' AS serieFinal
                     )
                     ORDER BY disponible DESC""";
+    } else {
+      query = """
+                    SELECT
+                    *
+                    FROM (
+                    SELECT -1 AS id, 'EPIN' AS tangible, 'EPIN' AS modelo, 'SALDO EPIN' AS descripcion, '' AS imagen, 0 AS asignado, 1 AS disponible, '0' AS serieInicial, '0' AS serieFinal
+                    UNION ALL
+                    SELECT -2 AS id, 'TMY' AS tangible, 'TMY' AS modelo, 'SALDO TIGO MONEY' AS descripcion, '' AS imagen, 0 AS asignado, 1 AS disponible, '0' AS serieInicial, '0' AS serieFinal
+                    )
+                    ORDER BY disponible DESC""";
+    }
 
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
@@ -1384,31 +1398,47 @@ class DBService {
   Future<List<ModeloTangible>> leerListadoModelosAsignados(int? idPdv) async {
     await LocalDatabase.init();
     String where = "";
-    if (idPdv != null) {
-      where = "AND idPdv = $idPdv";
-    }
 
     print('filtro: $where');
 
     //" AND a.instanceId = '$instanceId' ";
     final query = """
-                    SELECT  
-                            a.tangible, 
-                            SUM(IFNULL(b.asignado,a.asignado)) asignado, 
-                            COUNT(*) disponible,
-                            MIN(b.serie) serieInicial,
-                            MAX(b.serie) serieFinal
-                    FROM modelo a 
-                        LEFT JOIN (select * from tangible where 1=1 $where)  b 
-                          ON a.tangible = b.tangible
-                            AND a.modelo = b.modelo
-                            AND b.asignado = 1
-                            AND b.enviado = 0
-                            AND b.confirmado = 0
-                    GROUP BY  
-                            a.tangible
-                    HAVING SUM(IFNULL(b.asignado, a.asignado)) > 0
-                    ORDER BY SUM(b.asignado) DESC
+                  SELECT  
+                    a.tangible, 
+                    SUM(
+                        CASE 
+                            WHEN a.tangible IN ('EPIN', 'TMY') THEN a.asignado
+                            ELSE IFNULL(b.asignado, 0)
+                        END
+                    ) AS asignado, 
+                    COUNT(*) AS disponible,
+                    MIN(b.serie) AS serieInicial,
+                    MAX(b.serie) AS serieFinal
+                FROM modelo a 
+                LEFT JOIN (
+                    SELECT * 
+                    FROM tangible 
+                    WHERE 1=1 $where
+                ) b 
+                    ON a.tangible = b.tangible
+                    AND a.modelo = b.modelo
+                    AND b.asignado = 1
+                    AND b.enviado = 0
+                    AND b.confirmado = 0
+                GROUP BY  
+                    a.tangible
+                HAVING SUM(
+                    CASE 
+                        WHEN a.tangible IN ('EPIN', 'TMY') THEN a.asignado
+                        ELSE IFNULL(b.asignado, 0)
+                    END
+                ) > 0
+                ORDER BY SUM(
+                    CASE 
+                        WHEN a.tangible IN ('EPIN', 'TMY') THEN a.asignado
+                        ELSE b.asignado
+                    END
+                ) DESC;
                     """;
 
     final List<Map<String, dynamic>> maps =
@@ -1878,7 +1908,7 @@ class DBService {
 
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
-    print(maps);
+    print('detalle: $maps');
     return maps
         .map((json) => ProductoTangibleReasignacion.fromMap(json))
         .toList();
@@ -1923,7 +1953,7 @@ class DBService {
 
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
-    print(maps);
+    print("get tang: $maps");
     return maps
         .map((json) => ProductoTangibleReasignacion.fromMap(json))
         .toList();
@@ -2403,7 +2433,6 @@ class DBService {
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
 
-    print(maps);
     return maps.map((json) => IncentivoPdv.fromMap(json)).toList();
   }
 }

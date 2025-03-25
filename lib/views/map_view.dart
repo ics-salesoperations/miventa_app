@@ -44,7 +44,7 @@ class MapView extends StatelessWidget {
                 markers: markers,
                 onMapCreated: (controller) {
                   mapBloc.add(
-                    onMapInitializedEvent(
+                    OnMapInitializedEvent(
                       controller,
                       context,
                     ),

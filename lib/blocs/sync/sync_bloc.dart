@@ -275,8 +275,6 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
         ),
       );
     } catch (e) {
-      print("ERROR");
-      print(e.toString());
       add(
         const OnSincronizandoEvent(
           sincronizando: false,

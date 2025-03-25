@@ -29,6 +29,9 @@ class _CestaReasignacionPdvScreenState
     _carritoBloc = BlocProvider.of<CarritoReasignacionBloc>(context);
     _authBloc = BlocProvider.of<AuthBloc>(context);
     _carritoBloc.getModelosAsignados(pdv: widget.pdv);
+    if (widget.pdv.idPdv != null) {
+      _carritoBloc.getModelosReasignacion(widget.pdv.idPdv!);
+    }
   }
 
   IconData _getIcon(String tangible) {
@@ -263,7 +266,24 @@ class _CestaReasignacionPdvScreenState
                   if (state.validandoBlister) {
                     return _buildLoadingIndicator(state.mensaje);
                   }
-                  return _buildConfirmationButton();
+
+                  int totalAsignado = state.modelos
+                      .map<int>((item) =>
+                          item.asignado +
+                          item.descartado) // Extrae los valores de "asignado"
+                      .fold(0, (sum, value) => sum + value);
+
+                  int totalDisponible = state.modelos
+                      .map<int>((item) =>
+                          item.disponible) // Extrae los valores de "asignado"
+                      .fold(0, (sum, value) => sum + value);
+                  // Suma los valores
+                  if (totalAsignado == totalDisponible) {
+                    return _buildConfirmationButton();
+                  } else {
+                    return _buildLoadingIndicator(
+                        "Debe reasignar o descartar todo lo disponible");
+                  }
                 },
               ),
             ],

@@ -153,7 +153,7 @@ class _MiPerfilPageState extends State<MiPerfilPage> {
                               ),
                             ),
                             const Text(
-                              "Versión 3.6.0",
+                              "Versión 4.0.0",
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,

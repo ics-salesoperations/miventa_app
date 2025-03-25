@@ -329,7 +329,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 break;
               case 1:
                 navBloc.add(
-                  OnChangePageEvent(
+                  const OnChangePageEvent(
                     selectedPage: InicioPage(),
                   ),
                 );

@@ -57,8 +57,6 @@ class InventarioReasignadoBloc
     try {
       final token = await _authService.getToken();
 
-      print("antes de petición");
-
       final resp = await http.get(
           Uri.parse('${Environment.apiURL}/appmiventa/tangibles_pdv/' + idPdv),
           headers: {

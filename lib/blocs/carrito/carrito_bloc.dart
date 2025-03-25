@@ -133,13 +133,13 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     //init();
   }
 
-  Future<void> init() async {
-    final m = await getModelos();
+  Future<void> init([bool mostarTengible = true]) async {
+    final m = await getModelos(mostarTengible);
     await crearFrmProductos(m);
     await actualizaTotal();
   }
 
-  Future<List<ModeloTangible>> getModelos() async {
+  Future<List<ModeloTangible>> getModelos([bool mostarTengible = true]) async {
     add(OnCargarModelosEvent(
       modelos: state.modelos,
       cargandoModelos: true,
@@ -149,7 +149,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     List<ModeloTangible> modelos;
 
     try {
-      modelos = await _dbService.leerListadoModelos();
+      modelos = await _dbService.leerListadoModelos(mostarTengible);
     } catch (e) {
       modelos = const [];
       add(OnCargarModelosEvent(
@@ -716,15 +716,9 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
       ),
     );
 
-    print("Servicios asignados");
-    print(pdv.servicios);
-    print(modelos.length);
     for (var e in modelos) {
       asignados.add(e.tangible.toString().toUpperCase());
     }
-
-    print("asignados");
-    print(asignados.toString());
 
     if (asignados.contains('BLISTER') &&
         !pdv.servicios.toString().toUpperCase().contains('BLISTER')) {
@@ -754,7 +748,6 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     required String usuario,
   }) async {
     bool validado = true;
-    List<String> asignados = [];
     bool almacenado = false;
 
     add(
@@ -825,14 +818,9 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
   }
 
   Future<void> enviarDatosAlarmasBlister() async {
-    print(":::::::Hola:::::");
     try {
       final solicitudes = await _dbService.leerSolicitudesAutomaticas();
       final token = await _authService.getToken();
-
-      print("LSITA D ESOLICITUDES PENDIENTES");
-
-      print(solicitudes.length);
 
       for (var solicitud in solicitudes) {
         final body = {

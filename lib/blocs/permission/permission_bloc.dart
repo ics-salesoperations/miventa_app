@@ -152,10 +152,7 @@ class PermissionBloc extends Bloc<PermissionEvent, PermissionState> {
   }
 
   Future<void> askNotificationAccess() async {
-    print("Antes de consultar");
     final status = await Permission.notification.request();
-    print("Despues de consultar");
-    print(status);
     switch (status) {
       case PermissionStatus.granted:
         add(

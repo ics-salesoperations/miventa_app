@@ -7,10 +7,10 @@ abstract class LocationEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class onNewUserLocationEvent extends LocationEvent {
+class OnNewUserLocationEvent extends LocationEvent {
   final LatLng newLocation;
 
-  const onNewUserLocationEvent({
+  const OnNewUserLocationEvent({
     required this.newLocation,
   });
 }
@@ -25,6 +25,6 @@ class OnActualizarReporteTrackingEvent extends LocationEvent {
   });
 }
 
-class onStartFollowingUser extends LocationEvent {}
+class OnStartFollowingUser extends LocationEvent {}
 
-class onStopFollowingUser extends LocationEvent {}
+class OnStopFollowingUser extends LocationEvent {}

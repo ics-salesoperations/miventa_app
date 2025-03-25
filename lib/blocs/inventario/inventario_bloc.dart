@@ -48,13 +48,11 @@ class InventarioBloc extends Bloc<InventarioEvent, InventarioState> {
   final UsuarioService _userService = UsuarioService();
 
   Future<void> actualiarInventario() async {
-    add(OnActualizarInventarioEvent(cargando: true));
+    add(const OnActualizarInventarioEvent(cargando: true));
 
     try {
       final token = await _authService.getToken();
       final usuario = await _userService.getInfoUsuario();
-
-      print("antes de petición");
 
       final resp = await http.get(
           Uri.parse('${Environment.apiURL}/appmiventa/tangibles_vendedor/' +
@@ -75,9 +73,11 @@ class InventarioBloc extends Bloc<InventarioEvent, InventarioState> {
       //guardar en base de datos local
       await _dbService.guardarTangibles(productoResponse.tangiblesAsignados);
       await _dbService.updateTabla(tbl: 'tangible');
-    } catch (e) {}
+    } catch (e) {
+      null;
+    }
 
-    add(OnActualizarInventarioEvent(cargando: false));
+    add(const OnActualizarInventarioEvent(cargando: false));
   }
 
   Future<void> cargarInventario() async {

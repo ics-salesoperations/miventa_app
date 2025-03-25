@@ -644,7 +644,7 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
           }).timeout(const Duration(
         minutes: 5,
       ));
-      final incentivosPdvResponse = IncentivoPdvResponseFromJson(
+      final incentivosPdvResponse = incentivoPdvResponseFromJson(
         utf8.decode(resp.bodyBytes),
       );
       //guardar en base de datos local

@@ -18,14 +18,14 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
   ReceivePort port = ReceivePort();
 
   LocationBloc() : super(LocationState()) {
-    on<onStartFollowingUser>(
+    on<OnStartFollowingUser>(
       (event, emit) {
         emit(state.copyWith(
           followingUser: true,
         ));
       },
     );
-    on<onStopFollowingUser>((event, emit) {
+    on<OnStopFollowingUser>((event, emit) {
       emit(state.copyWith(followingUser: false));
     });
     on<OnActualizarReporteTrackingEvent>((event, emit) {
@@ -36,7 +36,7 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
         ),
       );
     });
-    on<onNewUserLocationEvent>((event, emit) {
+    on<OnNewUserLocationEvent>((event, emit) {
       emit(
         state.copyWith(
           lastKnownLocation: event.newLocation,
@@ -49,7 +49,7 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     final position = await Geolocator.getCurrentPosition();
 
     add(
-      onNewUserLocationEvent(
+      OnNewUserLocationEvent(
         newLocation: LatLng(
           position.latitude,
           position.longitude,
@@ -93,11 +93,11 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
   }
 
   void startFollowingUser() async {
-    add(onStartFollowingUser());
+    add(OnStartFollowingUser());
     positionStream = Geolocator.getPositionStream().listen((event) {
       final position = event;
       add(
-        onNewUserLocationEvent(
+        OnNewUserLocationEvent(
           newLocation: LatLng(position.latitude, position.longitude),
         ),
       );
@@ -106,7 +106,7 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
 
   void stopFollowingUser() {
     positionStream?.cancel();
-    add(onStopFollowingUser());
+    add(OnStopFollowingUser());
   }
 
   @override

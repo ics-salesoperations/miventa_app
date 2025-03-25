@@ -15,7 +15,7 @@ class DetallePdvPage extends StatefulWidget {
 
   @override
   State<DetallePdvPage> createState() =>
-      _DetallePdvPageState(detallePdv: this.detallePdv);
+      _DetallePdvPageState(detallePdv: detallePdv);
 }
 
 class _DetallePdvPageState extends State<DetallePdvPage> {

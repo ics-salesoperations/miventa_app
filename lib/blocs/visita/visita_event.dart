@@ -23,14 +23,15 @@ class OnIniciarVisitaEvent extends VisitaEvent {
   final FormGroup? formGroupVisita;
   final bool frmVisitaListo;
   final List<String> errores;
+  final bool? mostrarTangible;
 
-  const OnIniciarVisitaEvent({
-    required this.visitaIniciada,
-    required this.frmControlVisita,
-    this.formGroupVisita,
-    required this.frmVisitaListo,
-    required this.errores,
-  });
+  const OnIniciarVisitaEvent(
+      {required this.visitaIniciada,
+      required this.frmControlVisita,
+      this.formGroupVisita,
+      required this.frmVisitaListo,
+      required this.errores,
+      required this.mostrarTangible});
 }
 
 class OnFinalizarVisitaEvent extends VisitaEvent {

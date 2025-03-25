@@ -14,6 +14,7 @@ class VisitaState extends Equatable {
   final bool enviado;
   final String idVisita;
   final int idPdv;
+  final bool mostrarTangible;
 
   const VisitaState({
     this.frmVisitaListo = false,
@@ -29,6 +30,7 @@ class VisitaState extends Equatable {
     this.fechaCreacion = "",
     this.idVisita = "",
     this.idPdv = 0,
+    this.mostrarTangible = false,
   });
 
   VisitaState copyWith({
@@ -47,6 +49,7 @@ class VisitaState extends Equatable {
     String? respondentId,
     String? idVisita,
     int? idPdv,
+    bool? mostrarTangible,
   }) =>
       VisitaState(
         frmVisitaListo: frmVisitaListo ?? this.frmVisitaListo,
@@ -62,6 +65,7 @@ class VisitaState extends Equatable {
         respondentId: respondentId ?? this.respondentId,
         idVisita: idVisita ?? this.idVisita,
         idPdv: idPdv ?? this.idPdv,
+        mostrarTangible: mostrarTangible ?? this.mostrarTangible,
       );
 
   @override
@@ -78,5 +82,6 @@ class VisitaState extends Equatable {
         respondentId,
         idVisita,
         idPdv,
+        mostrarTangible,
       ];
 }

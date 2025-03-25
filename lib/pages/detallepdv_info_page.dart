@@ -51,7 +51,7 @@ class _DetallePdvInfoState extends State<DetallePdvInfo> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
+    double screenWidth = MediaQuery.of(context).size.width; 
     double screenHeigth = MediaQuery.of(context).size.height;
     int? perfil = BlocProvider.of<AuthBloc>(context).state.usuario.perfil;
 
@@ -163,7 +163,7 @@ class _DetallePdvInfoState extends State<DetallePdvInfo> {
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
+                            return const Center(child: CircularProgressIndicator());
                           } else if (snapshot.hasError) {
                             return Center(
                                 child: Text('Error: ${snapshot.error}'));
