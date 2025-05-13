@@ -43,7 +43,7 @@ class AuthService with ChangeNotifier {
         ;
   }
 
-  Future<bool> login(String usuario, String password) async {
+  Future<LoginResponse> login(String usuario, String password, String version) async {
     final usuarioService = UsuarioService();
     autenticando = true;
 
@@ -56,8 +56,8 @@ class AuthService with ChangeNotifier {
       'appId': 300,
       'userId': osToken,
       'modelo': androidInfo.model,
+      'version': version
     };
-
     try {
       final resp = await http
           .post(
@@ -69,25 +69,47 @@ class AuthService with ChangeNotifier {
           .timeout(const Duration(
             minutes: 1,
           ));
+      switch (resp.statusCode) {
+        case 200:
+          final loginResponse = loginResponseFromJson(resp.body);
+          this.usuario = loginResponse.usuario;
 
-      if (resp.statusCode == 200) {
-        final loginResponse = loginResponseFromJson(resp.body);
-        this.usuario = loginResponse.usuario;
+          await _guardarToken(
+            loginResponse.token,
+            loginResponse.exp,
+          );
+          await usuarioService.guardarUsuario();
 
-        await _guardarToken(
-          loginResponse.token,
-          loginResponse.exp,
-        );
-        await usuarioService.guardarUsuario();
-
-        return true;
-      } else {
-        return false;
+          return loginResponse;
+        case 401:
+          return LoginResponse(flag: 'false',
+              mensaje: 'Usuario o contraseña incorrectos.',
+              token: '',
+              exp: 0,
+              usuario: '');
+        case 426:
+          return LoginResponse(flag: 'false',
+              mensaje: 'Versión de la app obsoleta. Por favor actualiza a la última versión.',
+              token: '',
+              exp: 0,
+              usuario: '');
+        default:
+        // Si tu backend envía un mensaje de error en JSON, puedes parsearlo aquí:
+          String errorMsg = 'Error inesperado (${resp.statusCode})';
+          try {
+            final json = jsonDecode(resp.body);
+            if (json['message'] != null) errorMsg = json['message'];
+          } catch (_) {}
+          return LoginResponse(flag: 'false',
+              mensaje: errorMsg,
+              token: '',
+              exp: 0,
+              usuario: '');
       }
     } on TimeoutException catch (e) {
-      return false;
+      return LoginResponse(flag: 'false', mensaje: 'Tiempo de espera agotado. Inténtalo de nuevo.',token: '',exp:0, usuario: '');;
     } catch (e) {
-      return false;
+      return LoginResponse(flag: 'false', mensaje: 'Error de conexión: $e',token: '',exp:0, usuario: '');
     }
   }
 

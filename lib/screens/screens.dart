@@ -20,3 +20,4 @@ export 'reasignacion_content_screen.dart';
 export 'detalle_modelo_reasignacion_screen.dart';
 export 'cesta_reasignacion_pdv_screen.dart';
 export 'processing_venta_reasignacion.dart';
+export 'reporte_venta_screen.dart';

@@ -14,18 +14,21 @@ class LoginResponse {
     required this.usuario,
     required this.token,
     required this.exp,
+    this.mensaje
   });
 
   String flag;
   String usuario;
   String token;
   int exp;
+  String? mensaje;
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) => LoginResponse(
     flag: json["flag"],
     usuario: json["usuario"],
     token: json["token"],
     exp: json["exp"],
+    mensaje: json["mensaje"]
   );
 
   Map<String, dynamic> toJson() => {
@@ -33,5 +36,6 @@ class LoginResponse {
     "usuario": usuario,
     "token": token,
     "exp": exp,
+    "mensaje": mensaje
   };
 }

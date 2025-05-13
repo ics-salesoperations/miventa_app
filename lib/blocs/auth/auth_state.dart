@@ -10,6 +10,7 @@ class AuthState extends Equatable {
   final bool showPass;
   final bool procesando;
   final DateTime expirationDate = DateTime.parse('19900101');
+  final String mensaje;
 
   AuthState({
     required this.usuario,
@@ -20,6 +21,7 @@ class AuthState extends Equatable {
     this.intentos = 0,
     this.showPass = false,
     this.procesando = false,
+    this.mensaje = ""
   });
 
   AuthState copyWith({
@@ -32,6 +34,7 @@ class AuthState extends Equatable {
     bool? checkLoginFinish,
     int? intentos,
     bool? procesando,
+    String? mensaje,
   }) =>
       AuthState(
         usuario: usuario ?? this.usuario,
@@ -42,6 +45,7 @@ class AuthState extends Equatable {
         checkLoginFinish: checkLoginFinish ?? this.checkLoginFinish,
         intentos: intentos ?? this.intentos,
         procesando: procesando ?? this.procesando,
+        mensaje: mensaje ?? this.mensaje,
       );
 
   @override
@@ -55,5 +59,6 @@ class AuthState extends Equatable {
         checkLoginFinish,
         showPass,
         procesando,
+        mensaje,
       ];
 }

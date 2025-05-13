@@ -10,8 +10,9 @@ abstract class AuthEvent extends Equatable {
 class OnLoginEvent extends AuthEvent {
   final String usuario;
   final String password;
+  final String version;
 
-  const OnLoginEvent({required this.usuario, required this.password});
+  const OnLoginEvent({required this.usuario, required this.password, required this.version});
 }
 
 class OnCheckLoginEvent extends AuthEvent {

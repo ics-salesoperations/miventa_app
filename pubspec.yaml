@@ -15,7 +15,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 4.0.0
+version: 4.1.2
 
 environment:
   sdk: ">=2.17.5 <3.0.0"
@@ -27,6 +27,9 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  package_info_plus: ^3.1.2
+  pdf: ^3.8.1
+  printing: ^5.9.0
   flutter:
     sdk: flutter
 
@@ -84,7 +87,6 @@ dependencies:
   reactive_range_slider: ^0.5.0
   maps_launcher: ^2.2.0
   file: ^6.1.4
-  flutter_app_version_checker: ^0.3.2
   url_launcher: ^6.1.11
   data_table_2: ^2.4.1
   huawei_map: ^6.11.2+301

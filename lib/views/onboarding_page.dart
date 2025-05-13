@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app_version_checker/flutter_app_version_checker.dart';
 import 'package:miventa_app/app_styles.dart';
 import 'package:miventa_app/main.dart';
 import 'package:miventa_app/models/onboard_data.dart';
@@ -18,7 +17,6 @@ class OnBoardingPage extends StatefulWidget {
 class _OnBoardingPageState extends State<OnBoardingPage> {
   int currentPage = 0;
   final PageController _pageController = PageController(initialPage: 0);
-  final _checker = AppVersionChecker();
 
   AnimatedContainer dotIndicator(index) {
     return AnimatedContainer(
@@ -43,20 +41,6 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   void initState() {
     super.initState();
     setSeenonboard();
-    checkVersion();
-  }
-
-  void checkVersion() async {
-    _checker.checkUpdate().then((value) {
-      if (value.canUpdate) {
-        showUPdateAvailable(
-          context,
-          value.currentVersion,
-          value.newVersion.toString(),
-          value.appURL.toString(),
-        );
-      }
-    });
   }
 
   void showUPdateAvailable(

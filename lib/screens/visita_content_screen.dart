@@ -30,10 +30,12 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
   late CarritoBloc _carritoBloc;
   List<int> asignados = [];
   late VisitaBloc _visitaBloc;
+  // Mapa para guardar los precios por modelo
+  Map<String, double> preciosPorModelo = {};
 
-  // Define los TextEditingController para EPIN y TMY
-  final TextEditingController _epinController = TextEditingController();
-  final TextEditingController _tmyController = TextEditingController();
+  // Mapa para guardar los TextEditingController por modelo
+  final Map<String, TextEditingController> _controllers = {};
+  final Map<String, FocusNode> _focusNodes = {};
 
   @override
   void initState() {
@@ -41,12 +43,47 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
     _carritoBloc = BlocProvider.of<CarritoBloc>(context);
     _visitaBloc = BlocProvider.of<VisitaBloc>(context);
     _visitaBloc.initSaldos();
+
+    // Inicializa los TextEditingController para cada modelo
+    for (var modelo in widget.modelos) {
+      if (modelo.tangible == 'SMARTHPHONES' || modelo.tangible == 'EPIN' || modelo.tangible == 'TMY') {
+        preciosPorModelo[modelo.modelo.toString()] = 0.0;
+        _controllers[modelo.modelo.toString()] = TextEditingController(
+          text: preciosPorModelo[modelo.modelo.toString()].toString(), // Inicializar con valor previo si existe
+        );
+        // Inicializa el FocusNode para este modelo
+        _focusNodes[modelo.modelo.toString()] = FocusNode();
+        // Agrega un listener para controlar el estado del foco
+        _focusNodes[modelo.modelo.toString()]?.addListener(() {
+          if (_focusNodes[modelo.modelo.toString()]!.hasFocus &&
+              _controllers[modelo.modelo.toString()]!.text == '0.0') {
+            // Si tiene el foco y el valor es 0.0, limpia el texto
+            _controllers[modelo.modelo.toString()]!.clear();
+          } else if (!_focusNodes[modelo.modelo.toString()]!.hasFocus &&
+              _controllers[modelo.modelo.toString()]!.text.isEmpty) {
+            // Si pierde el foco y el texto está vacío, escribe 0.0
+            _controllers[modelo.modelo.toString()]!.text = '0.0';
+          }
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    // Limpia los TextEditingController cuando se destruye el widget
+    _controllers.forEach((key, controller) {
+      controller.dispose();
+    });
+    _focusNodes.forEach((key, node) {
+      node.dispose();
+    });
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
-    int index = 0;
     bool advertenciaMostrada = false;
 
     List<ModeloTangible> filtrado = widget.modelos;
@@ -85,7 +122,7 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
           physics: const BouncingScrollPhysics(),
           children: [
             ...filtrado.map(
-              (model) {
+                  (model) {
                 var modelo = model;
                 if (model.modelo == _carritoBloc.state.actual.modelo) {
                   modelo = _carritoBloc.state.actual;
@@ -131,11 +168,12 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                     ),
                   );
                 } else if ((modelo.tangible.toString() != 'BLISTER' &&
-                        widget.pdv.segmentoPdv == 'B PDA') ||
+                    widget.pdv.segmentoPdv == 'B PDA') ||
                     widget.pdv.segmentoPdv != 'B PDA') {
                   return ZoomIn(
-                    //duration: const Duration(milliseconds: 200),
+                    //duration: const Duration(milliseconds: 200)
                     child: Container(
+                      key: ValueKey(modelo.modelo),
                       margin: const EdgeInsets.only(
                         bottom: 15,
                         left: 5,
@@ -181,10 +219,59 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                 const SizedBox(
                                   height: 5,
                                 ),
+                                if (modelo.tangible?.toLowerCase() ==
+                                    'smarthphones') ...[
+                                  Container(
+                                    padding: const EdgeInsets.all(6),
+                                    width: MediaQuery.of(context).size.width*0.8,
+                                    decoration: BoxDecoration(
+                                      color: const Color.fromARGB(
+                                        255,
+                                        247,
+                                        249,
+                                        249,
+                                      ),
+                                      borderRadius:
+                                      BorderRadius.circular(
+                                          5),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: kSecondaryColor
+                                              .withOpacity(0.4),
+                                          blurRadius: 3,
+                                        )
+                                      ],
+                                    ),
+                                    child: SizedBox(
+                                      child: TextField(
+                                        keyboardType: TextInputType.number,
+                                        focusNode: _focusNodes[modelo.modelo.toString()],
+                                        style: const TextStyle(
+                                          color: kPrimaryColor,
+                                          fontFamily: 'CronosSPro',
+                                          fontSize: 26,
+                                        ),
+                                        decoration: const InputDecoration(
+                                          labelText: "Precio por modelo"
+                                        ),
+                                        onChanged: (valor) {
+                                          // Actualizar el precio en el TextEditingController cuando cambie el valor del TextField
+                                          setState(() {
+                                            preciosPorModelo[modelo.modelo.toString()] = double.tryParse(valor) ?? 0.0;
+                                            modelo.precio = double.tryParse(valor) ?? 0; // Guarda el precio en el modelo
+                                            print('detalle:' + modelo.toJson().toString());
+                                          });
+                                        },
+                                        controller: _controllers[modelo.modelo.toString()],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                                 Row(
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.all(6),
+                                      width: MediaQuery.of(context).size.width*0.4,
                                       decoration: BoxDecoration(
                                           color: const Color.fromARGB(
                                             255,
@@ -193,7 +280,7 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                             249,
                                           ),
                                           borderRadius:
-                                              BorderRadius.circular(12),
+                                          BorderRadius.circular(12),
                                           boxShadow: const [
                                             BoxShadow(
                                               color: Colors.black12,
@@ -208,7 +295,7 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                               "SERIE INICIAL ",
                                               style: TextStyle(
                                                 color:
-                                                    kFourColor.withOpacity(0.6),
+                                                kFourColor.withOpacity(0.6),
                                                 fontFamily: 'CronosLPro',
                                                 fontSize: 12,
                                               ),
@@ -231,6 +318,7 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                     ),
                                     Container(
                                       padding: const EdgeInsets.all(6),
+                                      width: MediaQuery.of(context).size.width*0.4,
                                       decoration: BoxDecoration(
                                           color: const Color.fromARGB(
                                             255,
@@ -239,7 +327,7 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                             249,
                                           ),
                                           borderRadius:
-                                              BorderRadius.circular(12),
+                                          BorderRadius.circular(12),
                                           boxShadow: const [
                                             BoxShadow(
                                               color: Colors.black12,
@@ -254,7 +342,7 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                               "SERIE FINAL ",
                                               style: TextStyle(
                                                 color:
-                                                    kFourColor.withOpacity(0.6),
+                                                kFourColor.withOpacity(0.6),
                                                 fontFamily: 'CronosLPro',
                                                 fontSize: 12,
                                               ),
@@ -279,20 +367,20 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                 ),
                                 Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           crossAxisAlignment:
-                                              CrossAxisAlignment.center,
+                                          CrossAxisAlignment.center,
                                           children: [
                                             Text(
                                               modelo.modelo == 'EPIN' ||
-                                                      modelo.modelo == 'TMY'
+                                                  modelo.modelo == 'TMY'
                                                   ? "MONTO A VENDER: "
                                                   : "DISPONIBLE: ",
                                               style: const TextStyle(
@@ -303,10 +391,10 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                             ),
                                             Text(
                                               modelo.modelo == 'EPIN' ||
-                                                      modelo.modelo == 'TMY'
+                                                  modelo.modelo == 'TMY'
                                                   ? ''
                                                   : modelo.disponible
-                                                      .toString(),
+                                                  .toString(),
                                               style: const TextStyle(
                                                 color: kPrimaryColor,
                                                 fontFamily: 'CronosSPro',
@@ -320,7 +408,7 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                         ),
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                          MainAxisAlignment.center,
                                           children: [
                                             if (modelo.modelo != 'EPIN' &&
                                                 modelo.modelo != 'TMY') ...[
@@ -337,17 +425,20 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                                   }
 
                                                   modelo = modelo.copyWith(
-                                                    asignado: nuevo,
+                                                    asignado: nuevo
                                                   );
+                                                  final textoPrecio = _controllers[modelo.modelo.toString()]?.text.trim() ?? '0';
+                                                  final precioIngresado = double.tryParse(textoPrecio) ?? 0.0;
 
                                                   //Asignadndo tangible a nivel de base de datos.
                                                   await _carritoBloc
                                                       .desAsignarProducto(
                                                     modelo: modelo,
                                                     idPdv:
-                                                        _visitaBloc.state.idPdv,
+                                                    _visitaBloc.state.idPdv,
                                                     idVisita: _visitaBloc
                                                         .state.idVisita,
+                                                    precio: precioIngresado,
                                                   );
 
                                                   await _carritoBloc
@@ -366,8 +457,8 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                                     color: kThirdColor
                                                         .withOpacity(0.8),
                                                     borderRadius:
-                                                        BorderRadius.circular(
-                                                            5),
+                                                    BorderRadius.circular(
+                                                        5),
                                                     boxShadow: [
                                                       BoxShadow(
                                                         color: kSecondaryColor
@@ -417,14 +508,18 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                                     asignado: nuevo,
                                                   );
 
+                                                  final textoPrecio = _controllers[modelo.modelo.toString()]?.text.trim() ?? '0';
+                                                  final precioIngresado = double.tryParse(textoPrecio) ?? 0.0;
+
                                                   //Asignadndo tangible a nivel de base de datos.
                                                   await _carritoBloc
                                                       .asignarProducto(
                                                     modelo: modelo,
                                                     idPdv:
-                                                        _visitaBloc.state.idPdv,
+                                                    _visitaBloc.state.idPdv,
                                                     idVisita: _visitaBloc
                                                         .state.idVisita,
+                                                    precio: precioIngresado,
                                                   );
 
                                                   await _carritoBloc
@@ -444,8 +539,8 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                                     color: kThirdColor
                                                         .withOpacity(0.8),
                                                     borderRadius:
-                                                        BorderRadius.circular(
-                                                            5),
+                                                    BorderRadius.circular(
+                                                        5),
                                                     boxShadow: [
                                                       BoxShadow(
                                                         color: kSecondaryColor
@@ -471,12 +566,11 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                                 width: 120,
                                                 child: Center(
                                                   child: TextField(
-                                                    controller:
-                                                        modelo.modelo == 'EPIN'
-                                                            ? _epinController
-                                                            : _tmyController,
+                                                    key: ValueKey(modelo.modelo),
+                                                    focusNode: _focusNodes[modelo.modelo.toString()],
+                                                    controller: _controllers[modelo.modelo.toString()],
                                                     keyboardType:
-                                                        TextInputType.number,
+                                                    TextInputType.number,
                                                     textAlign: TextAlign
                                                         .center, // Centra el texto
                                                     style: const TextStyle(
@@ -485,32 +579,32 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                                       fontSize: 24,
                                                     ),
                                                     decoration:
-                                                        const InputDecoration(
+                                                    const InputDecoration(
                                                       isDense: true,
                                                       contentPadding:
-                                                          EdgeInsets.all(5),
+                                                      EdgeInsets.all(5),
                                                       border:
-                                                          OutlineInputBorder(
+                                                      OutlineInputBorder(
                                                         borderSide: BorderSide(
                                                           color: kPrimaryColor,
                                                           width:
-                                                              2.0, // Ancho del borde
+                                                          2.0, // Ancho del borde
                                                         ),
                                                       ),
                                                       enabledBorder:
-                                                          OutlineInputBorder(
+                                                      OutlineInputBorder(
                                                         borderSide: BorderSide(
                                                           color: kPrimaryColor,
                                                           width:
-                                                              2.0, // Ancho del borde
+                                                          2.0, // Ancho del borde
                                                         ),
                                                       ),
                                                       focusedBorder:
-                                                          OutlineInputBorder(
+                                                      OutlineInputBorder(
                                                         borderSide: BorderSide(
                                                           color: kPrimaryColor,
                                                           width:
-                                                              2.0, // Ancho del borde
+                                                          2.0, // Ancho del borde
                                                         ),
                                                       ),
                                                     ),
@@ -526,93 +620,90 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                     SizedBox(
                                       height: 40,
                                       child: modelo.modelo == 'EPIN' ||
-                                              modelo.modelo == 'TMY'
+                                          modelo.modelo == 'TMY'
                                           ? MaterialButton(
-                                              elevation: 0,
-                                              color: kPrimaryColor,
-                                              child: const Text(
-                                                'Guardar',
-                                                style: TextStyle(
-                                                  color: kSecondaryColor,
-                                                  fontSize: 16,
+                                        key: ValueKey(modelo.modelo),
+                                        elevation: 0,
+                                        color: kPrimaryColor,
+                                        child: const Text(
+                                          'Guardar',
+                                          style: TextStyle(
+                                            color: kSecondaryColor,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        onPressed: () async {
+                                          final int? number =
+                                          int.tryParse(_controllers[modelo.modelo.toString()]?.value.text ?? '');
+                                          if (number == null ||
+                                              number <= 0) {
+                                            const snackBar = SnackBar(
+                                              content: Center(
+                                                child: Text(
+                                                  'El saldo debe ser mayor a 0',
+                                                  textAlign:
+                                                  TextAlign.center,
                                                 ),
                                               ),
-                                              onPressed: () async {
-                                                final int? number =
-                                                    int.tryParse(modelo
-                                                                .modelo ==
-                                                            'EPIN'
-                                                        ? _epinController.text
-                                                        : _tmyController.text);
-                                                if (number == null ||
-                                                    number <= 0) {
-                                                  const snackBar = SnackBar(
-                                                    content: Center(
-                                                      child: Text(
-                                                        'El saldo debe ser mayor a 0',
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      ),
-                                                    ),
-                                                    backgroundColor: Colors.red,
-                                                  );
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(snackBar);
-                                                } else {
-                                                  await _carritoBloc
-                                                      .guardarModeloSaldo(
-                                                          modelo: modelo);
-                                                  await _carritoBloc
-                                                      .asignarSaldos(
-                                                    cantidad: number,
-                                                    modelo: modelo,
-                                                    idPdv:
-                                                        _visitaBloc.state.idPdv,
-                                                    idVisita: _visitaBloc
-                                                        .state.idVisita,
-                                                  );
-                                                  final snackBar = SnackBar(
-                                                    content: Center(
-                                                      child: Text(
-                                                        '${modelo.modelo} datos guardados correctamente',
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      ),
-                                                    ),
-                                                    backgroundColor:
-                                                        kPrimaryColor,
-                                                  );
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(snackBar);
-                                                }
-                                              },
-                                            )
-                                          : MaterialButton(
-                                              elevation: 0,
-                                              color: kPrimaryColor,
-                                              child: const FaIcon(
-                                                FontAwesomeIcons.barcode,
-                                                size: 16,
-                                                color: kSecondaryColor,
+                                              backgroundColor: Colors.red,
+                                            );
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(snackBar);
+                                          } else {
+                                            await _carritoBloc
+                                                .guardarModeloSaldo(
+                                                modelo: modelo);
+                                            await _carritoBloc
+                                                .asignarSaldos(
+                                              cantidad: number,
+                                              modelo: modelo,
+                                              idPdv:
+                                              _visitaBloc.state.idPdv,
+                                              idVisita: _visitaBloc
+                                                  .state.idVisita,
+                                            );
+                                            final snackBar = SnackBar(
+                                              content: Center(
+                                                child: Text(
+                                                  '${modelo.modelo} datos guardados correctamente',
+                                                  textAlign:
+                                                  TextAlign.center,
+                                                ),
                                               ),
-                                              onPressed: () {
-                                                showDialog(
-                                                  context: context,
-                                                  builder: (context) =>
-                                                      DetalleModeloScreen(
+                                              backgroundColor:
+                                              kPrimaryColor,
+                                            );
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(snackBar);
+                                          }
+                                        },
+                                      )
+                                          : MaterialButton(
+                                          elevation: 0,
+                                          color: kPrimaryColor,
+                                          child: const FaIcon(
+                                            FontAwesomeIcons.barcode,
+                                            size: 16,
+                                            color: kSecondaryColor,
+                                          ),
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) =>
+                                                  DetalleModeloScreen(
                                                     modelo: modelo,
                                                   ),
-                                                ).then((value) async {
-                                                  final m = await _carritoBloc
-                                                      .getModelos(_visitaBloc
-                                                          .state
-                                                          .mostrarTangible);
-                                                  await _carritoBloc
-                                                      .crearFrmProductos(m);
-                                                  await _carritoBloc
-                                                      .actualizaTotal();
-                                                });
-                                              }),
+                                            ).then((value) async {
+                                              final m = await _carritoBloc
+                                                  .getModelos(_visitaBloc
+                                                  .state
+                                                  .mostrarTangible);
+                                              await _carritoBloc
+                                                  .crearFrmProductos(m);
+                                              await _carritoBloc
+                                                  .actualizaTotal();
+                                            });
+                                          }),
                                     ),
                                   ],
                                 ),

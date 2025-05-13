@@ -188,6 +188,21 @@ class _ReportesPageState extends State<ReportesPage> {
                             },
                           )
                         : Container(),
+                    ReporteCard(
+                      title: "Reporte de Ventas",
+                      icon: Icons.point_of_sale,
+                      iconColor: kSecondaryColor,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                            const ReporteResumenModeloScreen(
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),

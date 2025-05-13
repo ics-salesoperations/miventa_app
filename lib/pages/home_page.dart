@@ -1,6 +1,5 @@
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_version_checker/flutter_app_version_checker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:miventa_app/app_styles.dart';
@@ -35,7 +34,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late MapBloc mapBloc;
   late AnimationController animationController;
   late TabController ctrlTab;
-  final _checker = AppVersionChecker();
 
   @override
   void initState() {
@@ -52,7 +50,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       initialIndex: widget.selectedIndex,
     );
 
-    checkVersion();
     selecionarMenu();
 
     super.initState();
@@ -93,19 +90,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     animationController.dispose();
     ctrlTab.dispose();
     super.dispose();
-  }
-
-  void checkVersion() async {
-    _checker.checkUpdate().then((value) {
-      if (value.canUpdate) {
-        showUPdateAvailable(
-          context,
-          value.currentVersion,
-          value.newVersion.toString(),
-          value.appURL.toString(),
-        );
-      }
-    });
   }
 
   void selecionarMenu() {

@@ -60,6 +60,14 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
         ),
       );
     });
+    on<OnActualizarIndicadoresVendedorEvent>((event, emit) {
+      emit(
+        state.copyWith(
+          mensaje: event.mensaje,
+          actualizandoIndicadoresVendedor: event.actualizandoIndicadoresVendedor,
+        ),
+      );
+    });
     on<OnActualizarModelosEvent>((event, emit) {
       emit(
         state.copyWith(
@@ -115,6 +123,13 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
     return incentivoPdv;
   }
 
+  Future<List<IndicadoresVendedor>> getIndicadoresVendedor() async {
+    List<IndicadoresVendedor> indicadoresVendedor;
+    indicadoresVendedor = await _dbService.leerIndicadoresPorVendedor();
+
+    return indicadoresVendedor;
+  }
+
   Future<void> actualizarPlanning({required List<Tabla> currentTablas}) async {
     add(
       OnActualizarPlanningEvent(
@@ -129,7 +144,7 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
       Usuario usuario = await _userService.getInfoUsuario();
 
       if (usuario.perfil == 1) {
-        usuario = usuario.copyWith(idDms: '3768');
+        usuario = usuario.copyWith(idDms: '5515');
       }
 
       final resp = await http.get(
@@ -496,7 +511,6 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
       await _dbService
           .guardarTangiblesReasignado(productoResponse.tangiblesReasignados);
       await _dbService.updateTabla(tbl: 'tangible_reasignacion');
-      final tablas = await _dbService.leerListadoTablas();
       add(const OnActualizarTangiblesReasignacionEvent(
         actualizandoTangible: false,
         mensaje: "Producto asignado actualizado exitosamente.",
@@ -649,19 +663,13 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
       );
       //guardar en base de datos local
 
-      if (incentivosPdvResponse.incentivosPDV.isNotEmpty) {
-        await _dbService
-            .crearDetalleIncentivoPdv(incentivosPdvResponse.incentivosPDV);
-        add(const OnActualizarIncentivosPdvEvent(
-          actualizandoIncentivosPdv: false,
-          mensaje: "IncentivosPdv actualizadas exitosamente.",
-        ));
-      } else {
-        add(const OnActualizarIncentivosPdvEvent(
-          actualizandoIncentivosPdv: false,
-          mensaje: "Ocurrió un error al actualizar sus IncentivosPdv.",
-        ));
-      }
+      await _dbService
+          .crearDetalleIncentivoPdv(incentivosPdvResponse.incentivosPDV);
+      add(const OnActualizarIncentivosPdvEvent(
+        actualizandoIncentivosPdv: false,
+        mensaje: "IncentivosPdv actualizadas exitosamente.",
+      ));
+
     } on TimeoutException catch (_) {
       add(const OnActualizarIncentivosPdvEvent(
         actualizandoIncentivosPdv: false,
@@ -671,6 +679,67 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
       add(const OnActualizarIncentivosPdvEvent(
         actualizandoIncentivosPdv: false,
         mensaje: "Ocurrió un error al actualizar sus IncentivosPdv.",
+      ));
+    }
+  }
+
+  Future<void> actualizarIndicadoresVendedores({required List<Tabla> currentTablas}) async {
+    add(
+      OnActualizarIndicadoresVendedorEvent(
+        actualizandoIndicadoresVendedor: true,
+        mensaje: "Espere un momento, estamos actualizando las IndicadoresVendedor.",
+        tablas: currentTablas,
+      ),
+    );
+
+    try {
+      final token = await _authService.getToken();
+      Usuario usuario = await _userService.getInfoUsuario();
+      final resp = await http.get(
+          Uri.parse(
+            '${Environment.apiURL}/appmiventa/indicadores_vendedor/' +
+                usuario.idDms.toString(),
+          ),
+          headers: {
+            'Content-Type': 'application/json',
+            'token': token,
+          }).timeout(const Duration(
+        minutes: 5,
+      ));
+      print(utf8.decode(resp.bodyBytes));
+      final indicadoresVendedorResponse = indicadoresVendedorResponseFromJson(
+        utf8.decode(resp.bodyBytes),
+      );
+      //guardar en base de datos local
+
+      if (indicadoresVendedorResponse.indicadoresVendedor.isNotEmpty) {
+        await _dbService
+            .crearDetalleIndicadoresVendedor(indicadoresVendedorResponse.indicadoresVendedor);
+        await _dbService.updateTabla(tbl: 'indicadores');
+        final tablas = await _dbService.leerListadoTablas();
+        add(OnActualizarIndicadoresVendedorEvent(
+          actualizandoIndicadoresVendedor: false,
+          mensaje: "IndicadoresVendoder actualizadas exitosamente.",
+          tablas: tablas
+        ));
+      } else {
+        add(OnActualizarIndicadoresVendedorEvent(
+          actualizandoIndicadoresVendedor: false,
+          mensaje: "Ocurrió un error al actualizar sus IndicadoresVendedor.",
+          tablas: currentTablas
+        ));
+      }
+    } on TimeoutException catch (_) {
+      add(OnActualizarIndicadoresVendedorEvent(
+        actualizandoIndicadoresVendedor: false,
+        mensaje: "Ocurrió un error al actualizar sus IndicadoresVendedor.",
+        tablas: currentTablas
+      ));
+    } catch (e) {
+      add(OnActualizarIndicadoresVendedorEvent(
+        actualizandoIndicadoresVendedor: false,
+        mensaje: "Ocurrió un error al actualizar sus indicadoresVendedor.",
+        tablas: currentTablas
       ));
     }
   }

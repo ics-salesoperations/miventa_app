@@ -76,7 +76,7 @@ class _ActualizarPageState extends State<ActualizarPage>
                 alignment: Alignment.topLeft,
                 child: InkWell(
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.pop(context,true);
                   },
                   child: const Icon(
                     Icons.arrow_back_outlined,
@@ -196,6 +196,16 @@ class _ActualizarPageState extends State<ActualizarPage>
                                       );
                                     };
                                     if (state.actualizandoModelos) {
+                                      animar = true;
+                                    }
+                                    break;
+                                  case 'indicadores':
+                                    fnActualizar = () {
+                                      _actualizarBloc.actualizarIndicadoresVendedores(
+                                        currentTablas: state.tablas,
+                                      );
+                                    };
+                                    if (state.actualizandoIndicadoresVendedor) {
                                       animar = true;
                                     }
                                     break;

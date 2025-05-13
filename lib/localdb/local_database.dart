@@ -10,7 +10,7 @@ class LocalDatabase {
 
   LocalDatabase._init();
 
-  static int get _version => 5;
+  static int get _version => 9;
 
   static Future<void> init() async {
     try {
@@ -260,7 +260,8 @@ class LocalDatabase {
                 disponible $integerType,
                 serieInicial $textType,
                 serieFinal $textType,
-                descartado $integerType
+                descartado $integerType,
+                precio $realType
                 )
       """;
     await db.execute(sql);
@@ -290,7 +291,8 @@ class LocalDatabase {
                 enviado $integerType,
                 idPdv $integerType,
                 idVisita $textType,
-                fechaVenta $textType
+                fechaVenta $textType,
+                precio $realType
                 )
       """;
     await db.execute(sql);
@@ -463,6 +465,31 @@ class LocalDatabase {
                 meta $integerType)
       """;
     await db.execute(sql);
+
+    /*CREANDO TABLA DE INDICADORES*/
+
+    //insertando en tabla tabla de control de Actualizaciones
+    sql = """
+              INSERT INTO tablas (
+                                    tabla,
+                                    descripcion
+                                    )
+                                    VALUES ('indicadores', 'Indicadores')
+            """;
+    await db.execute(sql);
+
+    sql = """
+                CREATE TABLE indicadores
+                (
+                id $idType,
+                anomes $integerType,
+                indicador $textType,
+                m0 $realType,
+                m1 $realType,
+                varianza $realType)
+      """;
+
+    await db.execute(sql);
   }
 
   static void onUpgrade(Database db, int oldVersion, int version) async {
@@ -470,7 +497,15 @@ class LocalDatabase {
     const textType = 'TEXT';
     const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
     const integerType = 'INTEGER';
+    const realType = 'REAL';
     String sql = "";
+
+    Future<bool> columnExists(Database db, String tableName, String columnName) async {
+      final List<Map<String, Object?>> result = await db.rawQuery(
+        'PRAGMA table_info($tableName)',
+      );
+      return result.any((row) => row['name'] == columnName);
+    }
 
     if (oldVersion <= 1) {
       try {
@@ -545,6 +580,44 @@ class LocalDatabase {
                     invBlsDisp text)""";
         await db.execute(sql);
       } catch (_) {}
+    }else if (oldVersion <= 5) {
+      try {
+        await db.execute(sql);
+        sql = """
+                   ALTER TABLE modelo ADD COLUMN precio REAL DEFAULT 0
+          """;
+        await db.execute(sql);
+      } catch (_) {}
+    }else if (oldVersion <= 6) {
+      try {
+        await db.execute(sql);
+        sql = """
+                CREATE TABLE indicadores
+                (
+                id $idType,
+                anomes $integerType,
+                indicador $textType,
+                m0 $integerType,
+                m1 $integerType,
+                var $integerType)
+      """;
+
+        await db.execute(sql);
+      } catch (_) {}
+    }else if (oldVersion <= 8) {
+      try {
+        // Comprobar si la columna 'precio' ya existe
+        bool precioColumnExists = await columnExists(db, 'tangible', 'precio');
+        if (!precioColumnExists) {
+          String sql = """
+        alter table tangible add column precio $realType;
+      """;
+          await db.execute(sql);
+        }
+
+      } catch (e) {
+        print('Error al agregar columnas: $e'); // Agrega un log de error
+      }
     }
   }
 
@@ -1044,6 +1117,39 @@ class LocalDatabase {
 
     for (var dato in datos) {
       ba.rawInsert(query, [dato.idPdv, dato.incentivo, dato.meta]);
+    }
+    //await _db!.execute(query, datos);
+
+    await ba.commit(noResult: true);
+
+    return resp;
+  }
+
+  static Future<int> insertListIndicadoresVendedor(List<IndicadoresVendedor> datos) async {
+    int resp = 0;
+
+    Batch ba = _db!.batch();
+    String query = """
+                      INSERT INTO indicadores 
+                      (
+                        anomes,
+                        indicador,
+                        m0,
+                        m1,
+                        varianza
+                      ) 
+                      VALUES
+                      (
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?
+                      )
+                    """;
+
+    for (var dato in datos) {
+      ba.rawInsert(query, [dato.anomes, dato.indicador, dato.m0, dato.m1, dato.varianza]);
     }
     //await _db!.execute(query, datos);
 

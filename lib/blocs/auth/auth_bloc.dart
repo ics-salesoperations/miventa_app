@@ -6,7 +6,7 @@ import 'package:miventa_app/services/services.dart';
 part 'auth_event.dart';
 part 'auth_state.dart';
 
-class AuthBloc extends Bloc<AuthEvent, AuthState> {
+class  AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc() : super(AuthState(usuario: Usuario())) {
     on<OnLoginEvent>(_onLoginUsuario);
     on<OnLogoutEvent>(_onLogoutUsuario);
@@ -40,9 +40,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthService _auth = AuthService();
     UsuarioService _usuarioService = UsuarioService();
 
-    final resp = await _auth.login(event.usuario, event.password);
+    final resp = await _auth.login(event.usuario, event.password, event.version);
 
-    if (resp) {
+    if (resp.flag == 'true') {
       final token = await _auth.getToken();
       final tokenExpiration = await _auth.getTokenExp();
       final usuario = await _usuarioService.getInfoUsuario();
@@ -65,6 +65,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           fallido: true,
           intentos: state.intentos + 1,
           procesando: false,
+          mensaje: resp.mensaje
         ),
       );
     }

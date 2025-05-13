@@ -35,6 +35,9 @@ export 'package:miventa_app/models/visita.dart';
 
 export 'package:miventa_app/models/solicitudes_ger.dart';
 export 'package:miventa_app/models/sucursal_response.dart';
+export 'package:miventa_app/models/indicadores_vendedor.dart';
+export 'package:miventa_app/models/indicadores_vendedor_response.dart';
+
 
 export 'fordis11.dart';
 export 'modelo_tangible.dart';
@@ -50,3 +53,4 @@ export 'incentivo_pdv_response.dart';
 export 'producto_tangible_pdv.dart';
 export 'producto_tangible_pdv_response.dart';
 export 'tipo_tangible_reasignacion_info.dart';
+export 'modelo_tangible_agrupado.dart';

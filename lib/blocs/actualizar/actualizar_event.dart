@@ -94,3 +94,15 @@ class OnActualizarIncentivosPdvEvent extends ActualizarEvent {
     required this.mensaje,
   });
 }
+
+class OnActualizarIndicadoresVendedorEvent extends ActualizarEvent {
+  final String mensaje;
+  final bool actualizandoIndicadoresVendedor;
+  final List<Tabla> tablas;
+
+  const OnActualizarIndicadoresVendedorEvent({
+    required this.actualizandoIndicadoresVendedor,
+    required this.mensaje,
+    required this.tablas,
+  });
+}

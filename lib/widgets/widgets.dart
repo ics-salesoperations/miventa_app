@@ -28,6 +28,7 @@ export 'package:miventa_app/widgets/task_tile.dart';
 export 'package:miventa_app/widgets/visita_pdv_categoria.dart';
 export 'package:miventa_app/widgets/visita_pdv_header.dart';
 export 'package:miventa_app/widgets/reasignacion_pdv_categoria.dart';
+export 'package:miventa_app/widgets/card_kpi.dart';
 
 export './btn_actualizar_departamento.dart';
 export './btn_current_location.dart';

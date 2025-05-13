@@ -76,6 +76,17 @@ class DBService {
     }
   }
 
+  Future crearDetalleIndicadoresVendedor(List<IndicadoresVendedor> datos) async {
+    await LocalDatabase.init();
+
+    int anomes = datos.first.anomes!;
+    await LocalDatabase.delete('indicadores',
+        where: 'anomes = ?', whereArgs: [anomes]);
+    if (datos.isNotEmpty) {
+      await LocalDatabase.insertListIndicadoresVendedor(datos);
+    }
+  }
+
   Future<int> insertardetallePDV(Planning detpdv) async {
     await LocalDatabase.init();
     final resultado = await LocalDatabase.insert(Planning.table, detpdv);
@@ -1289,6 +1300,30 @@ class DBService {
                     SELECT
                     *
                     FROM (
+                    SELECT a.id, 
+                            a.tangible,
+                            a.modelo,
+                            a.descripcion,
+                            a.imagen, 
+                            SUM(b.asignado) asignado, 
+                            COUNT(*) disponible,
+                            MIN(b.serie) serieInicial,
+                            MAX(b.serie) serieFinal
+                    FROM modelo a 
+                        INNER JOIN tangible b 
+                          ON a.tangible = b.tangible
+                            AND a.modelo = b.modelo
+                    WHERE 1=1
+                        $where
+                        AND A.TANGIBLE IN ('SCRATCHCARD')
+                    GROUP BY a.id, 
+                            a.tangible,
+                            a.modelo,
+                            a.descripcion,
+                            a.imagen, 
+                            a.asignado, 
+                            a.disponible
+                    UNION ALL
                     SELECT -1 AS id, 'EPIN' AS tangible, 'EPIN' AS modelo, 'SALDO EPIN' AS descripcion, '' AS imagen, 0 AS asignado, 1 AS disponible, '0' AS serieInicial, '0' AS serieFinal
                     UNION ALL
                     SELECT -2 AS id, 'TMY' AS tangible, 'TMY' AS modelo, 'SALDO TIGO MONEY' AS descripcion, '' AS imagen, 0 AS asignado, 1 AS disponible, '0' AS serieInicial, '0' AS serieFinal
@@ -2434,5 +2469,62 @@ class DBService {
         await LocalDatabase.customQuery(query);
 
     return maps.map((json) => IncentivoPdv.fromMap(json)).toList();
+  }
+
+  /*INICIO DE FUNCIONES PARA INDICADORES*/
+  Future<List<IndicadoresVendedor>> leerIndicadoresPorVendedor() async {
+    await LocalDatabase.init();
+
+    String where = " ";
+
+    final query = """
+                    SELECT *
+                    FROM indicadores 
+                    WHERE 1=1
+                        $where
+                    """;
+
+    final List<Map<String, dynamic>> maps =
+    await LocalDatabase.customQuery(query);
+
+    return maps.map((json) => IndicadoresVendedor.fromMap(json)).toList();
+  }
+
+  Future<List<ResumenModelo>> leerResumenPorModelo({
+    DateTime? fechaInicio,
+    DateTime? fechaFin,
+  }) async {
+    await LocalDatabase.init(); // asume getter que abre tu base
+    // Formatear fechas a yyyy-MM-dd
+    final String? desde = fechaInicio != null
+        ? DateFormat('yyyy-MM-dd').format(fechaInicio)
+        : null;
+    final String? hasta = fechaFin != null
+        ? DateFormat('yyyy-MM-dd').format(fechaFin)
+        : null;
+
+    // Construir cláusula WHERE dinámica
+    String whereClause = 'and a.asignado = 1';
+    List<dynamic> args = [1];
+    if (desde != null && hasta != null) {
+      whereClause += ' AND date(fechaAsignacion) BETWEEN ? AND ?';
+    }
+
+
+    final query = """
+                    SELECT b.descripcion modelo, 
+                            count(*) total,
+                            a.precio
+                    FROM tangible a
+                     INNER JOIN modelo b
+                            on a.modelo = b.modelo
+                    WHERE 1=1
+                        $whereClause
+                    group by b.descripcion, a.precio
+                    """;
+    print('query: $query');
+    final List<Map<String, dynamic>> maps = await LocalDatabase.customQuery(query);
+    print('maps: $maps');
+    return maps.map((m) => ResumenModelo.fromMap(m)).toList();
   }
 }

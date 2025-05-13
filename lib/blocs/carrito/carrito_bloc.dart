@@ -237,6 +237,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
         'idPdv': venta.idPdv,
         'idVisita': venta.idVisita,
         'serie': venta.serie,
+        'precio': venta.precio,
       };
 
       datos.add(data);
@@ -427,6 +428,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     required ModeloTangible modelo,
     required int idPdv,
     required String idVisita,
+    double? precio,
   }) async {
     int valor = -1;
 
@@ -467,6 +469,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
           idPdv: tangibleDet.asignado == 1 ? null : idPdv,
           idVisita: tangibleDet.asignado == 1 ? null : idVisita,
           fechaVenta: tangibleDet.asignado == 1 ? null : DateTime.now(),
+          precio: precio,
         );
 
         await _dbService.updateTangible(tangibleDet);
@@ -656,6 +659,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     required ModeloTangible modelo,
     required int idPdv,
     required String idVisita,
+    double? precio,
   }) async {
     int valor = -1;
 
@@ -692,6 +696,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
           asignado: tangibleDet.asignado == 1 ? 0 : 1,
           idPdv: tangibleDet.asignado == 1 ? null : idPdv,
           idVisita: tangibleDet.asignado == 1 ? null : idVisita,
+          precio: tangibleDet.asignado == 1 ? null : precio,
         );
 
         await _dbService.updateTangible(tangibleDet);

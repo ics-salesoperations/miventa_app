@@ -15,11 +15,13 @@ class VisitaPDVCategoria extends StatefulWidget {
 
 class _VisitaPDVCategoriaState extends State<VisitaPDVCategoria> {
   late CarritoBloc _carritoBloc;
+  late VisitaBloc _visitaBloc;
 
   @override
   void initState() {
     super.initState();
     _carritoBloc = BlocProvider.of<CarritoBloc>(context);
+    _visitaBloc = BlocProvider.of<VisitaBloc>(context);
   }
 
   @override
@@ -133,7 +135,8 @@ class _VisitaPDVCategoriaState extends State<VisitaPDVCategoria> {
                                     ),
                                   ),
                                   onTap: () async {
-                                    final m = await _carritoBloc.getModelos();
+                                    final m = await _carritoBloc.getModelos(
+                                        _visitaBloc.state.mostrarTangible);
                                     await _carritoBloc.crearFrmProductos(m);
                                     await _carritoBloc.actualizaTotal();
                                     _carritoBloc.add(

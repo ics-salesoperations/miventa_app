@@ -15,6 +15,7 @@ class ModeloTangible extends Model {
     this.serieInicial = '0',
     this.serieFinal = '0',
     this.descartado = 0,
+    this.precio = 0,
   }) : super(id);
 
   String? tangible;
@@ -26,6 +27,7 @@ class ModeloTangible extends Model {
   String? serieInicial;
   String? serieFinal;
   int descartado;
+  double? precio;
   TextEditingController controller = TextEditingController();
 
   ModeloTangible copyWith({
@@ -39,6 +41,7 @@ class ModeloTangible extends Model {
     String? serieInicial,
     String? serieFinal,
     int? descartado,
+    double? precio,
   }) =>
       ModeloTangible(
         id: id ?? this.id,
@@ -51,32 +54,35 @@ class ModeloTangible extends Model {
         serieInicial: serieInicial ?? this.serieInicial,
         serieFinal: serieFinal ?? this.serieFinal,
         descartado: descartado ?? this.descartado,
+        precio: precio ?? this.precio,
       );
 
   factory ModeloTangible.fromMap(Map<String, dynamic> json) => ModeloTangible(
-        id: json["id"],
-        tangible: json["tangible"] ?? json["categoria"],
-        modelo: json["modelo"],
-        descripcion: json["descripcion"] ?? json["descripcionModelo"],
-        imagen: json["imagen"] ?? '',
-        asignado: json["asignado"] ?? 0,
-        disponible: json["disponible"] ?? 0,
-        serieInicial: json["serieInicial"],
-        serieFinal: json["serieFinal"],
-        descartado: json["descartado"] ?? 0,
-      );
+    id: json["id"],
+    tangible: json["tangible"] ?? json["categoria"],
+    modelo: json["modelo"],
+    descripcion: json["descripcion"] ?? json["descripcionModelo"],
+    imagen: json["imagen"] ?? '',
+    asignado: json["asignado"] ?? 0,
+    disponible: json["disponible"] ?? 0,
+    serieInicial: json["serieInicial"],
+    serieFinal: json["serieFinal"],
+    descartado: json["descartado"] ?? 0,
+    precio: json["precio"]?.toDouble(),
+  );
 
   @override
   Map<String, dynamic> toJson() => {
-        "id": id,
-        "tangible": tangible,
-        "modelo": modelo,
-        "descripcion": descripcion,
-        "imagen": imagen,
-        "asignado": asignado,
-        "disponible": disponible,
-        "serieInicial": serieInicial,
-        "serieFinal": serieFinal,
-        "descartado": descartado,
-      };
+    "id": id,
+    "tangible": tangible,
+    "modelo": modelo,
+    "descripcion": descripcion,
+    "imagen": imagen,
+    "asignado": asignado,
+    "disponible": disponible,
+    "serieInicial": serieInicial,
+    "serieFinal": serieFinal,
+    "descartado": descartado,
+    "precio": precio,
+  };
 }

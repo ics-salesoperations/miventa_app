@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:miventa_app/app_styles.dart';
 import 'package:miventa_app/blocs/auth/auth_bloc.dart';
 import 'package:miventa_app/screens/cambiar_foto_screen.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class MiPerfilPage extends StatefulWidget {
   const MiPerfilPage({super.key});
@@ -14,6 +15,20 @@ class MiPerfilPage extends StatefulWidget {
 }
 
 class _MiPerfilPageState extends State<MiPerfilPage> {
+  String _version = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersion();
+  }
+  Future<void> _loadVersion() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      _version = packageInfo.version;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final authBloc = BlocProvider.of<AuthBloc>(context);
@@ -152,9 +167,9 @@ class _MiPerfilPageState extends State<MiPerfilPage> {
                                 fontFamily: 'Cronos-Pro',
                               ),
                             ),
-                            const Text(
-                              "Versión 4.0.0",
-                              style: TextStyle(
+                            Text(
+                              'Versión $_version',
+                              style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
                                 color: kFourColor,

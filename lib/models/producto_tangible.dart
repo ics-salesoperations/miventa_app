@@ -17,6 +17,7 @@ class ProductoTangible extends Model {
     this.enviado = 0,
     this.idPdv,
     this.idVisita,
+    this.precio,
   }) : super(id);
 
   String? producto;
@@ -30,6 +31,7 @@ class ProductoTangible extends Model {
   int enviado;
   int? idPdv;
   String? idVisita;
+  double? precio;
 
   ProductoTangible copyWith({
     int? id,
@@ -44,6 +46,7 @@ class ProductoTangible extends Model {
     int? enviado,
     int? idPdv,
     String? idVisita,
+    double? precio,
   }) =>
       ProductoTangible(
         id: id ?? this.id,
@@ -58,6 +61,7 @@ class ProductoTangible extends Model {
         enviado: enviado ?? this.enviado,
         idPdv: idPdv ?? this.idPdv,
         idVisita: idVisita ?? this.idVisita,
+        precio: precio ?? this.precio,
       );
 
   factory ProductoTangible.fromMap(Map<String, dynamic> json) =>
@@ -82,6 +86,7 @@ class ProductoTangible extends Model {
         enviado: json["enviado"] ?? 0,
         idPdv: json["idPdv"] ?? 0,
         idVisita: json["idVisita"],
+        precio: json["precio"] ?? 0,
       );
 
   @override
@@ -102,5 +107,6 @@ class ProductoTangible extends Model {
         "enviado": enviado,
         "idPdv": idPdv,
         "idVisita": idVisita,
+        "precio": precio,
       };
 }

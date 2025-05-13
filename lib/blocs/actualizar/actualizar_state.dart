@@ -8,6 +8,7 @@ class ActualizarState extends Equatable {
   final bool actualizandoModelos;
   final bool actualizandoTangible;
   final bool actualizandoIncentivosPdv;
+  final bool actualizandoIndicadoresVendedor;
   final String mensaje;
   final String tabla;
 
@@ -18,6 +19,7 @@ class ActualizarState extends Equatable {
     this.actualizandoModelos = false,
     this.actualizandoTangible = false,
     this.actualizandoIncentivosPdv = false,
+    this.actualizandoIndicadoresVendedor = false,
     this.mensaje = "",
     this.tablas = const [],
     this.tabla = "",
@@ -30,6 +32,7 @@ class ActualizarState extends Equatable {
     bool? actualizandoModelos,
     bool? actualizandoTangible,
     bool? actualizandoIncentivosPdv,
+    bool? actualizandoIndicadoresVendedor,
     String? mensaje,
     List<Tabla>? tablas,
     String? tabla,
@@ -43,6 +46,8 @@ class ActualizarState extends Equatable {
         actualizandoTangible: actualizandoTangible ?? this.actualizandoTangible,
         actualizandoIncentivosPdv:
             actualizandoIncentivosPdv ?? this.actualizandoIncentivosPdv,
+        actualizandoIndicadoresVendedor:
+            actualizandoIndicadoresVendedor ?? this.actualizandoIndicadoresVendedor,
         mensaje: mensaje ?? this.mensaje,
         tablas: tablas ?? this.tablas,
         tabla: tabla ?? this.tabla,
@@ -56,6 +61,7 @@ class ActualizarState extends Equatable {
         actualizandoModelos,
         actualizandoTangible,
         actualizandoIncentivosPdv,
+        actualizandoIndicadoresVendedor,
         mensaje,
         tablas,
         tabla,

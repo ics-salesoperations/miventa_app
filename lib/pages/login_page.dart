@@ -5,6 +5,7 @@ import 'package:miventa_app/blocs/blocs.dart';
 import 'package:miventa_app/routes/logo.dart';
 import 'package:miventa_app/widgets/boton_azul.dart';
 import 'package:miventa_app/widgets/custom_input.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,13 +18,22 @@ class LoginPageState extends State<LoginPage> {
   bool isLoading = false;
   final usuarioCtrl = TextEditingController();
   final passCtrl = TextEditingController();
+  String _version = '';
 
   late AuthBloc authBloc;
 
   @override
   void initState() {
     super.initState();
+    _loadVersion();
     authBloc = BlocProvider.of<AuthBloc>(context);
+  }
+
+  Future<void> _loadVersion() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      _version = packageInfo.version;
+    });
   }
 
   void validarLogin() {
@@ -31,6 +41,7 @@ class LoginPageState extends State<LoginPage> {
       OnLoginEvent(
         usuario: usuarioCtrl.text.trim(),
         password: passCtrl.text.trim(),
+        version: _version
       ),
     );
   }
@@ -115,7 +126,7 @@ class LoginPageState extends State<LoginPage> {
                                             MediaQuery.of(context).size.width -
                                                 150,
                                         child: Text(
-                                          "${state.intentos} intentos fallidos.",
+                                          "${state.intentos} intentos fallidos. ${state.mensaje}",
                                           maxLines: 3,
                                           style: const TextStyle(
                                               color: kSecondaryColor,
@@ -148,7 +159,7 @@ class LoginPageState extends State<LoginPage> {
                         fontSize: 16,
                       ),
                     ),
-                    const Logo(),
+                    const Logo()
                   ],
                 ),
               ),
@@ -156,6 +167,22 @@ class LoginPageState extends State<LoginPage> {
           },
         ),
       ),
+      bottomNavigationBar: _version.isNotEmpty
+          ? SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            'Versión $_version',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: kSecondaryColor,
+              fontFamily: 'CronosLPro',
+              fontSize: 14,
+            ),
+          ),
+        ),
+      )
+          : const SizedBox.shrink(),
     );
   }
 }
