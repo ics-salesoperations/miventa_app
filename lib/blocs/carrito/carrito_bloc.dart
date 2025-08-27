@@ -133,13 +133,13 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     //init();
   }
 
-  Future<void> init([bool mostarTengible = true]) async {
-    final m = await getModelos(mostarTengible);
+  Future<void> init([bool mostarTengible = true, String idPdv ='0']) async {
+    final m = await getModelos(mostarTengible, idPdv);
     await crearFrmProductos(m);
-    await actualizaTotal();
+    await actualizaTotal(idPdv);
   }
 
-  Future<List<ModeloTangible>> getModelos([bool mostarTengible = true]) async {
+  Future<List<ModeloTangible>> getModelos([bool mostarTengible = true, String idPdv='0']) async {
     add(OnCargarModelosEvent(
       modelos: state.modelos,
       cargandoModelos: true,
@@ -149,7 +149,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     List<ModeloTangible> modelos;
 
     try {
-      modelos = await _dbService.leerListadoModelos(mostarTengible);
+      modelos = await _dbService.leerListadoModelos(mostarTengible, idPdv);
     } catch (e) {
       modelos = const [];
       add(OnCargarModelosEvent(
@@ -351,11 +351,11 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     return modelos;
   }
 
-  Future<void> actualizaTotal() async {
+  Future<void> actualizaTotal(String? idPdv) async {
     int total = 0;
 
     try {
-      total = await _dbService.leerTotalModelos();
+      total = await _dbService.leerTotalModelos(idPdv);
     } catch (e) {
       total = 0;
     }
@@ -365,7 +365,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     ));
   }
 
-  Future<void> getTangiblePorModelo({required ModeloTangible modelo}) async {
+  Future<void> getTangiblePorModelo({required ModeloTangible modelo, String? idPdv}) async {
     add(const OnCargarLstTangibleModeloEvent(
       lstTangibleModelo: [],
       cargandoLstTangibleModelo: true,
@@ -374,7 +374,7 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
     List<ProductoTangible> tangibles;
 
     try {
-      tangibles = await _dbService.getTangibleModelo(modelo: modelo);
+      tangibles = await _dbService.getTangibleModelo(modelo: modelo, idPdv: idPdv);
       tangibles.sort(
         (a, b) {
           return (DateFormat('yyyyMMdd').format(a.fechaAsignacion!) + a.serie!)
@@ -859,4 +859,32 @@ class CarritoBloc extends Bloc<CarritoEvent, CarritoState> {
       }
     } catch (_) {}
   }
+
+  Future<void> marcarPreventa({
+    required int idPdv,
+    required String idVisita,
+  }) async {
+    try {
+      add(const OnEnviarTangiblesEvent(
+        enviando: true,
+        mensaje: "Marcando preventa...",
+      ));
+
+      // Aquí debe ir el método que actualiza la columna pendiente de todos los productos asignados
+      await _dbService.marcarPendientePorPdvYVisita(idPdv: idPdv, idVisita: idVisita);
+
+      add(const OnEnviarTangiblesEvent(
+        enviando: false,
+        mensaje: "Preventa realizada correctamente.",
+      ));
+    } catch (e) {
+      add(const OnEnviarTangiblesEvent(
+        enviando: false,
+        mensaje: "Ocurrió un error al marcar preventa.",
+      ));
+    }
+  }
+
+
+
 }

@@ -203,6 +203,21 @@ class _ReportesPageState extends State<ReportesPage> {
                         );
                       },
                     ),
+                    ReporteCard(
+                      title: "Reporte de Saldos",
+                      icon: Icons.credit_score,
+                      iconColor: kSecondaryColor,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                            const ReporteResumenSaldoScreen(
+                            ),
+                          ),
+                        );
+                      },
+                    )
                   ],
                 ),
               ),

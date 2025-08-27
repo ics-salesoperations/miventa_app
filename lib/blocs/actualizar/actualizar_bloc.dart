@@ -95,6 +95,15 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
         ),
       );
     });
+    on<OnActualizarSaldoVendedorEvent>((event, emit) {
+      emit(
+        state.copyWith(
+          mensaje: event.mensaje,
+          actualizandoSaldoVendedor: event.actualizandoSaldoVendedor,
+          tablas: event.tablas,
+        ),
+      );
+    });
   }
 
   Future<void> actualizarTodo({required List<Tabla> currentTablas}) async {
@@ -143,8 +152,8 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
       final token = await _authService.getToken();
       Usuario usuario = await _userService.getInfoUsuario();
 
-      if (usuario.perfil == 1) {
-        usuario = usuario.copyWith(idDms: '5515');
+      if (usuario.perfil == 1 ) {
+        usuario = usuario.copyWith(idDms: '5409');
       }
 
       final resp = await http.get(
@@ -422,7 +431,7 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
 
     try {
       final token = await _authService.getToken();
-      final usuario = await _userService.getInfoUsuario();
+      Usuario usuario = await _userService.getInfoUsuario();
 
       final tangibleConfirmado = await _dbService.getTangibleConfirmado();
 
@@ -433,6 +442,10 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
           tablas: currentTablas,
         ));
         return;
+      }
+
+      if (usuario.perfil == 1) {
+        usuario = usuario.copyWith(idDms: '5409');
       }
 
       final resp = await http.get(
@@ -695,6 +708,9 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
     try {
       final token = await _authService.getToken();
       Usuario usuario = await _userService.getInfoUsuario();
+      if (usuario.perfil == 1 ) {
+        usuario = usuario.copyWith(idDms: '5409');
+      }
       final resp = await http.get(
           Uri.parse(
             '${Environment.apiURL}/appmiventa/indicadores_vendedor/' +
@@ -706,7 +722,6 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
           }).timeout(const Duration(
         minutes: 5,
       ));
-      print(utf8.decode(resp.bodyBytes));
       final indicadoresVendedorResponse = indicadoresVendedorResponseFromJson(
         utf8.decode(resp.bodyBytes),
       );
@@ -719,7 +734,7 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
         final tablas = await _dbService.leerListadoTablas();
         add(OnActualizarIndicadoresVendedorEvent(
           actualizandoIndicadoresVendedor: false,
-          mensaje: "IndicadoresVendoder actualizadas exitosamente.",
+          mensaje: "Indicadores vendedor actualizados exitosamente.",
           tablas: tablas
         ));
       } else {
@@ -743,4 +758,62 @@ class ActualizarBloc extends Bloc<ActualizarEvent, ActualizarState> {
       ));
     }
   }
+  Future<void> actualizarSaldoVendedor(
+      {required List<Tabla> currentTablas}) async {
+    add(
+      OnActualizarSaldoVendedorEvent(
+        actualizandoSaldoVendedor: true,
+        mensaje: "Espere un momento, estamos actualizando tu saldo.",
+        tablas: currentTablas,
+      ),
+    );
+
+    try {
+      final token = await _authService.getToken();
+      Usuario usuario = await _userService.getInfoUsuario();
+
+      if (usuario.perfil == 1) {
+        usuario = usuario.copyWith(idDms: '5409');
+      }
+
+      final resp = await http.get(
+          Uri.parse(
+            '${Environment.apiURL}/appmiventa/saldos_vendedor/' +
+                usuario.idDms.toString(),
+          ),
+          headers: {
+            'Content-Type': 'application/json',
+            'token': token,
+          }).timeout(const Duration(minutes: 10));
+
+      final saldoVendedorResponse = saldoVendedorResponseFromJson(
+        utf8.decode(resp.bodyBytes),
+      );
+
+      //guardar en base de datos local
+      await _dbService.crearSaldoVendedor(saldoVendedorResponse.saldoVendedor);
+
+      await _dbService.updateTabla(tbl: 'saldo');
+      final tablas = await _dbService.leerListadoTablas();
+      add(OnActualizarSaldoVendedorEvent(
+        actualizandoSaldoVendedor: false,
+        mensaje: "Saldo vendedor actualizado exitosamente",
+        tablas: tablas,
+      ));
+    } on TimeoutException catch (_) {
+      add(OnActualizarSaldoVendedorEvent(
+        actualizandoSaldoVendedor: false,
+        mensaje: "Error: Tiempo de conexion excedido.",
+        tablas: currentTablas,
+      ));
+    } catch (e) {
+      add(OnActualizarSaldoVendedorEvent(
+        actualizandoSaldoVendedor: false,
+        mensaje:
+        'Ocurrió un error al actualizar el saldo', //"Ocurrio un error al actualizar tu planificacion ",
+        tablas: currentTablas,
+      ));
+    }
+  }
+
 }

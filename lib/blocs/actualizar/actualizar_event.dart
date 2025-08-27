@@ -106,3 +106,15 @@ class OnActualizarIndicadoresVendedorEvent extends ActualizarEvent {
     required this.tablas,
   });
 }
+
+class OnActualizarSaldoVendedorEvent extends ActualizarEvent{
+  final String mensaje;
+  final bool actualizandoSaldoVendedor;
+  final List<Tabla> tablas;
+
+  const OnActualizarSaldoVendedorEvent({
+    required this.actualizandoSaldoVendedor,
+    required this.mensaje,
+    required this.tablas,
+  });
+}

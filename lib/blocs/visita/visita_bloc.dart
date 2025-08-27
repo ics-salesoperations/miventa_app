@@ -81,7 +81,8 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
     Planning pdv,
     String idForm,
     String usuario,
-  ) async {
+  )
+  async {
     add(
       const OnIniciarVisitaEvent(
         visitaIniciada: false,
@@ -117,8 +118,12 @@ class VisitaBloc extends Bloc<VisitaEvent, VisitaState> {
 
     if (distancia >= 100) {
       errores.add("No estas en el Punto de Venta.");
-      mostrarTangible =
-          false; // Si está muy lejos, ocultamos los tangibles fisicos.
+      if(pdv.enListaBlanca =='SI'){
+        mostrarTangible = true;
+      }else {
+        mostrarTangible =
+        false; // Si está muy lejos, ocultamos los tangibles fisicos.
+      }
     }
 
     final sinConfirmar = await _dbService.getPendienteConfirmar(

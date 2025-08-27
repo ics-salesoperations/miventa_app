@@ -10,7 +10,7 @@ class LocalDatabase {
 
   LocalDatabase._init();
 
-  static int get _version => 9;
+  static int get _version => 14;
 
   static Future<void> init() async {
     try {
@@ -20,7 +20,7 @@ class LocalDatabase {
         _path,
         version: _version,
         onCreate: onCreate,
-        onUpgrade: onUpgrade,
+        onUpgrade: onUpgrade
       );
     } catch (ex) {
       return;
@@ -37,7 +37,7 @@ class LocalDatabase {
 
     //creando tabla de control de Actualizaciones
     sql = """
-              CREATE TABLE tablas (
+              CREATE TABLE IF NOT EXISTS tablas (
                                     id $idType,
                                     tabla $stringType,
                                     descripcion $stringType,
@@ -48,7 +48,7 @@ class LocalDatabase {
 
     //creando tabla de usuarios
     sql = """
-              CREATE TABLE usuario (
+              CREATE TABLE IF NOT EXISTS usuario (
                                     id $idType,
                                     flag $stringType,
                                     iddms $stringType,
@@ -67,7 +67,7 @@ class LocalDatabase {
 
     //creando tabla de gerentes
     sql = """
-              CREATE TABLE gerentes (
+              CREATE TABLE IF NOT EXISTS gerentes (
                                     id $idType,
                                     usuario $stringType,
                                     idDealer $stringType,
@@ -88,7 +88,7 @@ class LocalDatabase {
 
     /*CREANDO TABLA DE TRACKING DEL USUARIO HEAD*/
     sql = """
-                CREATE TABLE tracking_head
+                CREATE TABLE IF NOT EXISTS tracking_head
                 (
                 id $idType,
                 idTracking $textType,
@@ -101,7 +101,7 @@ class LocalDatabase {
 
     /*CREANDO TABLA DE TRACKING DEL USUARIO DET*/
     sql = """
-                CREATE TABLE tracking_det
+                CREATE TABLE IF NOT EXISTS tracking_det
                 (
                 id $idType,
                 idTracking $textType,
@@ -124,7 +124,7 @@ class LocalDatabase {
 
     /*CREANDO TABLA DE DETALLE PDV*/
     sql = """
-                CREATE TABLE planning
+                CREATE TABLE IF NOT EXISTS planning
                 (
                 id $idType,
                 idDealer $integerType,
@@ -196,7 +196,22 @@ class LocalDatabase {
                 invBls $textType,
                 grsBls $textType,
                 cnvBls $textType,
-                invBlsDisp $textType
+                invBlsDisp $textType,
+                invBlsDesc $textType,
+                enListaBlanca $textType,
+                invBlsHist $textType,
+                grsBlsHist $textType,
+                cnvBlsHist $textType,
+                invBlsDispHist $textType,
+                invBlsDescHist $textType,
+                qbrBlsCantAsig $textType,  
+                qbrBlsCantAct $textType,
+                qbrBls $textType,
+                qbrBlsAcum $textType,
+                qbrBlsDias  $textType,
+                qbrBlsEvalua  $textType,
+                invBlsFechaAct $textType,
+                invBlsHistFechaAct $textType
                 )
       """;
     await db.execute(sql);
@@ -213,7 +228,7 @@ class LocalDatabase {
 
     /*CREANDO TABLA DE FORMULARIOS*/
     sql = """
-                CREATE TABLE formulario
+                CREATE TABLE IF NOT EXISTS formulario
                 (
                 id $idType,
                 formId $integerType,
@@ -249,7 +264,7 @@ class LocalDatabase {
 
     /*CREANDO TABLA DE MODELOS*/
     sql = """
-                CREATE TABLE modelo
+                CREATE TABLE IF NOT EXISTS modelo
                 (
                 id $idType,
                 tangible $textType,
@@ -278,7 +293,7 @@ class LocalDatabase {
 
     /*CREANDO TABLA DE FORMULARIOS*/
     sql = """
-                CREATE TABLE tangible
+                CREATE TABLE IF NOT EXISTS tangible
                 (
                 id $idType,
                 tangible $textType,
@@ -292,13 +307,14 @@ class LocalDatabase {
                 idPdv $integerType,
                 idVisita $textType,
                 fechaVenta $textType,
-                precio $realType
+                precio $realType,
+                pendiente $integerType 
                 )
       """;
     await db.execute(sql);
 
     sql = """
-                CREATE TABLE tangible_reasignacion
+                CREATE TABLE IF NOT EXISTS tangible_reasignacion
                 (
                 id $idType,
                 idPdv $integerType,
@@ -319,7 +335,7 @@ class LocalDatabase {
 
     /*CREANDO TABLA DE RESPUESTA DE FORMULARIOS*/
     sql = """
-                CREATE TABLE formulario_answer
+                CREATE TABLE IF NOT EXISTS formulario_answer
                 (
                 id $idType,
                 instanceId $textType,
@@ -335,7 +351,7 @@ class LocalDatabase {
 
     /*CREANDO TABLA DE REGISTRO DE VISITAS*/
     sql = """
-                CREATE TABLE visita
+                CREATE TABLE IF NOT EXISTS visita
                 (
                 id $idType,
                 fechaInicioVisita $textType,
@@ -352,7 +368,7 @@ class LocalDatabase {
 
     //creando tabla de informacion de red automatico
     sql = """
-              CREATE TABLE networkinfo (
+              CREATE TABLE IF NOT EXISTS networkinfo (
                                     id $idType,
                                     marca $stringType,
                                     modelo $stringType,
@@ -400,7 +416,7 @@ class LocalDatabase {
 
     //creando tabla de informacion de red manual
     sql = """
-              CREATE TABLE manualnetworkinfo (
+              CREATE TABLE IF NOT EXISTS manualnetworkinfo (
                                     id $idType,
                                     idLectura $textType,
                                     departamento $stringType,
@@ -425,7 +441,7 @@ class LocalDatabase {
     await db.execute(sql);
 
     sql = """
-              CREATE TABLE solicitud (
+              CREATE TABLE IF NOT EXISTS solicitud (
                                     id $idType,
                                     codigo $stringType,
                                     idPdv $stringType,
@@ -443,7 +459,7 @@ class LocalDatabase {
 
     /*CREANDO TABLA DE SERVICIO BLISTER*/
     sql = """
-                CREATE TABLE solicitud_automatica
+                CREATE TABLE IF NOT EXISTS solicitud_automatica
                 (
                 id $idType,
                 fecha $textType,
@@ -457,7 +473,7 @@ class LocalDatabase {
 
     /*CREANDO TABLA DE INCENTIVOS*/
     sql = """
-                CREATE TABLE incentivo
+                CREATE TABLE IF NOT EXISTS incentivo
                 (
                 id $idType,
                 idPdv $integerType,
@@ -479,7 +495,7 @@ class LocalDatabase {
     await db.execute(sql);
 
     sql = """
-                CREATE TABLE indicadores
+                CREATE TABLE IF NOT EXISTS indicadores
                 (
                 id $idType,
                 anomes $integerType,
@@ -489,6 +505,37 @@ class LocalDatabase {
                 varianza $realType)
       """;
 
+    await db.execute(sql);
+
+
+    //insertando en tabla tabla de control de Actualizaciones
+    sql = """
+              INSERT INTO tablas (
+                                    tabla,
+                                    descripcion
+                                    )
+                                    VALUES ('saldo', 'Saldos')
+            """;
+    await db.execute(sql);
+
+    /*CREANDO TABLA DE MODELOS*/
+    sql = """
+                CREATE TABLE IF NOT EXISTS saldo
+                (
+                id $idType,
+                fechaHoraTfr $textType,
+                nombreDms $textType,
+                saldoVendedor $realType,
+                fromMovil $textType,
+                toMovil $integerType,
+                canal $integerType,
+                idPdv $textType,
+                nombrePdv $textType,
+                montoTfr $realType,
+                saldoPdv $realType,
+                actualizado $textType
+                )
+      """;
     await db.execute(sql);
   }
 
@@ -511,7 +558,7 @@ class LocalDatabase {
       try {
         /*CREANDO TABLA DE SERVICIO BLISTER*/
         sql = """
-                    CREATE TABLE solicitud_automatica
+                    CREATE TABLE IF NOT EXISTS solicitud_automatica
                     (
                     id $idType,
                     fecha $textType,
@@ -523,7 +570,7 @@ class LocalDatabase {
           """;
         /*CREANDO TABLA DE INCENTIVOS*/
         sql = """
-                    CREATE TABLE incentivo
+                    CREATE TABLE IF NOT EXISTS incentivo
                     (
                     id $idType,
                     idPdv $integerType,
@@ -536,7 +583,7 @@ class LocalDatabase {
       try {
         /*CREANDO TABLA DE REASIGNACION*/
         sql = """
-                    CREATE TABLE tangible_reasignacion
+                    CREATE TABLE IF NOT EXISTS tangible_reasignacion
                     (
                     id $idType,
                     idPdv $integerType,
@@ -592,7 +639,7 @@ class LocalDatabase {
       try {
         await db.execute(sql);
         sql = """
-                CREATE TABLE indicadores
+                CREATE TABLE IF NOT EXISTS indicadores
                 (
                 id $idType,
                 anomes $integerType,
@@ -615,6 +662,109 @@ class LocalDatabase {
           await db.execute(sql);
         }
 
+      } catch (e) {
+        print('Error al agregar columnas: $e'); // Agrega un log de error
+      }
+    }else if (oldVersion <= 9) {
+      try {
+        // Comprobar si la columna 'invBlsDesc' ya existe
+        bool precioColumnExists = await columnExists(
+            db, 'plannig', 'invBlsDesc');
+        if (!precioColumnExists) {
+          String sql = """
+                        alter table plannig add column invBlsDesc $textType;
+                      """;
+          await db.execute(sql);
+        }
+      } catch (e) {
+        print('Error al agregar columnas: $e'); // Agrega un log de error
+      }
+    }else if (oldVersion <= 10) {
+        try {
+          // Comprobar si la columna 'precio' ya existe
+          bool columnaExiste = await columnExists(db, 'tangible', 'pendiente');
+          if (!columnaExiste) {
+            String sql = """
+                          alter table tangible add column pendiente $integerType;
+                        """;
+            await db.execute(sql);
+          }
+
+        } catch (e) {
+          print('Error al agregar columnas: $e'); // Agrega un log de error
+        }
+    }else if (oldVersion <= 11) {
+      try {
+        // Comprobar si la columna 'enListaBlanca' ya existe
+        bool columnaExiste = await columnExists(db, 'plannig', 'enListaBlanca');
+        if (!columnaExiste) {
+          String sql = """
+                          alter table plannig add column enListaBlanca $textType;
+                        """;
+          await db.execute(sql);
+        }
+
+      } catch (e) {
+        print('Error al agregar columnas: $e'); // Agrega un log de error
+      }
+    }else if (oldVersion <= 12) {
+      try {
+        // Comprobar si la columna 'enListaBlanca' ya existe
+        bool columnaExiste = await columnExists(db, 'plannig', 'invBlsHist');
+        if (!columnaExiste) {
+          String sql = """
+                          alter table plannig add column (
+                            enListaBlanca $textType, 
+                            invBlsHist $textType, 
+                            grsBlsHist $textType, 
+                            cnvBlsHist $textType, 
+                            invBlsDispHist $textType, 
+                            invBlsDescHist $textType, 
+                            qbrBlsCantAsig $textType, 
+                            qbrBlsCantAct $textType, 
+                            qbrBls $textType, 
+                            qbrBlsAcum $textType, 
+                            qbrBlsDias $textType, 
+                            qbrBlsEvalua $textType,
+                            invBlsFechaAct $textType,
+                            invBlsHistFechaAct $textType);
+                        """;
+          await db.execute(sql);
+        }
+      } catch (e) {
+        print('Error al agregar columnas: $e'); // Agrega un log de error
+      }
+    }else if (oldVersion <= 13) {
+      try {
+        // Comprobar si la columna 'enListaBlanca' ya existe
+        sql = """
+              INSERT INTO tablas (
+                                    tabla,
+                                    descripcion
+                                    )
+                                    VALUES ('saldo', 'Saldos')
+            """;
+        await db.execute(sql);
+
+        /*CREANDO TABLA DE MODELOS*/
+        sql = """
+                CREATE TABLE IF NOT EXISTS saldo
+                (
+                id $idType,
+                fechaHoraTfr $textType,
+                nombreDms $textType,
+                saldoVendedor $realType,
+                fromMovil $textType,
+                toMovil $integerType,
+                canal $integerType,
+                idPdv $textType,
+                nombrePdv $textType,
+                montoTfr $realType,
+                saldoPdv $realType,
+                actualizado $textType
+                )
+      """;
+        await db.execute(sql);
       } catch (e) {
         print('Error al agregar columnas: $e'); // Agrega un log de error
       }
@@ -731,7 +881,22 @@ class LocalDatabase {
                         invBls,
                         grsBls,
                         cnvBls,
-                        invBlsDisp
+                        invBlsDisp,
+                        invBlsDesc,
+                        enListaBlanca,
+                        invBlsHist,
+                        grsBlsHist,
+                        cnvBlsHist,
+                        invBlsDispHist,
+                        invBlsDescHist,
+                        qbrBlsCantAsig,
+                        qbrBlsCantAct,
+                        qbrBls,
+                        qbrBlsAcum,
+                        qbrBlsDias,
+                        qbrBlsEvalua,
+                        invBlsFechaAct,
+                        invBlsHistFechaAct
                       )
                       VALUES
                       (
@@ -800,6 +965,21 @@ class LocalDatabase {
                         ?,
                         ?,
                         ?, 
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
                         ?,
                         ?,
                         ?,
@@ -883,7 +1063,22 @@ class LocalDatabase {
         dato.invBls.toString() == 'null' ? '0' : dato.invBls.toString(),
         dato.grsBls.toString() == 'null' ? '0' : dato.grsBls.toString(),
         dato.cnvBls.toString() == 'null' ? '0' : dato.cnvBls.toString(),
-        dato.invBlsDisp.toString() == 'null' ? '0' : dato.invBlsDisp.toString()
+        dato.invBlsDisp.toString() == 'null' ? '0' : dato.invBlsDisp.toString(),
+        dato.invBlsDesc.toString() == 'null' ? '0' : dato.invBlsDesc.toString(),
+        dato.enListaBlanca.toString() == 'null' ? 'NO' : dato.enListaBlanca.toString(),
+        dato.invBlsHist.toString() == 'null' ? '0' : dato.invBlsHist.toString(),
+        dato.grsBlsHist.toString() == 'null' ? '0' : dato.grsBlsHist.toString(),
+        dato.cnvBlsHist.toString() == 'null' ? '0' : dato.cnvBlsHist.toString(),
+        dato.invBlsDispHist.toString() == 'null' ? '0' : dato.invBlsDispHist.toString(),
+        dato.invBlsDescHist.toString() == 'null' ? '0' : dato.invBlsDescHist.toString(),
+        dato.qbrBlsCantAsig.toString() == 'null' ? '0' : dato.qbrBlsCantAsig.toString(),
+        dato.qbrBlsCantAct.toString() == 'null' ? '0' : dato.qbrBlsCantAct.toString(),
+        dato.qbrBls.toString() == 'null' ? '0' : dato.qbrBls.toString(),
+        dato.qbrBlsAcum.toString() == 'null' ? '0' : dato.qbrBlsAcum.toString(),
+        dato.qbrBlsDias.toString() == 'null' ? '0' : dato.qbrBlsDias.toString(),
+        dato.qbrBlsEvalua.toString() == 'null' ? '0' : dato.qbrBlsEvalua.toString(),
+        dato.invBlsFechaAct.toString() == 'null' ? '0' : dato.invBlsFechaAct.toString(),
+        dato.invBlsHistFechaAct.toString() == 'null' ? '0' : dato.invBlsHistFechaAct.toString()
       ]);
     }
     //await _db!.execute(query, datos);
@@ -891,6 +1086,67 @@ class LocalDatabase {
 
     return resp;
   }
+
+  static Future<int> insertListSaldo(List<SaldoVendedor> datos) async {
+    int resp = 0;
+
+    Batch ba = _db!.batch();
+    String query = """
+                      INSERT INTO saldo 
+                      (
+                        fechaHoraTfr,
+                        nombreDms,
+                        saldoVendedor,
+                        fromMovil,
+                        toMovil,
+                        canal,
+                        idPdv,
+                        nombrePdv,
+                        montoTfr,
+                        saldoPdv,
+                        actualizado
+                      )
+                      VALUES
+                      (
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?
+                      )
+                    """;
+
+    for (var dato in datos) {
+      ba.rawInsert(query, [
+        (dato.fechaHoraTfr != null)
+            ? DateFormat('yyyy-MM-dd HH:mm:ss').format(dato.fechaHoraTfr!)
+            : null,
+        dato.nombreDms,
+        dato.saldoVendedor,
+        dato.fromMovil,
+        dato.toMovil,
+        dato.canal,
+        dato.idPdv,
+        dato.nombrePdv,
+        dato.montoTfr,
+        dato.saldoPdv,
+        (dato.actualizado != null)
+            ? DateFormat('yyyy-MM-dd HH:mm:ss').format(dato.actualizado!)
+            : null
+      ]);
+    }
+    //await _db!.execute(query, datos);
+    await ba.commit(noResult: true);
+
+    return resp;
+  }
+
 
   static Future<int> insertListTangible(List<ProductoTangible> datos) async {
     int resp = 0;
@@ -909,10 +1165,14 @@ class LocalDatabase {
                         enviado,
                         idPdv,
                         idVisita,
-                        fechaVenta
+                        fechaVenta,
+                        precio,
+                        pendiente
                       )
                       VALUES
                       (
+                        ?,
+                        ?,
                         ?,
                         ?,
                         ?,
@@ -946,6 +1206,8 @@ class LocalDatabase {
         (dato.fechaVenta == null)
             ? null
             : DateFormat('dd-MM-yyyy HH:mm:ss').format(dato.fechaVenta!),
+        dato.precio,
+        dato.pendiente
       ]);
     }
     //await _db!.execute(query, datos);

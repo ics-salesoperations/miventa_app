@@ -123,6 +123,13 @@ class _DetallePdvEjecucionState extends State<DetallePdvEjecucion> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
+                      Text("Resumen de Blister ${detallePdv.invBlsFechaAct.toString() == "null" ? "SIN DATOS" : detallePdv.invBlsFechaAct.toString()}",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: kPrimaryColor,
+                          )),
+                      const SizedBox(height: 12),
                       buildUserInfoDisplay(
                           getValue: detallePdv.grsBlsM0.toString() == "null"
                               ? "SIN DATOS"
@@ -171,6 +178,15 @@ class _DetallePdvEjecucionState extends State<DetallePdvEjecucion> {
                         icono: 'assets/Iconos/info_dollar.svg',
                         screenWidth: screenWidth,
                       ),
+                      buildUserInfoDisplay(
+                        getValue: detallePdv.invBlsDesc.toString() == "null"
+                            ? "SIN DATOS"
+                            : detallePdv.invBlsDesc.toString(),
+                        title: "Inventario Descartado",
+                        icono: 'assets/Iconos/info_dollar.svg',
+                        screenWidth: screenWidth,
+                      ),
+                      buildBlisterResumen(detallePdv,screenWidth)
                     ],
                   ),
                 ),

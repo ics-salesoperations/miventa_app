@@ -19,7 +19,7 @@ class BuildKpiInfoDisplay extends StatelessWidget {
       required this.mom,
       required this.title,
       required this.icono,
-      required this.screenWidth,
+      this.screenWidth=360.0,
       this.valor_1 = '',
       this.valor_2 = ''})
       : super(key: key);

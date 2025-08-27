@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:miventa_app/app_styles.dart';
 import 'package:miventa_app/blocs/blocs.dart';
 import 'package:miventa_app/widgets/widgets.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:miventa_app/models/models.dart';
 
+import 'package:miventa_app/localdb/local_database.dart';
 import 'pages.dart';
 
 class InicioPage extends StatefulWidget {
@@ -26,6 +28,49 @@ class _InicioPageState extends State<InicioPage> {
   late ActualizarBloc _actualizarBloc;
 
   List<IndicadoresVendedor> indicadoresVendedor = [];
+
+  Future<String> obtenerSaldoActual() async {
+    final resultado = await LocalDatabase.customQuery('''
+    SELECT saldoVendedor
+    FROM saldo
+    WHERE fechaHoraTfr = (SELECT MAX(fechaHoraTfr) FROM saldo)
+  ''');
+
+    if (resultado.isNotEmpty) {
+      return resultado.first['saldoVendedor'].toString();
+    } else {
+      return '0.00';
+    }
+  }
+
+  Future<String> getTotalVentaHoy() async { // Obteniendo la instancia de la BD
+
+    // Ejecuta la consulta cruda (raw query)
+    final result = await LocalDatabase.customQuery(
+      '''SELECT SUM(montoTfr) as totalVenta FROM saldo WHERE date(fechaHoraTfr) = date('now')'''// Pasa los argumentos en una lista
+    );
+
+    // El resultado de SUM es una lista con un mapa, ej: [{'totalVenta': 550.75}]
+    // Si no hay ventas, el valor puede ser null.
+    if (result.isNotEmpty && result.first['totalVenta'].toString() != 'null') {
+      // Si es null, retorna 0.0, de lo contrario, retorna el valor.
+      return result.first['totalVenta'].toString();
+    }
+
+    return '0.0';
+  }
+
+  Future<String> obtenerActualizacion() async {
+    final resultado = await LocalDatabase.customQuery('''
+    SELECT MAX(actualizado) actualizado FROM saldo
+  ''');
+
+    if (resultado.isNotEmpty && resultado.first['actualizado'].toString() != 'null') {
+      return resultado.first['actualizado'].toString();
+    } else {
+      return 'No se encontraron datos.';
+    }
+  }
 
 
 
@@ -80,8 +125,6 @@ class _InicioPageState extends State<InicioPage> {
                 clipBehavior: Clip.none,
                 children: [
                   Container(
-                    width: 188,
-                    height: 50,
                     alignment: Alignment.center,
                     decoration: const BoxDecoration(
                       color: kThirdColor,
@@ -110,14 +153,148 @@ class _InicioPageState extends State<InicioPage> {
                             ),
                           ),
                         ),
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            "Mi Venta",
-                            style: TextStyle(
-                                color: kSecondaryColor,
-                                fontFamily: 'CronosSPro',
-                                fontSize: 32),
+                        Column(
+                          mainAxisSize: MainAxisSize.min, // Para que la columna no ocupe más espacio del necesario
+                          crossAxisAlignment: CrossAxisAlignment.start, // Alinea el texto a la derecha
+                          children: [
+                            const Text(
+                              "Venta del día:",
+                              style: TextStyle(
+                                color: kSecondaryColor, // Puedes ajustar el color y estilo
+                                fontFamily: 'CronosLPro', // O la fuente que prefieras
+                                fontSize: 14, // Ajusta el tamaño
+                              ),
+                            ),
+                            const SizedBox(height: 4), // Pequeño espacio entre el título y el valor
+                            FutureBuilder<String>(
+                              future: getTotalVentaHoy(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const Text(
+                                    "Cargando...",
+                                    style: TextStyle(
+                                      color: kSecondaryColor,
+                                      fontFamily: 'CronosSPro',
+                                      fontSize: 24, // Ajusta el tamaño si es necesario
+                                    ),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return const Text(
+                                    "Error",
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontFamily: 'CronosSPro',
+                                      fontSize: 24, // Ajusta el tamaño si es necesario
+                                    ),
+                                  );
+                                } else {
+                                  return Text(
+                                    NumberFormat.currency(locale: 'en_US', symbol: 'L ')
+                                        .format(double.tryParse(snapshot.data ?? '0') ?? 0),
+                                    style: const TextStyle(
+                                      color: kSecondaryColor,
+                                      fontFamily: 'CronosSPro',
+                                      fontSize: 20,
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                            const Text(
+                              'Actualizado:',
+                              style: TextStyle(
+                                color: kFourColor, // Puedes ajustar el color y estilo
+                                fontFamily: 'CronosSPro', // O la fuente que prefieras
+                                fontSize: 16, // Ajusta el tamaño
+                              )
+                            )
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            right: 10,
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min, // Para que la columna no ocupe más espacio del necesario
+                            crossAxisAlignment: CrossAxisAlignment.start, // Alinea el texto a la derecha
+                            children: [
+                              const Text(
+                                "Saldo Epin:",
+                                style: TextStyle(
+                                  color: kSecondaryColor, // Puedes ajustar el color y estilo
+                                  fontFamily: 'CronosLPro', // O la fuente que prefieras
+                                  fontSize: 14, // Ajusta el tamaño
+                                ),
+                              ),
+                              const SizedBox(height: 4), // Pequeño espacio entre el título y el valor
+                              FutureBuilder<String>(
+                                future: obtenerSaldoActual(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return const Text(
+                                      "Cargando...",
+                                      style: TextStyle(
+                                        color: kSecondaryColor,
+                                        fontFamily: 'CronosSPro',
+                                        fontSize: 24, // Ajusta el tamaño si es necesario
+                                      ),
+                                    );
+                                  } else if (snapshot.hasError) {
+                                    return const Text(
+                                      "Error",
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontFamily: 'CronosSPro',
+                                        fontSize: 24, // Ajusta el tamaño si es necesario
+                                      ),
+                                    );
+                                  } else {
+                                    return Text(
+                                      NumberFormat.currency(locale: 'en_US', symbol: 'L ')
+                                          .format(double.tryParse(snapshot.data ?? '0') ?? 0),
+                                      style: const TextStyle(
+                                        color: kSecondaryColor,
+                                        fontFamily: 'CronosSPro',
+                                        fontSize: 20,
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                              FutureBuilder<String>(
+                                future: obtenerActualizacion(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return const Text(
+                                      "Cargando...",
+                                      style: TextStyle(
+                                        color: kSecondaryColor,
+                                        fontFamily: 'CronosSPro',
+                                        fontSize: 16, // Ajusta el tamaño si es necesario
+                                      ),
+                                    );
+                                  } else if (snapshot.hasError) {
+                                    return const Text(
+                                      "Error",
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontFamily: 'CronosSPro',
+                                        fontSize: 16, // Ajusta el tamaño si es necesario
+                                      ),
+                                    );
+                                  } else {
+                                    return Text(
+                                        snapshot.data ?? 'No se encontraron datos.',
+                                        style: const TextStyle(
+                                        color: kFourColor, // Puedes ajustar el color y estilo
+                                        fontFamily: 'CronosSPro', // O la fuente que prefieras
+                                        fontSize: 16, // Ajusta el tamaño
+                                        )
+                                    );
+                                  }
+                                },
+                              ),
+                            ],
                           ),
                         ),
                       ],

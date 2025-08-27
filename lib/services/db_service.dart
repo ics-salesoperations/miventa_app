@@ -142,6 +142,12 @@ class DBService {
     }
   }
 
+  Future crearSaldoVendedor(List<SaldoVendedor> detpdv) async {
+    await LocalDatabase.init();
+    await LocalDatabase.delete('saldo');
+    await LocalDatabase.insertListSaldo(detpdv);
+  }
+
   Future<int> actualizarPdvPlanning(Planning pdv) async {
     await LocalDatabase.init();
 
@@ -293,7 +299,22 @@ class DBService {
                             invBls,
                             grsBls,
                             cnvBls,
-                            invBlsDisp
+                            invBlsDisp,
+                            invBlsDesc,
+                            enListaBlanca,
+                            invBlsHist,
+                            grsBlsHist,
+                            cnvBlsHist,
+                            invBlsDispHist,
+                            invBlsDescHist,
+                            qbrBlsCantAsig,
+                            qbrBlsCantAct,
+                            qbrBls,
+                            qbrBlsAcum,
+                            qbrBlsDias,
+                            qbrBlsEvalua,
+                            invBlsFechaAct,
+                            invBlsHistFechaAct
                       FROM planning a 
                       WHERE id>=0
                           $where
@@ -355,12 +376,26 @@ class DBService {
                             invBls,
                             grsBls,
                             cnvBls,
-                            invBlsDisp
+                            invBlsDisp,
+                            invBlsDesc,
+                            enListaBlanca,
+                            invBlsHist,
+                            grsBlsHist,
+                            cnvBlsHist,
+                            invBlsDispHist,
+                            invBlsDescHist,
+                            qbrBlsCantAsig,
+                            qbrBlsCantAct,
+                            qbrBls,
+                            qbrBlsAcum,
+                            qbrBlsDias,
+                            qbrBlsEvalua,
+                            invBlsFechaAct,
+                            invBlsHistFechaAct
                     """;
 
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
-    print('detalle_pdv: ' + maps.toString());
     return maps.map((json) {
       return Planning.fromJson(json);
     }).toList();
@@ -680,7 +715,6 @@ class DBService {
                   """;
 
     List<Map<String, dynamic>> maps = await LocalDatabase.customQuery(query);
-    print('detalle_pdv: ' + maps.toString());
     return maps.map((item) => Planning.fromJson(item)).toList()[0];
   }
 
@@ -726,8 +760,6 @@ class DBService {
 
     List<Map<String, dynamic>> maps = await LocalDatabase.customQuery(query);
 
-    print('maps $maps');
-
     return maps.fold<List<String>>(
         [],
         (previousValue, element) =>
@@ -769,8 +801,6 @@ class DBService {
                   """;
 
     List<Map<String, dynamic>> maps = await LocalDatabase.customQuery(query);
-
-    print('servicio: $maps');
 
     final arreglo = maps.fold<List<String>>(
         [],
@@ -1258,12 +1288,12 @@ class DBService {
   }
 
   Future<List<ModeloTangible>> leerListadoModelos(
-      [bool mostarTengible = true]) async {
+      [bool mostarTengible = true, String? idPdv]) async {
     await LocalDatabase.init();
     String where =
-        " AND confirmado = 0 AND enviado = 0"; //" AND a.instanceId = '$instanceId' ";
+        " AND confirmado = 0 AND enviado = 0 and (idPdv = 0 or idPdv = $idPdv)"; //" AND a.instanceId = '$instanceId' ";
     final String query;
-    if (mostarTengible) {
+    //if (mostarTengible) {
       query = """
                     SELECT
                     *
@@ -1295,7 +1325,7 @@ class DBService {
                     SELECT -2 AS id, 'TMY' AS tangible, 'TMY' AS modelo, 'SALDO TIGO MONEY' AS descripcion, '' AS imagen, 0 AS asignado, 1 AS disponible, '0' AS serieInicial, '0' AS serieFinal
                     )
                     ORDER BY disponible DESC""";
-    } else {
+    /*} else {
       query = """
                     SELECT
                     *
@@ -1329,7 +1359,7 @@ class DBService {
                     SELECT -2 AS id, 'TMY' AS tangible, 'TMY' AS modelo, 'SALDO TIGO MONEY' AS descripcion, '' AS imagen, 0 AS asignado, 1 AS disponible, '0' AS serieInicial, '0' AS serieFinal
                     )
                     ORDER BY disponible DESC""";
-    }
+    }*/
 
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
@@ -1374,7 +1404,6 @@ class DBService {
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
     //return maps.map((json) => FormularioAnswer.fromMap(json)).toList();
-    print(maps);
     return maps.map((json) {
       return ModeloTangible.fromMap(json);
     }).toList();
@@ -1432,9 +1461,7 @@ class DBService {
 
   Future<List<ModeloTangible>> leerListadoModelosAsignados(int? idPdv) async {
     await LocalDatabase.init();
-    String where = "";
-
-    print('filtro: $where');
+    String where = "idPdv = $idPdv";
 
     //" AND a.instanceId = '$instanceId' ";
     final query = """
@@ -1453,7 +1480,7 @@ class DBService {
                 LEFT JOIN (
                     SELECT * 
                     FROM tangible 
-                    WHERE 1=1 $where
+                    WHERE $where
                 ) b 
                     ON a.tangible = b.tangible
                     AND a.modelo = b.modelo
@@ -1490,8 +1517,6 @@ class DBService {
     if (idPdv != null) {
       where = "AND idPdv = $idPdv";
     }
-
-    print('filtro: $where');
 
     //" AND a.instanceId = '$instanceId' ";
     final query = """
@@ -1584,10 +1609,10 @@ class DBService {
     }).toList();
   }
 
-  Future<int> leerTotalModelos() async {
+  Future<int> leerTotalModelos(String? idPdv) async {
     await LocalDatabase.init();
 
-    String where = ""; //" AND a.instanceId = '$instanceId' ";
+    String where = "and idPdv = $idPdv"; //" AND a.instanceId = '$instanceId' ";
 
     final query = """
                     SELECT
@@ -1635,7 +1660,6 @@ class DBService {
   Future<List<String>> leerTiposDB() async {
     await LocalDatabase.init();
 
-    String where = ""; //" AND a.instanceId = '$instanceId' ";
 
     const query = """
                     SELECT
@@ -1658,8 +1682,6 @@ class DBService {
 
   Future<List<String>> leerTiposReasignacionDB() async {
     await LocalDatabase.init();
-
-    String where = ""; //" AND a.instanceId = '$instanceId' ";
 
     const query = """
                     SELECT
@@ -1743,8 +1765,6 @@ class DBService {
   Future<List<ProductoTangible>> leerInventarioDB() async {
     await LocalDatabase.init();
 
-    String where = ""; //" AND a.instanceId = '$instanceId' ";
-
     const query = """
                     SELECT
                       a.*,
@@ -1765,8 +1785,6 @@ class DBService {
   Future<List<ProductoTangibleReasignacion>>
       leerInventarioReasignadoDB() async {
     await LocalDatabase.init();
-
-    String where = ""; //" AND a.instanceId = '$instanceId' ";
 
     const query = """
                     SELECT
@@ -1943,7 +1961,6 @@ class DBService {
 
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
-    print('detalle: $maps');
     return maps
         .map((json) => ProductoTangibleReasignacion.fromMap(json))
         .toList();
@@ -1988,7 +2005,6 @@ class DBService {
 
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
-    print("get tang: $maps");
     return maps
         .map((json) => ProductoTangibleReasignacion.fromMap(json))
         .toList();
@@ -2084,6 +2100,7 @@ class DBService {
 
   Future<List<ProductoTangible>> getTangibleModelo({
     required ModeloTangible modelo,
+    String? idPdv
   }) async {
     await LocalDatabase.init();
 
@@ -2091,6 +2108,13 @@ class DBService {
                        AND modelo = '${modelo.modelo}'
                        AND enviado = 0
                     """;
+
+    if (idPdv !="") {
+      where += """ 
+          AND (idPdv = $idPdv OR idPdv = 0)
+      """;
+    }
+
     String order = " ORDER BY fechaAsignacion ASC, serie, asignado DESC";
 
     final query = """
@@ -2435,8 +2459,6 @@ class DBService {
                         $where
                     """;
 
-    print(query);
-
     final List<Map<String, dynamic>> maps =
         await LocalDatabase.customQuery(query);
 
@@ -2444,7 +2466,7 @@ class DBService {
       solicitudes =
           maps.map((json) => SolicitudAutomatica.fromMap(json)).toList();
     } catch (e) {
-      print(e.toString());
+      null;
     }
 
     return solicitudes;
@@ -2505,7 +2527,6 @@ class DBService {
 
     // Construir cláusula WHERE dinámica
     String whereClause = 'and a.asignado = 1';
-    List<dynamic> args = [1];
     if (desde != null && hasta != null) {
       whereClause += ' AND date(fechaAsignacion) BETWEEN ? AND ?';
     }
@@ -2522,9 +2543,63 @@ class DBService {
                         $whereClause
                     group by b.descripcion, a.precio
                     """;
-    print('query: $query');
     final List<Map<String, dynamic>> maps = await LocalDatabase.customQuery(query);
-    print('maps: $maps');
     return maps.map((m) => ResumenModelo.fromMap(m)).toList();
   }
+
+  Future<void> marcarPendientePorPdvYVisita({
+    required int idPdv,
+    required String idVisita,
+  }) async {
+    await LocalDatabase.init();
+    final query = """
+    UPDATE tangible 
+      SET pendiente = 1
+    WHERE idPdv = $idPdv
+      AND idVisita = '$idVisita'
+      AND asignado = 1
+      AND confirmado = 0
+      AND enviado = 0
+  """;
+    await LocalDatabase.customUpdate(query);
+  }
+
+  Future< List<SaldoReporte>> leerReporteSaldo({
+    DateTime? fechaInicio,
+    DateTime? fechaFin,
+  }) async {
+    await LocalDatabase.init(); // asume getter que abre tu base
+    // Formatear fechas a yyyy-MM-dd
+    final String? desde = fechaInicio != null
+        ? DateFormat('yyyy-MM-dd').format(fechaInicio)
+        : null;
+    final String? hasta = fechaFin != null
+        ? DateFormat('yyyy-MM-dd').format(fechaFin)
+        : null;
+
+    // Construir cláusula WHERE dinámica
+    String whereClause = '';
+    if (desde != null && hasta != null) {
+      whereClause += """ AND date(fechaHoraTfr) BETWEEN '$desde' AND '$hasta' """;
+    }
+
+
+    final query = """
+                    SELECT 
+                           fechaHoraTfr, 
+                           idPdv||' - '||nombrePdv nombrePdv,
+                           toMovil,
+                           montoTfr,
+                           saldoPdv,
+                           saldoVendedor
+                    FROM saldo
+                    WHERE 1=1
+                        $whereClause
+                    order by fechaHoraTfr desc
+                    """;
+    final List<Map<String, dynamic>> maps = await LocalDatabase.customQuery(query);
+    return maps.map((m) => SaldoReporte.fromMap(m)).toList();
+  }
+
+
 }

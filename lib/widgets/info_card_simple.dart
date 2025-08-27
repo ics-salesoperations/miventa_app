@@ -13,7 +13,7 @@ class buildUserInfoDisplay extends StatelessWidget {
       required this.getValue,
       required this.title,
       required this.icono,
-      required this.screenWidth})
+      this.screenWidth = 360.0})
       : super(key: key);
 
   @override

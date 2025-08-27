@@ -138,7 +138,8 @@ class _ActualizarPageState extends State<ActualizarPage>
                             if (state.actualizandoModelos ||
                                 state.actualizandoForms ||
                                 state.actualizandoPlanning ||
-                                state.actualizandoTangible) {
+                                state.actualizandoTangible ||
+                                state.actualizandoIndicadoresVendedor) {
                               btnController.forward();
                             } else {
                               btnController.stop();
@@ -216,6 +217,16 @@ class _ActualizarPageState extends State<ActualizarPage>
                                       );
                                     };
                                     if (state.actualizandoTangible) {
+                                      animar = true;
+                                    }
+                                    break;
+                                  case 'saldo':
+                                    fnActualizar = () {
+                                      _actualizarBloc.actualizarSaldoVendedor(
+                                        currentTablas: state.tablas,
+                                      );
+                                    };
+                                    if (state.actualizandoSaldoVendedor) {
                                       animar = true;
                                     }
                                     break;

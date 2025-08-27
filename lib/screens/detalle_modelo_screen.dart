@@ -33,6 +33,7 @@ class _DetalleModeloScreenState extends State<DetalleModeloScreen> {
     visitaBloc = BlocProvider.of<VisitaBloc>(context);
     carritoBloc.getTangiblePorModelo(
       modelo: widget.modelo,
+      idPdv: visitaBloc.state.idPdv.toString(),
     );
   }
 

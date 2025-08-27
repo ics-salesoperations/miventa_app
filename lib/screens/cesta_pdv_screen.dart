@@ -20,12 +20,14 @@ class CestaPdvScreen extends StatefulWidget {
 class _CestaPdvScreenState extends State<CestaPdvScreen> {
   late CarritoBloc _carritoBloc;
   late AuthBloc _authBloc;
+  late VisitaBloc _visitaBloc;
 
   @override
   void initState() {
     super.initState();
     _carritoBloc = BlocProvider.of<CarritoBloc>(context);
     _authBloc = BlocProvider.of<AuthBloc>(context);
+    _visitaBloc = BlocProvider.of<VisitaBloc>(context);
     _carritoBloc.getModelosAsignados(
       pdv: widget.pdv,
     );
@@ -412,32 +414,110 @@ class _CestaPdvScreenState extends State<CestaPdvScreen> {
                     );
                   }
 
-                  return MaterialButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => ProcessingVenta(pdv: widget.pdv),
-                      );
-                    },
-                    child: Container(
-                      height: 40,
-                      alignment: Alignment.center,
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        color: kSecondaryColor,
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(10),
+                  bool esPreventa = !_visitaBloc
+                      .state
+                      .mostrarTangible; // Cambia según tu lógica
+
+                  return Column(
+                    children: [
+                      if (esPreventa)
+                        MaterialButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => ProcessingPreventa(pdv: widget.pdv),
+                            );
+                          },
+                          child: Container(
+                            height: 40,
+                            alignment: Alignment.center,
+                            width: double.infinity,
+                            decoration: const BoxDecoration(
+                              color: Colors.orange,
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.shopping_cart, color: Colors.white),
+                                SizedBox(width: 8),
+                                Text(
+                                  "Preventa",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontFamily: 'CronosPro',
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      else ...[
+                        MaterialButton(
+                          onPressed: () {
+                            // Acción para eliminar
+                          },
+                          child: Container(
+                            height: 40,
+                            alignment: Alignment.center,
+                            width: double.infinity,
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.delete, color: Colors.white),
+                                SizedBox(width: 8),
+                                Text(
+                                  "Eliminar",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontFamily: 'CronosPro',
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        "Confirmar Compra",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontFamily: 'CronosPro',
-                          color: Colors.white,
+                        const SizedBox(height: 10),
+                        MaterialButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => ProcessingVenta(pdv: widget.pdv),
+                            );
+                          },
+                          child: Container(
+                            height: 40,
+                            alignment: Alignment.center,
+                            width: double.infinity,
+                            decoration: const BoxDecoration(
+                              color: kSecondaryColor,
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.check_circle, color: Colors.white),
+                                SizedBox(width: 8),
+                                Text(
+                                  "Confirmar Compra",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontFamily: 'CronosPro',
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      ],
+                    ],
                   );
                 },
               )

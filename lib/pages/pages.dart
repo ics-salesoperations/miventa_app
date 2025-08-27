@@ -20,4 +20,5 @@ export 'package:miventa_app/pages/reporte_senal_page.dart';
 export 'package:miventa_app/pages/reportes_page.dart';
 export 'package:miventa_app/pages/sincronizar_page.dart';
 export 'package:miventa_app/pages/inventario_reasignacion_page.dart';
+export 'package:miventa_app/screens/enviar_epin_screen.dart';
 

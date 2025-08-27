@@ -76,6 +76,21 @@ class Planning extends Model {
     this.grsBls,
     this.cnvBls,
     this.invBlsDisp,
+    this.invBlsDesc,
+    this.enListaBlanca,
+    this.invBlsHist,
+    this.grsBlsHist,
+    this.cnvBlsHist,
+    this.invBlsDispHist,
+    this.invBlsDescHist,
+    this.qbrBlsCantAsig,
+    this.qbrBlsCantAct,
+    this.qbrBls,
+    this.qbrBlsAcum,
+    this.qbrBlsDias,
+    this.qbrBlsEvalua,
+    this.invBlsFechaAct,
+    this.invBlsHistFechaAct,
   }) : super(id);
 
   int? idDealer;
@@ -148,6 +163,21 @@ class Planning extends Model {
   String? grsBls;
   String? cnvBls;
   String? invBlsDisp;
+  String? invBlsDesc;
+  String? enListaBlanca;
+  String? invBlsHist;
+  String? grsBlsHist;
+  String? cnvBlsHist;
+  String? invBlsDispHist;
+  String? invBlsDescHist;
+  String? qbrBlsCantAsig;
+  String? qbrBlsCantAct;
+  String? qbrBls;
+  String? qbrBlsAcum;
+  String? qbrBlsDias;
+  String? qbrBlsEvalua;
+  String? invBlsFechaAct;
+  String? invBlsHistFechaAct;
 
   Planning copyWith(
           {int? id,
@@ -220,7 +250,23 @@ class Planning extends Model {
           String? invBls,
           String? grsBls,
           String? cnvBls,
-          String? invBlsDisp}) =>
+          String? invBlsDisp,
+          String? invBlsDesc,
+          String? enListaBlanca,
+          String? invBlsHist,
+          String? grsBlsHist,
+          String? cnvBlsHist,
+          String? invBlsDispHist,
+          String? invBlsDescHist,
+          String? qbrBlsCantAsig,
+          String? qbrBlsCantAct,
+          String? qbrBls,
+          String? qbrBlsAcum,
+          String? qbrBlsDias,
+          String? qbrBlsEvalua,
+          String? invBlsFechaAct,
+          String? invBlsHistFechaAct,
+          }) =>
       Planning(
         id: id ?? this.id,
         idDealer: idDealer ?? this.idDealer,
@@ -293,6 +339,21 @@ class Planning extends Model {
         grsBls: grsBls ?? this.grsBls,
         cnvBls: cnvBls ?? this.cnvBls,
         invBlsDisp: invBlsDisp ?? this.invBlsDisp,
+        invBlsDesc: invBlsDesc ?? this.invBlsDesc,
+        enListaBlanca: enListaBlanca ?? this.enListaBlanca,
+        invBlsHist: invBlsHist ?? this.invBlsHist,
+        grsBlsHist: grsBlsHist ?? this.grsBlsHist,
+        cnvBlsHist: cnvBlsHist ?? this.cnvBlsHist,
+        invBlsDispHist: invBlsDispHist ?? this.invBlsDispHist,
+        invBlsDescHist: invBlsDescHist ?? this.invBlsDescHist,
+        qbrBlsCantAsig: qbrBlsCantAsig ?? this.qbrBlsCantAsig,
+        qbrBlsCantAct: qbrBlsCantAct ?? this.qbrBlsCantAct,
+        qbrBls: qbrBls ?? this.qbrBls,
+        qbrBlsAcum: qbrBlsAcum ?? this.qbrBlsAcum,
+        qbrBlsDias: qbrBlsDias ?? this.qbrBlsDias,
+        qbrBlsEvalua: qbrBlsEvalua ?? this.qbrBlsEvalua,
+        invBlsFechaAct: invBlsFechaAct ?? this.invBlsFechaAct,
+        invBlsHistFechaAct: invBlsHistFechaAct ?? this.invBlsHistFechaAct,
       );
 
   factory Planning.fromJson(Map<String, dynamic> json) {
@@ -372,6 +433,21 @@ class Planning extends Model {
       grsBls: json["grsBls"].toString(),
       cnvBls: json["cnvBls"].toString(),
       invBlsDisp: json["invBlsDisp"].toString(),
+      invBlsDesc: json["invBlsDesc"].toString(),
+      enListaBlanca: json["enListaBlanca"] ?? "NO",
+      invBlsHist: json["invBlsHist"].toString(),
+      grsBlsHist: json["grsBlsHist"].toString(),
+      cnvBlsHist: json["cnvBlsHist"].toString(),
+      invBlsDispHist: json["invBlsDispHist"].toString(),
+      invBlsDescHist: json["invBlsDescHist"].toString(),
+      qbrBlsCantAsig: json["qbrBlsCantAsig"].toString(),
+      qbrBlsCantAct: json["qbrBlsCantAct"].toString(),
+      qbrBls: json["qbrBls"].toString(),
+      qbrBlsAcum: json["qbrBlsAcum"].toString(),
+      qbrBlsDias: json["qbrBlsDias"].toString(),
+      qbrBlsEvalua: json["qbrBlsEvalua"].toString(),
+      invBlsFechaAct: json["invBlsFechaAct"].toString(),
+      invBlsHistFechaAct: json["invBlsHistFechaAct"].toString(),
     );
   }
 
@@ -453,6 +529,21 @@ class Planning extends Model {
       "grsBls": grsBls,
       "cnvBls": cnvBls,
       "invBlsDisp": invBlsDisp,
+      "invBlsDesc": invBlsDesc,
+      "enListaBlanca": enListaBlanca ?? "NO",
+      "invBlsHist": invBlsHist,
+      "grsBlsHist": grsBlsHist,
+      "cnvBlsHist": cnvBlsHist,
+      "invBlsDispHist": invBlsDispHist,
+      "invBlsDescHist": invBlsDescHist,
+      "qbrBlsCantAsig": qbrBlsCantAsig,
+      "qbrBlsCantAct": qbrBlsCantAct,
+      "qbrBls": qbrBls,
+      "qbrBlsAcum": qbrBlsAcum,
+      "qbrBlsDias": qbrBlsDias,
+      "qbrBlsEvalua": qbrBlsEvalua,
+      "invBlsFechaAct": invBlsFechaAct,
+      "invBlsHistFechaAct": invBlsHistFechaAct,
     };
   }
 }

@@ -136,9 +136,9 @@ class _VisitaPDVCategoriaState extends State<VisitaPDVCategoria> {
                                   ),
                                   onTap: () async {
                                     final m = await _carritoBloc.getModelos(
-                                        _visitaBloc.state.mostrarTangible);
+                                        _visitaBloc.state.mostrarTangible, _visitaBloc.state.idPdv.toString());
                                     await _carritoBloc.crearFrmProductos(m);
-                                    await _carritoBloc.actualizaTotal();
+                                    await _carritoBloc.actualizaTotal(_visitaBloc.state.idPdv.toString());
                                     _carritoBloc.add(
                                       OnCambiarCategoriaEvent(
                                         categoria: elemento.toString(),

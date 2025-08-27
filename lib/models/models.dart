@@ -54,3 +54,6 @@ export 'producto_tangible_pdv.dart';
 export 'producto_tangible_pdv_response.dart';
 export 'tipo_tangible_reasignacion_info.dart';
 export 'modelo_tangible_agrupado.dart';
+export 'saldo_vendedor.dart';
+export 'saldo_vendedor_response.dart';
+export 'saldo_reporte.dart';

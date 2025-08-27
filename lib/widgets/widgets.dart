@@ -40,3 +40,4 @@ export './fields/my_text_form_field.dart';
 export './formulario/so_number_alone.dart';
 export './info_card_mom.dart';
 export './onboard_nav_btn.dart';
+export './build_blister_resumen.dart';

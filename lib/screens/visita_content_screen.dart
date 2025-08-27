@@ -4,7 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:miventa_app/app_styles.dart';
 import 'package:miventa_app/models/models.dart';
-import 'package:miventa_app/screens/detalle_modelo_screen.dart';
+import 'package:miventa_app/screens/screens.dart';
+import 'dart:io' show Platform;
+// Para Android, usaremos este paquete que ejecuta el código USSD.
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 
 import '../blocs/blocs.dart';
 
@@ -259,7 +262,7 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                           setState(() {
                                             preciosPorModelo[modelo.modelo.toString()] = double.tryParse(valor) ?? 0.0;
                                             modelo.precio = double.tryParse(valor) ?? 0; // Guarda el precio en el modelo
-                                            print('detalle:' + modelo.toJson().toString());
+
                                           });
                                         },
                                         controller: _controllers[modelo.modelo.toString()],
@@ -267,99 +270,102 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                     ),
                                   ),
                                 ],
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(6),
-                                      width: MediaQuery.of(context).size.width*0.4,
-                                      decoration: BoxDecoration(
-                                          color: const Color.fromARGB(
-                                            255,
-                                            247,
-                                            249,
-                                            249,
+                                modelo.modelo == 'EPIN'||
+                                    modelo.modelo == 'TMY'
+                                    ? const SizedBox.shrink()
+                                    : Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(6),
+                                          width: MediaQuery.of(context).size.width*0.4,
+                                          decoration: BoxDecoration(
+                                              color: const Color.fromARGB(
+                                                255,
+                                                247,
+                                                249,
+                                                249,
+                                              ),
+                                              borderRadius:
+                                              BorderRadius.circular(12),
+                                              boxShadow: const [
+                                                BoxShadow(
+                                                  color: Colors.black12,
+                                                  blurRadius: 12,
+                                                )
+                                              ]),
+                                          child: Column(
+                                            children: [
+                                              if (modelo.modelo != 'EPIN' &&
+                                                  modelo.modelo != 'TMY') ...[
+                                                Text(
+                                                  "SERIE INICIAL ",
+                                                  style: TextStyle(
+                                                    color:
+                                                    kFourColor.withOpacity(0.6),
+                                                    fontFamily: 'CronosLPro',
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  modelo.serieInicial.toString(),
+                                                  style: const TextStyle(
+                                                    color: kSecondaryColor,
+                                                    fontFamily: 'CronosLPro',
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ],
+                                              // Otros widgets que quieras agregar
+                                            ],
                                           ),
-                                          borderRadius:
-                                          BorderRadius.circular(12),
-                                          boxShadow: const [
-                                            BoxShadow(
-                                              color: Colors.black12,
-                                              blurRadius: 12,
-                                            )
-                                          ]),
-                                      child: Column(
-                                        children: [
-                                          if (modelo.modelo != 'EPIN' &&
-                                              modelo.modelo != 'TMY') ...[
-                                            Text(
-                                              "SERIE INICIAL ",
-                                              style: TextStyle(
-                                                color:
-                                                kFourColor.withOpacity(0.6),
-                                                fontFamily: 'CronosLPro',
-                                                fontSize: 12,
+                                        ),
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.all(6),
+                                          width: MediaQuery.of(context).size.width*0.4,
+                                          decoration: BoxDecoration(
+                                              color: const Color.fromARGB(
+                                                255,
+                                                247,
+                                                249,
+                                                249,
                                               ),
-                                            ),
-                                            Text(
-                                              modelo.serieInicial.toString(),
-                                              style: const TextStyle(
-                                                color: kSecondaryColor,
-                                                fontFamily: 'CronosLPro',
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                          // Otros widgets que quieras agregar
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      width: 10,
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.all(6),
-                                      width: MediaQuery.of(context).size.width*0.4,
-                                      decoration: BoxDecoration(
-                                          color: const Color.fromARGB(
-                                            255,
-                                            247,
-                                            249,
-                                            249,
+                                              borderRadius:
+                                              BorderRadius.circular(12),
+                                              boxShadow: const [
+                                                BoxShadow(
+                                                  color: Colors.black12,
+                                                  blurRadius: 12,
+                                                )
+                                              ]),
+                                          child: Column(
+                                            children: [
+                                              if (modelo.modelo != 'EPIN' &&
+                                                  modelo.modelo != 'TMY') ...[
+                                                Text(
+                                                  "SERIE FINAL ",
+                                                  style: TextStyle(
+                                                    color:
+                                                    kFourColor.withOpacity(0.6),
+                                                    fontFamily: 'CronosLPro',
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  modelo.serieFinal.toString(),
+                                                  style: const TextStyle(
+                                                    color: kSecondaryColor,
+                                                    fontFamily: 'CronosLPro',
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ],
+                                              // Otros widgets que quieras agregar
+                                            ],
                                           ),
-                                          borderRadius:
-                                          BorderRadius.circular(12),
-                                          boxShadow: const [
-                                            BoxShadow(
-                                              color: Colors.black12,
-                                              blurRadius: 12,
-                                            )
-                                          ]),
-                                      child: Column(
-                                        children: [
-                                          if (modelo.modelo != 'EPIN' &&
-                                              modelo.modelo != 'TMY') ...[
-                                            Text(
-                                              "SERIE FINAL ",
-                                              style: TextStyle(
-                                                color:
-                                                kFourColor.withOpacity(0.6),
-                                                fontFamily: 'CronosLPro',
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                            Text(
-                                              modelo.serieFinal.toString(),
-                                              style: const TextStyle(
-                                                color: kSecondaryColor,
-                                                fontFamily: 'CronosLPro',
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                          // Otros widgets que quieras agregar
-                                        ],
-                                      ),
-                                    )
+                                        )
                                   ],
                                 ),
                                 const SizedBox(
@@ -389,23 +395,26 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                                 fontSize: 14,
                                               ),
                                             ),
-                                            Text(
-                                              modelo.modelo == 'EPIN' ||
-                                                  modelo.modelo == 'TMY'
-                                                  ? ''
-                                                  : modelo.disponible
-                                                  .toString(),
-                                              style: const TextStyle(
-                                                color: kPrimaryColor,
-                                                fontFamily: 'CronosSPro',
-                                                fontSize: 26,
-                                              ),
-                                            ),
+                                            modelo.modelo == 'EPIN' ||
+                                                modelo.modelo == 'TMY'
+                                                ? const SizedBox.shrink()
+                                                :Text(
+                                                  modelo.disponible
+                                                      .toString(),
+                                                  style: const TextStyle(
+                                                    color: kPrimaryColor,
+                                                    fontFamily: 'CronosSPro',
+                                                    fontSize: 26,
+                                                  ),
+                                                ),
                                           ],
                                         ),
-                                        const SizedBox(
-                                          height: 4,
-                                        ),
+                                        modelo.modelo == 'EPIN' ||
+                                            modelo.modelo == 'TMY'
+                                            ?const SizedBox.shrink()
+                                            :const SizedBox(
+                                              height: 4,
+                                            ),
                                         Row(
                                           mainAxisAlignment:
                                           MainAxisAlignment.center,
@@ -442,7 +451,7 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                                   );
 
                                                   await _carritoBloc
-                                                      .actualizaTotal();
+                                                      .actualizaTotal(_visitaBloc.state.idPdv.toString());
 
                                                   _carritoBloc.add(
                                                       OnChangeModeloActual(
@@ -523,7 +532,7 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                                   );
 
                                                   await _carritoBloc
-                                                      .actualizaTotal();
+                                                      .actualizaTotal(_visitaBloc.state.idPdv.toString());
 
                                                   _carritoBloc.add(
                                                       OnChangeModeloActual(
@@ -617,6 +626,7 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                       ],
                                     ),
                                     Text(modelo.controller.text),
+                                    //Text(modelo.modelo.toString()),
                                     SizedBox(
                                       height: 40,
                                       child: modelo.modelo == 'EPIN' ||
@@ -625,9 +635,11 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                         key: ValueKey(modelo.modelo),
                                         elevation: 0,
                                         color: kPrimaryColor,
-                                        child: const Text(
-                                          'Guardar',
-                                          style: TextStyle(
+                                        child: Text(
+                                          modelo.modelo == 'EPIN'
+                                              ? 'Enviar'
+                                              : 'Guardar',
+                                          style: const TextStyle(
                                             color: kSecondaryColor,
                                             fontSize: 16,
                                           ),
@@ -635,46 +647,75 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                         onPressed: () async {
                                           final int? number =
                                           int.tryParse(_controllers[modelo.modelo.toString()]?.value.text ?? '');
-                                          if (number == null ||
-                                              number <= 0) {
-                                            const snackBar = SnackBar(
-                                              content: Center(
-                                                child: Text(
+                                          if (modelo.modelo == 'EPIN'){
+                                                if (number == null ||
+                                                number <= 0) {
+                                                  const snackBar = SnackBar(
+                                                  content: Center(
+                                                  child: Text(
                                                   'El saldo debe ser mayor a 0',
                                                   textAlign:
                                                   TextAlign.center,
+                                                  ),
+                                                  ),
+                                                  backgroundColor: Colors.red,
+                                                  );
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(snackBar);
+                                                }
+                                                else {
+                                                  _mostrarModalUssd(
+                                                      context,
+                                                      widget.pdv.movilEpin
+                                                          .toString(),
+                                                      number.toString()
+                                                  );
+                                                }
+                                          }
+                                          else {
+                                            if (number == null ||
+                                                number <= 0) {
+                                              const snackBar = SnackBar(
+                                                content: Center(
+                                                  child: Text(
+                                                    'El saldo debe ser mayor a 0',
+                                                    textAlign:
+                                                    TextAlign.center,
+                                                  ),
                                                 ),
-                                              ),
-                                              backgroundColor: Colors.red,
-                                            );
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(snackBar);
-                                          } else {
-                                            await _carritoBloc
-                                                .guardarModeloSaldo(
-                                                modelo: modelo);
-                                            await _carritoBloc
-                                                .asignarSaldos(
-                                              cantidad: number,
-                                              modelo: modelo,
-                                              idPdv:
-                                              _visitaBloc.state.idPdv,
-                                              idVisita: _visitaBloc
-                                                  .state.idVisita,
-                                            );
-                                            final snackBar = SnackBar(
-                                              content: Center(
-                                                child: Text(
-                                                  '${modelo.modelo} datos guardados correctamente',
-                                                  textAlign:
-                                                  TextAlign.center,
+                                                backgroundColor: Colors.red,
+                                              );
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(snackBar);
+                                            }
+                                            else {
+                                              await _carritoBloc
+                                                  .guardarModeloSaldo(
+                                                  modelo: modelo);
+                                              await _carritoBloc
+                                                  .asignarSaldos(
+                                                cantidad: number,
+                                                modelo: modelo,
+                                                idPdv:
+                                                _visitaBloc.state.idPdv,
+                                                idVisita: _visitaBloc
+                                                    .state.idVisita,
+                                              );
+                                              final snackBar = SnackBar(
+                                                content: Center(
+                                                  child: Text(
+                                                    '${modelo
+                                                        .modelo} datos guardados correctamente',
+                                                    textAlign:
+                                                    TextAlign.center,
+                                                  ),
                                                 ),
-                                              ),
-                                              backgroundColor:
-                                              kPrimaryColor,
-                                            );
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(snackBar);
+                                                backgroundColor:
+                                                kPrimaryColor,
+                                              );
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(snackBar);
+                                            }
                                           }
                                         },
                                       )
@@ -697,11 +738,12 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
                                               final m = await _carritoBloc
                                                   .getModelos(_visitaBloc
                                                   .state
-                                                  .mostrarTangible);
+                                                  .mostrarTangible,
+                                                  _visitaBloc.state.idPdv.toString());
                                               await _carritoBloc
                                                   .crearFrmProductos(m);
                                               await _carritoBloc
-                                                  .actualizaTotal();
+                                                  .actualizaTotal(_visitaBloc.state.idPdv.toString());
                                             });
                                           }),
                                     ),
@@ -724,4 +766,19 @@ class _VisitaContentScreenState extends State<VisitaContentScreen> {
       ),
     );
   }
+}
+
+
+void _mostrarModalUssd(BuildContext context, String pNumeroEpin, String pMonto) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext dialogContext) {
+      // Simplemente retornamos la instancia de nuestro nuevo widget
+      return UssdModal(
+        pNumeroEpin: pNumeroEpin,
+        pMonto: pMonto,
+      );
+    },
+  );
 }

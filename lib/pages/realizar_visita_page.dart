@@ -41,7 +41,7 @@ class _RealizarVisitaPageState extends State<RealizarVisitaPage>
       duration: const Duration(seconds: 3),
     );
 
-    _carritoBloc.init(_visitaBloc.state.mostrarTangible);
+    _carritoBloc.init(_visitaBloc.state.mostrarTangible, _visitaBloc.state.idPdv.toString());
 
     controller.addListener(() {
       setState(() {});
@@ -90,10 +90,10 @@ class _RealizarVisitaPageState extends State<RealizarVisitaPage>
                     ),
                   ).then((value) async {
                     final m = await _carritoBloc
-                        .getModelos(_visitaBloc.state.mostrarTangible);
+                        .getModelos(_visitaBloc.state.mostrarTangible,_visitaBloc.state.idPdv.toString());
                     print('modelos:$m');
                     await _carritoBloc.crearFrmProductos(m);
-                    await _carritoBloc.actualizaTotal();
+                    await _carritoBloc.actualizaTotal(_visitaBloc.state.idPdv.toString());
                   });
                 },
                 child: Stack(
